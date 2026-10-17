@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>United Nations IV</title>
+<title>United Nations IV — Proyek Fiksi & Simulasi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -66,7 +66,7 @@
 
   /* HERO */
   .hero{
-    padding:180px 0 110px;
+    padding:160px 0 110px;
     text-align:center;
     position:relative;
     border-bottom:1px solid var(--line);
@@ -84,6 +84,23 @@
     pointer-events:none;
   }
   .emblem-hero{width:132px; height:auto; margin:0 auto 34px; position:relative; z-index:1; display:block; mix-blend-mode:screen;}
+  
+  /* BADGE FIKSI BARU */
+  .fiction-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--bg);
+    background: var(--ink);
+    padding: 6px 14px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+    font-weight: 600;
+  }
+
   .kicker{
     font-family:var(--mono); font-size:0.78rem; color:var(--ink-dim);
     letter-spacing:0.04em; margin-bottom:18px; position:relative; z-index:1;
@@ -211,6 +228,19 @@
   footer .foot-col a:hover{color:var(--ink);}
   .foot-bottom{border-top:1px solid var(--line); padding-top:24px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-family:var(--mono); font-size:0.72rem; color:var(--ink-faint);}
 
+  /* DISCLAIMER FIKSI BARU */
+  .fiction-disclaimer {
+    margin-top: 30px;
+    padding: 20px;
+    background: rgba(242,242,238,0.03);
+    border: 1px dashed var(--line-strong);
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    line-height: 1.6;
+    text-align: center;
+  }
+
   .reveal{opacity:0; transform:translateY(14px); transition:opacity .7s ease, transform .7s ease;}
   .reveal.in{opacity:1; transform:none;}
   @media (prefers-reduced-motion: reduce){ .reveal{opacity:1; transform:none; transition:none;} html{scroll-behavior:auto;} }
@@ -262,7 +292,7 @@
       <a href="#negara">Negara</a>
       <a href="#peristiwa">Peristiwa</a>
     </nav>
-    <div class="nav-status"><span class="dot"></span>AKTIF</div>
+    <div class="nav-status"><span class="dot"></span>SIMULASI FIKSI</div>
   </div>
 </header>
 
@@ -281,12 +311,15 @@
       <circle cx="100" cy="100" r="9" stroke="#f2f2ee" stroke-opacity="0.5" stroke-width="0.8"/>
     </svg>
 
+    <!-- Badge penanda fiksi -->
+    <div class="fiction-badge">PROYEK DUNIA FIKSI · SIMULASI</div>
+
     <div class="kicker">DEWAN ANTARBANGSA · SESI KEEMPAT · ARSIP TERBUKA</div>
     <h1 class="title">United Nations <em>IV</em></h1>
     <p class="lede">
-      Sebuah forum musyawarah antarbangsa yang menempatkan dialog di atas kekuatan.
-      Empat sesi, empat puluh tujuh delegasi, dan satu keyakinan: bahwa perbedaan
-      paling baik diselesaikan di meja yang sama.
+      Sebuah proyek fiksi geopolitik yang mensimulasikan forum musyawarah antarbangsa. 
+      Menempatkan dialog di atas kekuatan, dengan empat sesi, empat puluh tujuh delegasi fiktif, 
+      dan satu keyakinan: bahwa perbedaan paling baik diselesaikan di meja yang sama.
     </p>
 
     <div class="stat-row">
@@ -648,8 +681,8 @@
         </svg>
         <h4>UNITED NATIONS IV</h4>
         <p class="foot-lede">
-          Arsip terbuka majelis antarbangsa. Seluruh risalah, draf, dan catatan
-          pemungutan suara dapat diakses publik.
+          Arsip terbuka majelis antarbangsa fiksi. Seluruh risalah, draf, dan catatan
+          pemungutan suara dibuat untuk keperluan simulasi dan narasi.
         </p>
       </div>
 
@@ -670,9 +703,16 @@
       </div>
     </div>
 
+    <!-- Tambahan Disclaimer Fiksi -->
+    <div class="fiction-disclaimer">
+      <strong>SANGKALAN (DISCLAIMER):</strong> Situs web ini adalah bagian dari proyek fiksi kreatif dan simulasi geopolitik. 
+      "United Nations IV" bukanlah badan resmi, tidak berafiliasi dengan, dan tidak didukung oleh Perserikatan Bangsa-Bangsa (PBB) yang asli. 
+      Seluruh nama, karakter, organisasi, dan peristiwa yang disebutkan di sini adalah fiktif atau digunakan dalam konteks simulasi.
+    </div>
+
     <div class="foot-bottom">
-      <span>© 2024 UNITED NATIONS IV — SESI KEEMPAT</span>
-      <span>DIRANCANG UNTUK DELIBERASI, BUKAN KEKUATAN</span>
+      <span>© 2026 UNITED NATIONS IV — PROYEK FIKSI</span>
+      <span>DIRANCANG UNTUK SIMULASI, BUKAN KEKUATAN NYATA</span>
     </div>
   </div>
 </footer>
@@ -732,4 +772,4 @@
 </script>
 
 </body>
-</html>title="Gelombang
+  </html>
