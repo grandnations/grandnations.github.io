@@ -71,6 +71,11 @@ title: Profil — Grand Nations
         
         <!-- TOMBOL EDIT PROFIL -->
         <button id="btn-edit-profile" class="btn solid" style="padding: 8px 20px; font-size: 0.8rem; width: 100%;">Edit Profil</button>
+
+        <!-- TOMBOL DASHBOARD ADMIN (Tersembunyi, hanya muncul untuk Admin) -->
+        <a href="/admin.html" id="btn-admin-panel" class="btn line" style="display: none; padding: 8px 20px; font-size: 0.8rem; width: 100%; margin-top: 10px; border-color: #ffc800; color: #ffc800;">
+          ⚡ Dashboard Admin
+        </a>
       </div>
 
       <!-- Kanan: Detail & Kartu Delegasi -->
@@ -179,12 +184,22 @@ title: Profil — Grand Nations
       currentUser = user;
       loginRequiredState.style.display = 'none';
       
+      // 1. Ambil Data Anggota
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists()) {
         currentUserData = userDocSnap.data();
         
+        // --- 2. LOGIKA CEK ADMIN (Hanya memunculkan tombol jika terdaftar) ---
+        const adminDocRef = doc(db, "admins", user.email);
+        const adminDocSnap = await getDoc(adminDocRef);
+        
+        if (adminDocSnap.exists()) {
+          document.getElementById('btn-admin-panel').style.display = 'block'; // Munculkan tombol admin
+        }
+        // ---------------------------------------------------------------------
+
         // Tampilkan Data ke Layar
         document.getElementById('user-name-display').textContent = currentUserData.full_name;
         document.getElementById('user-email-display').textContent = currentUserData.email;
@@ -203,7 +218,7 @@ title: Profil — Grand Nations
           document.getElementById('user-joined-display').textContent = currentUserData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
-        // Cek Negara
+        // 3. Cek Data Negara
         const nationDocRef = doc(db, "registrations", user.uid);
         const nationDocSnap = await getDoc(nationDocRef);
 
