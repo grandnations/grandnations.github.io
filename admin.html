@@ -198,7 +198,12 @@ title: Dashboard Admin — Grand Nations
       const allProcessed = data.nations.every(n => n.status !== 'pending');
       
       let updateData = { nations: data.nations };
-      if (allProcessed) updateData.status = 'approved';
+      
+      if (allProcessed) {
+        // Jika semua sudah diproses, cek apakah ada yang di-approve
+        const anyApproved = data.nations.some(n => n.status === 'approved');
+        updateData.status = anyApproved ? 'approved' : 'rejected';
+      }
 
       await updateDoc(docRef, updateData);
 
