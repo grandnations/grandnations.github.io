@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kartu Delegasi — Grand Nations</title>
+
+<!-- TAMBAHAN FAVICON (Gambar di atas tab) -->
+<link rel="icon" type="image/jpeg" href="assets/img/logogn.jpeg">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -160,7 +164,6 @@
       <div class="card-visual">
         <div class="flag-slot" id="flag-container">
           <span>BELUM ADA BENDERA</span>
-          <!-- Nanti gambar bendera akan disisipkan ke sini via JS -->
         </div>
         <div style="font-family:var(--mono); font-size:0.75rem; color:var(--faint); letter-spacing:0.1em;">
           DELEGASI RESMI
@@ -218,7 +221,6 @@
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-  // Konfigurasi Firebase kamu
   const firebaseConfig = {
     apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
     authDomain: "grand-nations-bcf65.firebaseapp.com",
@@ -237,47 +239,39 @@
   const emptyState = document.getElementById('empty-state');
   const profileState = document.getElementById('profile-state');
 
-  // 1. Cek Status Login
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // Ambil data dari Firestore (Tabel: registrations)
       const docRef = doc(db, "registrations", user.uid);
       const docSnap = await getDoc(docRef);
 
       loading.style.display = 'none';
 
       if (docSnap.exists()) {
-        // JIKA SUDAH DAFTAR
         const data = docSnap.data();
         
         document.getElementById('nation-name-display').textContent = data.nation_name;
         document.getElementById('leader-name-display').textContent = data.leader_name;
         document.getElementById('ideology-display').textContent = data.ideology || '-';
         
-        // Format Tanggal
         if (data.created_at) {
           const date = data.created_at.toDate();
           document.getElementById('date-display').textContent = date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
-        // Status Badge
         const badge = document.getElementById('status-badge');
         badge.textContent = data.status === 'approved' ? 'DISETUJUI' : 'MENUNGGU REVIEW';
         badge.className = 'status-badge ' + (data.status === 'approved' ? 'status-approved' : 'status-pending');
 
         profileState.style.display = 'block';
       } else {
-        // JIKA BELUM DAFTAR
         emptyState.style.display = 'block';
       }
 
     } else {
-      // Jika belum login, tendang ke beranda
       window.location.href = 'index.html';
     }
   });
 
-  // 2. Tombol Logout
   authButton.addEventListener('click', () => {
     signOut(auth).then(() => {
       window.location.href = 'index.html';
