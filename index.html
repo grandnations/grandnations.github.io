@@ -172,7 +172,6 @@ title: Grand Nations — Organisasi Roleplay
 
 <!-- ================= SCRIPT KHUSUS INDEX ================= -->
 <script>
-  /* Reveal on scroll */
   (function () {
     var els = document.querySelectorAll('.reveal');
     if (!('IntersectionObserver' in window)) { els.forEach(function (el) { el.classList.add('in'); }); return; }
@@ -182,7 +181,6 @@ title: Grand Nations — Organisasi Roleplay
     els.forEach(function (el, i) { el.style.transitionDelay = (i % 4) * 70 + 'ms'; io.observe(el); });
   })();
 
-  /* Count-up angka */
   (function () {
     var nums = document.querySelectorAll('[data-count]');
     function run(el) {
@@ -202,7 +200,6 @@ title: Grand Nations — Organisasi Roleplay
     nums.forEach(function (n) { io.observe(n); });
   })();
 
-  /* Timeline era */
   (function () {
     var tabs = Array.prototype.slice.call(document.querySelectorAll('.era-tab'));
     var yearEl = document.getElementById('eraYear'), titleEl = document.getElementById('eraTitle'),
