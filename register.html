@@ -4,13 +4,13 @@ title: Pendaftaran Anggota — Grand Nations
 ---
 
 <main class="wrap" style="padding-top: 140px; padding-bottom: 80px; flex: 1;">
-  <div class="page-head reveal">
+  <div class="page-head">
     <h1>Formulir<br>Anggota</h1>
     <div class="idx">PENDAFTARAN KEANGGOTAAN BARU</div>
   </div>
 
   <!-- STATE: BELUM LOGIN -->
-  <div id="login-required-state" class="auth-box reveal" style="display:none;">
+  <div id="login-required-state" class="auth-box" style="display:none;">
     <div class="icon">🔒</div>
     <h2>Akses Dibatasi</h2>
     <p>Kamu harus login menggunakan akun Google terlebih dahulu sebelum mendaftar sebagai anggota.</p>
@@ -18,7 +18,7 @@ title: Pendaftaran Anggota — Grand Nations
   </div>
 
   <!-- FORM PENDAFTARAN -->
-  <div id="form-container" class="reveal" style="display:none; background:var(--bg2); border:1px solid var(--line); padding:40px; max-width:800px; margin:0 auto;">
+  <div id="form-container" style="display:none; background:var(--bg2); border:1px solid var(--line); padding:40px; max-width:800px; margin:0 auto;">
     <form id="registration-form">
       <div style="margin-bottom:20px;">
         <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">NAMA LENGKAP</label>
@@ -44,7 +44,8 @@ title: Pendaftaran Anggota — Grand Nations
 </main>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+  // PERBAIKAN: Tambahkan getApps
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
   import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
@@ -58,7 +59,8 @@ title: Pendaftaran Anggota — Grand Nations
     appId: "1:266950230750:web:60c88d8abae6590bd4384f"
   };
 
-  const app = initializeApp(firebaseConfig);
+  // PERBAIKAN: Cek apakah app sudah ada, kalau belum baru inisialisasi
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   const auth = getAuth(app);
   const db = getFirestore(app);
   const storage = getStorage(app);
@@ -74,12 +76,11 @@ title: Pendaftaran Anggota — Grand Nations
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
-      // Cek apakah user sudah terdaftar sebagai anggota di tabel "users"
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        window.location.href = '/profile.html'; // Jika sudah, ke profil
+        window.location.href = '/profile.html';
       } else {
         loginRequiredState.style.display = 'none';
         formContainer.style.display = 'block';
@@ -108,7 +109,6 @@ title: Pendaftaran Anggota — Grand Nations
         photoURL = await getDownloadURL(storageRef);
       }
 
-      // Simpan ke tabel "users"
       await setDoc(doc(db, "users", currentUser.uid), {
         full_name: document.getElementById('full_name').value,
         dob: document.getElementById('dob').value,
