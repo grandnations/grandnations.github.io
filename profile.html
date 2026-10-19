@@ -31,7 +31,7 @@ title: Profil — Grand Nations
   </div>
 
   <div id="empty-user-state" class="auth-box" style="display:none;">
-    <div class="icon">?</div><h2>Belum Terdaftar</h2><p>Kamu belum mendaftarkan diri sebagai anggota.</p><a href="/register.html" class="btn solid">Daftar Anggota</a>
+    <div class="icon">?</div><h2>Belum Terdaftar</h2><p>Kamu belum mendaftarkan diri sebagai anggota Grand Nations. Silakan isi formulir keanggotaan terlebih dahulu.</p><a href="/register.html" class="btn solid">Daftar Anggota</a>
   </div>
 
   <div id="profile-state" style="display:none;">
@@ -69,8 +69,6 @@ title: Profil — Grand Nations
 
           <div id="has-nation-state" style="display:none;">
             <div id="nations-list-container"></div>
-            
-            <!-- TOMBOL DAFTAR ULANG (Hanya muncul jika semua ditolak) -->
             <div id="re-apply-container" style="display:none; margin-top:20px; text-align:center; border-top:1px solid var(--line); padding-top:20px;">
               <p style="color:#ff4d4d; font-size:0.9rem; margin-bottom:15px;">Semua pengajuan negaramu ditolak.</p>
               <a href="/register-nation.html" class="btn solid" style="padding:10px 20px; font-size:0.85rem; display:inline-block; text-decoration:none; border-color:#ff4d4d; background:#ff4d4d; color:#fff;">Ajukan Ulang Pendaftaran</a>
@@ -139,72 +137,84 @@ title: Profil — Grand Nations
       currentUser = user;
       loginRequiredState.style.display = 'none';
       
-      const userDocSnap = await getDoc(doc(db, "users", user.uid));
-      if (userDocSnap.exists()) {
-        currentUserData = userDocSnap.data();
-        
-        try {
-          const adminDocSnap = await getDoc(doc(db, "admins", user.email));
-          if (adminDocSnap.exists()) document.getElementById('btn-admin-panel').style.display = 'block'; 
-        } catch (error) { }
+      try {
+        // Ambil data user
+        const userDocSnap = await getDoc(doc(db, "users", user.uid));
 
-        document.getElementById('user-name-display').textContent = currentUserData.full_name;
-        document.getElementById('user-email-display').textContent = currentUserData.email;
-        document.getElementById('user-wa-display').textContent = currentUserData.whatsapp || '-';
-        
-        if (currentUserData.photo_url) {
-          document.getElementById('photo-placeholder').style.display = 'none';
-          const img = document.getElementById('profile-pic-display');
-          img.src = currentUserData.photo_url;
-          img.style.display = 'block';
-        }
-        if (currentUserData.dob) document.getElementById('user-dob-display').textContent = new Date(currentUserData.dob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-        if (currentUserData.created_at) document.getElementById('user-joined-display').textContent = currentUserData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-
-        // CEK DATA NEGARA
-        const nationDocSnap = await getDoc(doc(db, "registrations", user.uid));
-        if (nationDocSnap.exists()) {
-          const nationData = nationDocSnap.data();
-          document.getElementById('no-nation-state').style.display = 'none';
-          document.getElementById('has-nation-state').style.display = 'block';
-
-          const listContainer = document.getElementById('nations-list-container');
-          listContainer.innerHTML = `<div class="data-row" style="border-bottom:2px solid var(--line); margin-bottom:10px;"><span class="data-label">NAMA NEGARA</span><span class="data-label">STATUS</span></div>`;
+        if (userDocSnap.exists()) {
+          currentUserData = userDocSnap.data();
           
-          let allRejected = true; // Anggap semua ditolak dulu
+          // Cek Admin
+          try {
+            const adminDocSnap = await getDoc(doc(db, "admins", user.email));
+            if (adminDocSnap.exists()) document.getElementById('btn-admin-panel').style.display = 'block'; 
+          } catch (error) { }
 
-          if (nationData.nations && Array.isArray(nationData.nations)) {
-            nationData.nations.forEach(nation => {
-              let statusColor = '#ffc800'; 
-              if (nation.status === 'approved') statusColor = '#00ff64';
-              if (nation.status === 'rejected') statusColor = '#ff4d4d';
-              else allRejected = false; // Jika ada yg pending/approved, berarti tidak semua ditolak
-
-              listContainer.innerHTML += `
-                <div class="nation-item">
-                  <span class="data-value" style="color:#fff;">${nation.name}</span>
-                  <span class="data-value" style="color:${statusColor}; font-size:0.9rem;">${nation.status.toUpperCase()}</span>
-                </div>
-              `;
-            });
+          // Tampilkan Data
+          document.getElementById('user-name-display').textContent = currentUserData.full_name;
+          document.getElementById('user-email-display').textContent = currentUserData.email;
+          document.getElementById('user-wa-display').textContent = currentUserData.whatsapp || '-';
+          
+          if (currentUserData.photo_url) {
+            document.getElementById('photo-placeholder').style.display = 'none';
+            const img = document.getElementById('profile-pic-display');
+            img.src = currentUserData.photo_url;
+            img.style.display = 'block';
           }
+          if (currentUserData.dob) document.getElementById('user-dob-display').textContent = new Date(currentUserData.dob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+          if (currentUserData.created_at) document.getElementById('user-joined-display').textContent = currentUserData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
 
-          // Tampilkan tombol daftar ulang jika semua negara ditolak
-          if (allRejected && nationData.nations.length > 0) {
-            document.getElementById('re-apply-container').style.display = 'block';
+          // Cek Negara
+          const nationDocSnap = await getDoc(doc(db, "registrations", user.uid));
+          if (nationDocSnap.exists()) {
+            const nationData = nationDocSnap.data();
+            document.getElementById('no-nation-state').style.display = 'none';
+            document.getElementById('has-nation-state').style.display = 'block';
+
+            const listContainer = document.getElementById('nations-list-container');
+            listContainer.innerHTML = `<div class="data-row" style="border-bottom:2px solid var(--line); margin-bottom:10px;"><span class="data-label">NAMA NEGARA</span><span class="data-label">STATUS</span></div>`;
+            
+            let allRejected = true;
+
+            if (nationData.nations && Array.isArray(nationData.nations)) {
+              nationData.nations.forEach(nation => {
+                let statusColor = '#ffc800'; 
+                if (nation.status === 'approved') statusColor = '#00ff64';
+                if (nation.status === 'rejected') statusColor = '#ff4d4d';
+                else allRejected = false;
+
+                listContainer.innerHTML += `
+                  <div class="nation-item">
+                    <span class="data-value" style="color:#fff;">${nation.name}</span>
+                    <span class="data-value" style="color:${statusColor}; font-size:0.9rem;">${nation.status.toUpperCase()}</span>
+                  </div>
+                `;
+              });
+            }
+
+            if (allRejected && nationData.nations.length > 0) {
+              document.getElementById('re-apply-container').style.display = 'block';
+            } else {
+              document.getElementById('re-apply-container').style.display = 'none';
+            }
+
           } else {
-            document.getElementById('re-apply-container').style.display = 'none';
+            document.getElementById('no-nation-state').style.display = 'block';
+            document.getElementById('has-nation-state').style.display = 'none';
           }
+
+          profileState.style.display = 'block';
 
         } else {
-          document.getElementById('no-nation-state').style.display = 'block';
-          document.getElementById('has-nation-state').style.display = 'none';
+          // JIKA USER BARU (Tidak ada di database)
+          emptyUserState.style.display = 'block';
         }
-
-        profileState.style.display = 'block';
-      } else {
+      } catch (error) {
+        // JIKA TERJADI ERROR DATABASE, TETAP TAMPILKAN TOMBOL DAFTAR
+        console.error("Error fetching data:", error);
         emptyUserState.style.display = 'block';
       }
+
     } else {
       loginRequiredState.style.display = 'block';
       emptyUserState.style.display = 'none';
