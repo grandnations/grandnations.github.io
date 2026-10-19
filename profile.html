@@ -5,30 +5,19 @@ title: Profil — Grand Nations
 
 <!-- CSS KHUSUS MODAL EDIT -->
 <style>
-  .modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px;
-  }
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.active { display: flex; }
-  .modal-content {
-    background: var(--bg2); border: 1px solid var(--line-strong); padding: 40px;
-    width: 100%; max-width: 500px; position: relative; border-radius: 4px;
-    animation: modalIn 0.3s ease;
-  }
+  .modal-content { background: var(--bg2); border: 1px solid var(--line-strong); padding: 40px; width: 100%; max-width: 500px; position: relative; border-radius: 4px; animation: modalIn 0.3s ease; }
   @keyframes modalIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  .modal-close {
-    position: absolute; top: 15px; right: 20px; cursor: pointer;
-    font-size: 1.8rem; color: var(--dim); transition: color 0.2s;
-  }
+  .modal-close { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.8rem; color: var(--dim); transition: color 0.2s; }
   .modal-close:hover { color: #fff; }
   .form-group { margin-bottom: 20px; }
   .form-group label { display: block; font-family: var(--mono); font-size: 0.8rem; color: var(--dim); margin-bottom: 8px; }
-  .form-group input {
-    width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--line);
-    color: #fff; font-family: var(--head); border-radius: 2px;
-  }
+  .form-group input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--line); color: #fff; font-family: var(--head); border-radius: 2px; }
   .form-group input:focus { outline: none; border-color: #fff; }
+  
+  .nation-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+  .nation-item:last-child { border-bottom: none; }
 </style>
 
 <main class="wrap">
@@ -73,7 +62,7 @@ title: Profil — Grand Nations
         <button id="btn-edit-profile" class="btn solid" style="padding: 8px 20px; font-size: 0.8rem; width: 100%;">Edit Profil</button>
 
         <!-- TOMBOL DASHBOARD ADMIN (Tersembunyi, hanya muncul untuk Admin) -->
-        <a href="/admin.html" id="btn-admin-panel" class="btn line" style="display: none; padding: 8px 20px; font-size: 0.8rem; width: 100%; margin-top: 10px; border-color: #ffc800; color: #ffc800; text-decoration: none;">
+        <a href="/admin.html" id="btn-admin-panel" class="btn line" style="display: none; padding: 8px 20px; font-size: 0.8rem; width: 100%; margin-top: 10px; border-color: #ffc800; color: #ffc800; text-decoration: none; text-align: center;">
           ⚡ Dashboard Admin
         </a>
       </div>
@@ -84,6 +73,7 @@ title: Profil — Grand Nations
           <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DATA KEPENDUDUKAN</h3>
           <div class="data-list">
             <div class="data-row"><span class="data-label">TANGGAL LAHIR</span><span id="user-dob-display" class="data-value">-</span></div>
+            <div class="data-row"><span class="data-label">WHATSAPP</span><span id="user-wa-display" class="data-value">-</span></div>
             <div class="data-row"><span class="data-label">BERGABUNG SEJAK</span><span id="user-joined-display" class="data-value">-</span></div>
           </div>
         </div>
@@ -92,21 +82,14 @@ title: Profil — Grand Nations
         <div>
           <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DELEGASI NEGARA</h3>
           
-          <!-- JIKA BELUM PUNYA NEGARA -->
           <div id="no-nation-state" style="display:none; border:1px dashed var(--line-strong); padding:20px; text-align:center;">
             <p style="color:var(--dim); font-size:0.9rem; margin-bottom:15px;">Kamu belum mendaftarkan negara untuk berpartisipasi dalam simulasi.</p>
-            <!-- TOMBOL DIPERBAIKI: Mengarah ke register-nation.html -->
             <a href="/register-nation.html" class="btn solid" style="padding:10px 20px; font-size:0.85rem; display:inline-block; text-decoration:none;">Daftarkan Negara</a>
           </div>
 
-          <!-- JIKA SUDAH PUNYA NEGARA -->
           <div id="has-nation-state" style="display:none;">
-            <div class="data-list">
-              <div class="data-row"><span class="data-label">NAMA NEGARA</span><span id="nation-name-display" class="data-value" style="color:#00ff64;">-</span></div>
-              <div class="data-row"><span class="data-label">PEMIMPIN</span><span id="leader-name-display" class="data-value">-</span></div>
-              <div class="data-row"><span class="data-label">IDEOLOGI</span><span id="ideology-display" class="data-value">-</span></div>
-              <div class="data-row"><span class="data-label">STATUS</span><span id="status-badge" class="data-value">PENDING</span></div>
-            </div>
+            <!-- Daftar negara akan di-render di sini -->
+            <div id="nations-list-container"></div>
           </div>
         </div>
       </div>
@@ -124,6 +107,10 @@ title: Profil — Grand Nations
       <div class="form-group">
         <label>NAMA LENGKAP</label>
         <input type="text" id="edit-name" required>
+      </div>
+      <div class="form-group">
+        <label>NOMOR WHATSAPP</label>
+        <input type="tel" id="edit-wa" required placeholder="08123456789">
       </div>
       <div class="form-group">
         <label>TANGGAL LAHIR</label>
@@ -194,22 +181,21 @@ title: Profil — Grand Nations
       if (userDocSnap.exists()) {
         currentUserData = userDocSnap.data();
         
-        // --- 2. LOGIKA CEK ADMIN (Dengan pengaman try-catch) ---
+        // --- 2. LOGIKA CEK ADMIN ---
         try {
           const adminDocRef = doc(db, "admins", user.email);
           const adminDocSnap = await getDoc(adminDocRef);
-          
           if (adminDocSnap.exists()) {
             document.getElementById('btn-admin-panel').style.display = 'block'; 
           }
         } catch (error) {
-          console.log("Bukan admin atau akses ditolak, lanjut memuat profil biasa.");
+          console.log("Bukan admin atau akses ditolak.");
         }
-        // ---------------------------------------------------------------------
 
         // Tampilkan Data ke Layar
         document.getElementById('user-name-display').textContent = currentUserData.full_name;
         document.getElementById('user-email-display').textContent = currentUserData.email;
+        document.getElementById('user-wa-display').textContent = currentUserData.whatsapp || '-';
         
         if (currentUserData.photo_url) {
           document.getElementById('photo-placeholder').style.display = 'none';
@@ -234,14 +220,23 @@ title: Profil — Grand Nations
           document.getElementById('no-nation-state').style.display = 'none';
           document.getElementById('has-nation-state').style.display = 'block';
 
-          document.getElementById('nation-name-display').textContent = nationData.nation_name;
-          document.getElementById('leader-name-display').textContent = nationData.leader_name;
-          document.getElementById('ideology-display').textContent = nationData.ideology || '-';
+          const listContainer = document.getElementById('nations-list-container');
+          listContainer.innerHTML = `<div class="data-row" style="border-bottom:2px solid var(--line); margin-bottom:10px;"><span class="data-label">NAMA NEGARA</span><span class="data-label">STATUS</span></div>`;
           
-          const badge = document.getElementById('status-badge');
-          badge.textContent = nationData.status === 'approved' ? 'DISETUJUI' : 'MENUNGGU REVIEW';
-          badge.style.color = nationData.status === 'approved' ? '#00ff64' : '#ffc800';
+          if (nationData.nations && Array.isArray(nationData.nations)) {
+            nationData.nations.forEach(nation => {
+              let statusColor = '#ffc800'; 
+              if (nation.status === 'approved') statusColor = '#00ff64';
+              if (nation.status === 'rejected') statusColor = '#ff4d4d';
 
+              listContainer.innerHTML += `
+                <div class="nation-item">
+                  <span class="data-value" style="color:#fff;">${nation.name}</span>
+                  <span class="data-value" style="color:${statusColor}; font-size:0.9rem;">${nation.status.toUpperCase()}</span>
+                </div>
+              `;
+            });
+          }
         } else {
           document.getElementById('no-nation-state').style.display = 'block';
           document.getElementById('has-nation-state').style.display = 'none';
@@ -264,6 +259,7 @@ title: Profil — Grand Nations
   btnEditProfile.addEventListener('click', () => {
     if (!currentUserData) return;
     document.getElementById('edit-name').value = currentUserData.full_name || '';
+    document.getElementById('edit-wa').value = currentUserData.whatsapp || '';
     document.getElementById('edit-dob').value = currentUserData.dob || '';
     document.getElementById('edit-photo').value = ''; 
     editError.style.display = 'none';
@@ -288,6 +284,7 @@ title: Profil — Grand Nations
 
     try {
       const newName = document.getElementById('edit-name').value;
+      const newWa = document.getElementById('edit-wa').value;
       const newDob = document.getElementById('edit-dob').value;
       const file = document.getElementById('edit-photo').files[0];
       let newPhotoURL = currentUserData.photo_url;
@@ -309,14 +306,18 @@ title: Profil — Grand Nations
         newPhotoURL = data.secure_url;
       }
 
+      // Update data di Firestore (Termasuk WhatsApp)
       const userDocRef = doc(db, "users", currentUser.uid);
       await updateDoc(userDocRef, {
         full_name: newName,
+        whatsapp: newWa,
         dob: newDob,
         photo_url: newPhotoURL
       });
 
+      // Update tampilan secara instan tanpa reload
       document.getElementById('user-name-display').textContent = newName;
+      document.getElementById('user-wa-display').textContent = newWa;
       document.getElementById('user-dob-display').textContent = new Date(newDob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
       
       if (newPhotoURL) {
@@ -326,7 +327,9 @@ title: Profil — Grand Nations
         img.style.display = 'block';
       }
 
+      // Update data cache lokal
       currentUserData.full_name = newName;
+      currentUserData.whatsapp = newWa;
       currentUserData.dob = newDob;
       currentUserData.photo_url = newPhotoURL;
 
