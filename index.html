@@ -684,40 +684,56 @@
   })();
 </script>
 
-<!-- ================= SUPABASE INTEGRATION (UPGRADE AUTH) ================= -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://meftvtzaprefskfzomz.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZnR2dHphcHJyZWZza2Z6b216Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzNjQ5NTEsImV4cCI6MjEwNzk0MDk1MX0.dpQ-LO7cCtJQ2OeqQefF6IRrWIAyFyWDwZR7dFzno9Y';
+<!-- ================= FIREBASE INTEGRATION ================= -->
+<script type="module">
+  // 1. Import fungsi Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // 2. Konfigurasi Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCYben87_XUeQdJXz3DNeS07pv3upsGXYc",
+    authDomain: "grand-nations-bcf65.firebaseapp.com",
+    projectId: "grand-nations-bcf65",
+    storageBucket: "grand-nations-bcf65.firebasestorage.app",
+    messagingSenderId: "266950230750",
+    appId: "1:266950230750:web:5de3abb0e5a9a726d4384f"
+  };
+
+  // 3. Inisialisasi Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
   const authButton = document.getElementById('auth-button');
 
-  // 1. Fungsi Login Google
+  // 4. Fungsi Login (Pop-up)
   async function loginWithGoogle() {
-    const { data, error } = await supabaseClient.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin // Kembali ke web setelah login
-      }
-    });
-    if (error) console.error("Login Error:", error.message);
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log("Login berhasil:", result.user.email);
+    } catch (error) {
+      console.error("Login gagal:", error.message);
+      alert("Gagal login: " + error.message);
+    }
   }
 
-  // 2. Fungsi Logout
+  // 5. Fungsi Logout
   async function logout() {
-    await supabaseClient.auth.signOut();
-    window.location.reload();
+    try {
+      await signOut(auth);
+      console.log("Logout berhasil");
+    } catch (error) {
+      console.error("Logout gagal:", error.message);
+    }
   }
 
-  // 3. Cek Status Login Saat Web Dibuka
-  async function checkUser() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    
-    if (session) {
+  // 6. Pantau Status Login
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
       // Jika sudah login
-      const userEmail = session.user.email;
-      authButton.textContent = 'Logout (' + userEmail.split('@')[0] + ')';
+      const userName = user.displayName || user.email.split('@')[0];
+      authButton.textContent = 'Logout (' + userName + ')';
       authButton.style.background = 'transparent';
       authButton.style.border = '1px solid var(--ink)';
       authButton.style.color = 'var(--ink)';
@@ -730,17 +746,9 @@
       authButton.style.border = 'none';
       authButton.onclick = loginWithGoogle;
     }
-  }
-
-  // Jalankan pengecekan pertama kali
-  checkUser();
-
-  // Pantau perubahan (misal saat redirect balik dari halaman Google)
-  supabaseClient.auth.onAuthStateChange((_event, session) => {
-    checkUser();
   });
 </script>
-<!-- =================================================================== -->
+<!-- ======================================================== -->
 
 </body>
 </html>
