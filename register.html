@@ -14,7 +14,6 @@ title: Pendaftaran Anggota — Grand Nations
     <div class="icon">🔒</div>
     <h2>Akses Dibatasi</h2>
     <p>Kamu harus login menggunakan akun Google terlebih dahulu sebelum mendaftar sebagai anggota.</p>
-    <p style="font-family:var(--mono); font-size:0.85rem; color:var(--ink);">Silakan klik tombol <strong>Login Google</strong> di pojok kanan atas.</p>
   </div>
 
   <!-- FORM PENDAFTARAN -->
@@ -93,7 +92,6 @@ title: Pendaftaran Anggota — Grand Nations
     e.preventDefault();
     if (!currentUser) return;
 
-    // Cek ukuran file sebelum upload
     const file = document.getElementById('profile_pic').files[0];
     if (file && file.size > 2 * 1024 * 1024) {
       formError.textContent = "Ukuran foto terlalu besar! Maksimal 2MB.";
@@ -109,14 +107,18 @@ title: Pendaftaran Anggota — Grand Nations
       let photoURL = '';
 
       if (file) {
-        console.log("Mulai upload gambar...");
-        const storageRef = ref(storage, 'avatars/' + currentUser.uid + '_' + file.name);
+        console.log("1. Mulai upload gambar...");
+        // Bersihkan nama file dari karakter aneh (spasi, kurung, dll)
+        const safeFileName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+        const storageRef = ref(storage, 'avatars/' + currentUser.uid + '_' + safeFileName);
+        
+        // Proses upload
         await uploadBytes(storageRef, file);
+        console.log("2. Upload sukses, mengambil URL...");
         photoURL = await getDownloadURL(storageRef);
-        console.log("Gambar berhasil diupload!");
       }
 
-      console.log("Menyimpan data ke database...");
+      console.log("3. Menyimpan data ke database...");
       await setDoc(doc(db, "users", currentUser.uid), {
         full_name: document.getElementById('full_name').value,
         dob: document.getElementById('dob').value,
@@ -125,13 +127,12 @@ title: Pendaftaran Anggota — Grand Nations
         email: currentUser.email
       });
 
-      console.log("Data berhasil disimpan, mengalihkan ke profil...");
+      console.log("4. Sukses! Pindah ke profil...");
       window.location.href = '/profile.html';
 
     } catch (error) {
-      // Menampilkan error yang sebenarnya terjadi di layar
       console.error("ERROR DETAIL:", error);
-      formError.textContent = "Gagal mendaftar: " + error.message;
+      formError.textContent = "Gagal: " + error.message;
       formError.style.display = 'block';
       submitBtn.textContent = 'Daftar Anggota';
       submitBtn.disabled = false;
