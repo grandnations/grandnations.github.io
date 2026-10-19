@@ -25,6 +25,7 @@
   html{scroll-behavior:smooth;}
   body{background:var(--bg); color:var(--ink); font-family:var(--head); font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100vh; display:flex; flex-direction:column;}
   a{color:inherit; text-decoration:none;}
+  img{display:block; max-width:100%;}
   .wrap{max-width:var(--maxw); margin:0 auto; padding:0 32px; width:100%;}
 
   /* ===== NAV (Sama persis dengan index) ===== */
@@ -32,13 +33,22 @@
   .nav-inner{max-width:1480px; margin:0 auto; padding:0 28px; height:64px; display:flex; align-items:center; justify-content:space-between; gap:20px;}
   .brand{display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.2rem; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap;}
   .logo-slot{width:34px; height:34px; position:relative; flex-shrink:0;}
-  .logo-slot svg{width:100%; height:100%;}
+  .logo-slot img{width:100%; height:100%; object-fit:contain;}
+  .logo-slot svg{display:none; width:100%; height:100%;}
+  .logo-slot.missing svg{display:block;}
   nav.links{display:flex; gap:22px; align-items:center;}
   nav.links a{text-decoration:none; font-size:.9rem; font-weight:500; color:#d6d6d6; padding:6px 0; border-bottom:2px solid transparent; transition:color .2s, border-color .2s; white-space:nowrap;}
   nav.links a:hover, nav.links a.on{color:#fff; border-color:#fff;}
   #auth-button{background:#fff; color:#000; border:none; padding:9px 18px; font-family:var(--head); font-weight:600; font-size:.82rem; cursor:pointer; transition:opacity .2s; white-space:nowrap;}
   #auth-button:hover{opacity:.82;}
+  .burger{display:none; background:none; border:1px solid var(--line-strong); color:#fff; width:40px; height:40px; cursor:pointer; font-size:1.1rem;}
   .nav-right{display:flex; align-items:center; gap:12px;}
+  @media (max-width:1180px){
+    nav.links{display:none; position:absolute; top:64px; left:0; right:0; flex-direction:column; align-items:stretch; gap:0; background:rgba(0,0,0,.97); border-bottom:1px solid var(--line); padding:6px 28px 14px;}
+    nav.links.open{display:flex;}
+    nav.links a{padding:13px 0; border-bottom:1px solid var(--line);}
+    .burger{display:block;}
+  }
 
   /* ===== MAIN AREA ===== */
   main{flex:1; padding-top:140px; padding-bottom:80px;}
@@ -90,7 +100,6 @@
     .card-grid{grid-template-columns:1fr;}
     .card-visual{padding:40px;}
     .flag-slot{max-width:300px; margin:0 auto 20px;}
-    nav.links{display:none;}
   }
 </style>
 </head>
@@ -100,6 +109,7 @@
   <div class="nav-inner">
     <a class="brand" href="index.html">
       <span class="logo-slot">
+        <img src="assets/img/logogn.jpeg" alt="Logo" onerror="this.parentElement.classList.add('missing')">
         <svg viewBox="0 0 100 100" fill="none" stroke="#fff" aria-hidden="true">
           <circle cx="50" cy="50" r="30" stroke-width="3"/>
           <ellipse cx="50" cy="50" rx="12" ry="30" stroke-width="2"/>
@@ -108,7 +118,7 @@
       </span>
       Grand Nations
     </a>
-    <nav class="links">
+    <nav class="links" id="navLinks">
       <a href="index.html">Beranda</a>
       <a href="index.html#sejarah">Sejarah</a>
       <a href="index.html#struktur">Struktur</a>
@@ -117,6 +127,7 @@
     </nav>
     <div class="nav-right">
       <button id="auth-button">Logout</button>
+      <button class="burger" id="burger" aria-label="Menu">☰</button>
     </div>
   </div>
 </header>
@@ -149,6 +160,7 @@
       <div class="card-visual">
         <div class="flag-slot" id="flag-container">
           <span>BELUM ADA BENDERA</span>
+          <!-- Nanti gambar bendera akan disisipkan ke sini via JS -->
         </div>
         <div style="font-family:var(--mono); font-size:0.75rem; color:var(--faint); letter-spacing:0.1em;">
           DELEGASI RESMI
@@ -190,6 +202,15 @@
     </div>
   </div>
 </footer>
+
+<!-- ================= SCRIPT BURGER MENU ================= -->
+<script>
+  (function () {
+    var burger = document.getElementById('burger'), links = document.getElementById('navLinks');
+    burger.addEventListener('click', function () { links.classList.toggle('open'); });
+    links.addEventListener('click', function (e) { if (e.target.tagName === 'A') links.classList.remove('open'); });
+  })();
+</script>
 
 <!-- ================= FIREBASE LOGIC ================= -->
 <script type="module">
