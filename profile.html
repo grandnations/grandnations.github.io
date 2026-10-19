@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil Delegasi — Grand Nations</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070707; --bg-soft: #0f0f0f; --ink: #f2f2ee; --ink-dim: #9b9b95;
+    --line: rgba(242,242,238,0.14); --glass: rgba(242,242,238,0.045);
+    --serif: 'Fraunces', serif; --sans: 'IBM Plex Sans', sans-serif; --mono: 'IBM Plex Mono', monospace;
+  }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans);
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  header {
+    padding: 20px 28px; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .brand { font-family: var(--serif); font-size: 1.2rem; text-decoration: none; color: var(--ink); }
+  .btn {
+    background: transparent; color: var(--ink); border: 1px solid var(--line);
+    padding: 8px 16px; border-radius: 2px; cursor: pointer; font-family: var(--sans);
+    text-decoration: none; font-size: 0.85rem; transition: 0.2s;
+  }
+  .btn:hover { background: var(--ink); color: var(--bg); }
+  .btn-primary { background: var(--ink); color: var(--bg); border: none; font-weight: 600; }
+  .btn-primary:hover { opacity: 0.8; }
+  
+  .container {
+    flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px;
+  }
+  .card {
+    background: var(--glass); border: 1px solid var(--line); padding: 40px;
+    border-radius: 4px; width: 100%; max-width: 500px; text-align: center;
+    backdrop-filter: blur(10px);
+  }
+  .kicker { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-dim); margin-bottom: 10px; letter-spacing: 0.1em; }
+  h1 { font-family: var(--serif); font-size: 2rem; margin: 0 0 20px; }
+  .data-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .data-row:last-child { border-bottom: none; }
+  .data-label { color: var(--ink-dim); }
+  .status-badge {
+    display: inline-block; padding: 4px 10px; font-family: var(--mono); font-size: 0.7rem;
+    border-radius: 2px; margin-top: 20px;
+  }
+  .status-pending { background: rgba(255, 200, 0, 0.1); color: #ffc800; border: 1px solid #ffc800; }
+  .status-approved { background: rgba(0, 255, 100, 0.1); color: #00ff64; border: 1px solid #00ff64; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="brand">Grand Nations</a>
+  <button id="logout-btn" class="btn">Logout</button>
+</header>
+
+<div class="container">
+  <!-- Loading State -->
+  <div id="loading" style="color: var(--ink-dim); font-family: var(--mono);">Memuat data profil...</div>
+
+  <!-- State 1: Belum Daftar Negara -->
+  <div id="empty-state" class="card" style="display: none;">
+    <div class="kicker">DELEGASI BELUM TERDAFTAR</div>
+    <h1>Selamat Datang, <span id="user-name-display"></span></h1>
+    <p style="color: var(--ink-dim); margin-bottom: 30px;">
+      Kamu belum mendaftarkan negara apa pun untuk bergabung dalam simulasi. Daftarkan negaramu sekarang.
+    </p>
+    <a href="register.html" class="btn btn-primary">Daftarkan Negara</a>
+  </div>
+
+  <!-- State 2: Sudah Daftar Negara -->
+  <div id="profile-state" class="card" style="display: none;">
+    <div class="kicker">KARTU DELEGASI RESMI</div>
+    <h1 id="nation-name-display">Nama Negara</h1>
+    
+    <div class="data-row">
+      <span class="data-label">Pemimpin</span>
+      <span id="leader-name-display">-</span>
+    </div>
+    <div class="data-row">
+      <span class="data-label">Ideologi</span>
+      <span id="ideology-display">-</span>
+    </div>
+    
+    <div id="status-badge" class="status-badge">STATUS</div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
+    authDomain: "grand-nations-bcf65.firebaseapp.com",
+    projectId: "grand-nations-bcf65",
+    storageBucket: "grand-nations-bcf65.firebasestorage.app",
+    messagingSenderId: "266950230750",
+    appId: "1:266950230750:web:60c88d8abae6590bd4384f"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const loading = document.getElementById('loading');
+  const emptyState = document.getElementById('empty-state');
+  const profileState = document.getElementById('profile-state');
+
+  // Cek Status Login
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // Jika login, ambil nama panggilan
+      const userName = user.displayName || user.email.split('@')[0];
+      document.getElementById('user-name-display').textContent = userName;
+
+      // Ambil data dari tabel "registrations" berdasarkan UID user
+      const docRef = doc(db, "registrations", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      loading.style.display = 'none';
+
+      if (docSnap.exists()) {
+        // Jika data negara ditemukan
+        const data = docSnap.data();
+        document.getElementById('nation-name-display').textContent = data.nation_name;
+        document.getElementById('leader-name-display').textContent = data.leader_name;
+        document.getElementById('ideology-display').textContent = data.ideology || '-';
+        
+        const badge = document.getElementById('status-badge');
+        badge.textContent = data.status.toUpperCase();
+        badge.classList.add(data.status === 'approved' ? 'status-approved' : 'status-pending');
+
+        profileState.style.display = 'block';
+      } else {
+        // Jika tidak ada data (belum daftar)
+        emptyState.style.display = 'block';
+      }
+
+    } else {
+      // Jika tidak login, tendang ke halaman utama
+      window.location.href = 'index.html';
+    }
+  });
+
+  // Tombol Logout
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    signOut(auth).then(() => {
+      window.location.href = 'index.html';
+    });
+  });
+</script>
+
+</body>
+</html>
