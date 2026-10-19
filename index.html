@@ -91,7 +91,6 @@
   .hero-bg{position:absolute; inset:0; z-index:-3; background:#000;}
   .hero-bg img{width:100%; height:100%; object-fit:cover; opacity:.55;}
   .hero-bg.missing img{display:none;}
-  /* horizon bumi buatan CSS (muncul kalau hero-bg.jpg belum ada, tetap tampil bagus di atas gambar) */
   .horizon{position:absolute; left:50%; bottom:-62vw; width:150vw; height:150vw; transform:translateX(-50%); border-radius:50%; z-index:-2;
     background:radial-gradient(circle at 50% 0%, rgba(255,255,255,.22) 0%, rgba(255,255,255,.05) 8%, #050505 22%, #000 60%);
     box-shadow:0 -2px 60px 6px rgba(255,255,255,.18), inset 0 2px 1px rgba(255,255,255,.35);}
@@ -672,12 +671,13 @@
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
+      // UBAH DI SINI: Tombol menjadi "Profil Saya" dan mengarah ke profile.html
       const userName = user.displayName || user.email.split('@')[0];
-      authButton.textContent = 'Logout (' + userName + ')';
+      authButton.textContent = 'Profil Saya';
       authButton.style.background = 'transparent';
       authButton.style.border = '1px solid #fff';
       authButton.style.color = '#fff';
-      authButton.onclick = logout;
+      authButton.onclick = () => { window.location.href = 'profile.html'; };
     } else {
       authButton.textContent = 'Login Google';
       authButton.style.background = '#fff';
