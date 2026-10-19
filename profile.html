@@ -191,15 +191,19 @@ title: Profil — Grand Nations
       if (userDocSnap.exists()) {
         currentUserData = userDocSnap.data();
         
-        // --- 2. LOGIKA CEK ADMIN (Hanya memunculkan tombol jika terdaftar) ---
-        const adminDocRef = doc(db, "admins", user.email);
-        const adminDocSnap = await getDoc(adminDocRef);
-        
-        if (adminDocSnap.exists()) {
-          document.getElementById('btn-admin-panel').style.display = 'block'; // Munculkan tombol admin
+                // --- 2. LOGIKA CEK ADMIN (Dengan pengaman try-catch) ---
+        try {
+          const adminDocRef = doc(db, "admins", user.email);
+          const adminDocSnap = await getDoc(adminDocRef);
+          
+          if (adminDocSnap.exists()) {
+            document.getElementById('btn-admin-panel').style.display = 'block'; 
+          }
+        } catch (error) {
+          console.log("Bukan admin atau akses ditolak, lanjut memuat profil biasa.");
         }
         // ---------------------------------------------------------------------
-
+        
         // Tampilkan Data ke Layar
         document.getElementById('user-name-display').textContent = currentUserData.full_name;
         document.getElementById('user-email-display').textContent = currentUserData.email;
