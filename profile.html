@@ -1,143 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kartu Delegasi — Grand Nations</title>
-
-<!-- TAMBAHAN FAVICON (Gambar di atas tab) -->
-<link rel="icon" type="image/jpeg" href="assets/img/logogn.jpeg">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#000;
-    --bg2:#0a0a0a;
-    --bg3:#121212;
-    --ink:#fff;
-    --dim:#a9a9a9;
-    --faint:#6a6a6a;
-    --line:rgba(255,255,255,.18);
-    --line-strong:rgba(255,255,255,.5);
-    --head:'Poppins',sans-serif;
-    --mono:'IBM Plex Mono',monospace;
-    --maxw:1240px;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-  body{background:var(--bg); color:var(--ink); font-family:var(--head); font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100vh; display:flex; flex-direction:column;}
-  a{color:inherit; text-decoration:none;}
-  img{display:block; max-width:100%;}
-  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 32px; width:100%;}
-
-  /* ===== NAV (Sama persis dengan index) ===== */
-  header.nav{position:fixed; top:0; left:0; right:0; z-index:60; background:rgba(0,0,0,.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line);}
-  .nav-inner{max-width:1480px; margin:0 auto; padding:0 28px; height:64px; display:flex; align-items:center; justify-content:space-between; gap:20px;}
-  .brand{display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.2rem; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap;}
-  .logo-slot{width:34px; height:34px; position:relative; flex-shrink:0;}
-  .logo-slot img{width:100%; height:100%; object-fit:contain;}
-  .logo-slot svg{display:none; width:100%; height:100%;}
-  .logo-slot.missing svg{display:block;}
-  nav.links{display:flex; gap:22px; align-items:center;}
-  nav.links a{text-decoration:none; font-size:.9rem; font-weight:500; color:#d6d6d6; padding:6px 0; border-bottom:2px solid transparent; transition:color .2s, border-color .2s; white-space:nowrap;}
-  nav.links a:hover, nav.links a.on{color:#fff; border-color:#fff;}
-  #auth-button{background:#fff; color:#000; border:none; padding:9px 18px; font-family:var(--head); font-weight:600; font-size:.82rem; cursor:pointer; transition:opacity .2s; white-space:nowrap;}
-  #auth-button:hover{opacity:.82;}
-  .burger{display:none; background:none; border:1px solid var(--line-strong); color:#fff; width:40px; height:40px; cursor:pointer; font-size:1.1rem;}
-  .nav-right{display:flex; align-items:center; gap:12px;}
-  @media (max-width:1180px){
-    nav.links{display:none; position:absolute; top:64px; left:0; right:0; flex-direction:column; align-items:stretch; gap:0; background:rgba(0,0,0,.97); border-bottom:1px solid var(--line); padding:6px 28px 14px;}
-    nav.links.open{display:flex;}
-    nav.links a{padding:13px 0; border-bottom:1px solid var(--line);}
-    .burger{display:block;}
-  }
-
-  /* ===== MAIN AREA ===== */
-  main{flex:1; padding-top:140px; padding-bottom:80px;}
-  
-  .page-head{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:50px; border-bottom:1px solid var(--line); padding-bottom:20px;}
-  .page-head h1{font-weight:800; text-transform:uppercase; font-size:clamp(2.5rem,6vw,4.5rem); line-height:1.05; letter-spacing:-.01em;}
-  .page-head .idx{font-family:var(--mono); font-size:.76rem; color:var(--faint); letter-spacing:.08em;}
-
-  /* ===== STATE 1: BELUM DAFTAR ===== */
-  #empty-state{
-    border:1px solid var(--line); background:var(--bg2); padding:60px 30px; text-align:center;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:400px;
-  }
-  #empty-state .icon{width:80px; height:80px; border:2px dashed var(--line-strong); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:24px; font-family:var(--mono); font-size:2rem; color:var(--faint);}
-  #empty-state h2{font-weight:800; text-transform:uppercase; font-size:clamp(1.8rem,4vw,2.5rem); margin-bottom:14px;}
-  #empty-state p{color:var(--dim); max-width:500px; margin:0 auto 32px;}
-  .btn{display:inline-block; padding:14px 30px; font-weight:600; font-size:.92rem; text-decoration:none; border:1px solid #fff; transition:all .2s; letter-spacing:.03em; cursor:pointer;}
-  .btn.solid{background:#fff; color:#000;}
-  .btn.solid:hover{background:transparent; color:#fff;}
-
-  /* ===== STATE 2: SUDAH DAFTAR (KARTU) ===== */
-  #profile-state{display:none;}
-  .card-grid{display:grid; grid-template-columns:360px 1fr; gap:1px; background:var(--line); border:1px solid var(--line);}
-  
-  /* Visual (Bendera) */
-  .card-visual{background:var(--bg2); padding:30px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative;}
-  .flag-slot{width:100%; aspect-ratio:3/2; border:1px solid var(--line-strong); position:relative; background:repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 10px, transparent 10px 20px); margin-bottom:20px; display:flex; align-items:center; justify-content:center;}
-  .flag-slot span{font-family:var(--mono); font-size:.7rem; color:var(--faint);}
-  .flag-slot img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0;}
-
-  /* Detail (Data) */
-  .card-details{background:var(--bg2); padding:40px;}
-  .status-badge{display:inline-block; font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; padding:6px 12px; border:1px solid; margin-bottom:24px; text-transform:uppercase;}
-  .status-approved{border-color:#00ff64; color:#00ff64; background:rgba(0,255,100,.05);}
-  .status-pending{border-color:#ffc800; color:#ffc800; background:rgba(255,200,0,.05);}
-  
-  .nation-name{font-weight:800; font-size:clamp(2rem,4vw,3.5rem); line-height:1.1; margin-bottom:30px;}
-  
-  .data-list{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line);}
-  .data-row{display:flex; justify-content:space-between; padding:16px 0; border-bottom:1px solid var(--line); align-items:center;}
-  .data-label{font-family:var(--mono); font-size:.78rem; color:var(--dim); letter-spacing:.08em;}
-  .data-value{font-weight:600; font-size:1.1rem; text-align:right;}
-
-  /* ===== FOOTER ===== */
-  footer{padding:40px 0; background:#000; border-top:1px solid var(--line); margin-top:auto;}
-  .foot-bottom{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-family:var(--mono); font-size:.72rem; color:var(--faint);}
-  
-  @media (max-width:860px){
-    .card-grid{grid-template-columns:1fr;}
-    .card-visual{padding:40px;}
-    .flag-slot{max-width:300px; margin:0 auto 20px;}
-  }
-</style>
-</head>
-<body>
-
-<header class="nav">
-  <div class="nav-inner">
-    <a class="brand" href="index.html">
-      <span class="logo-slot">
-        <img src="assets/img/logogn.jpeg" alt="Logo" onerror="this.parentElement.classList.add('missing')">
-        <svg viewBox="0 0 100 100" fill="none" stroke="#fff" aria-hidden="true">
-          <circle cx="50" cy="50" r="30" stroke-width="3"/>
-          <ellipse cx="50" cy="50" rx="12" ry="30" stroke-width="2"/>
-          <path d="M20 50h60M50 20v60" stroke-width="2"/>
-        </svg>
-      </span>
-      Grand Nations
-    </a>
-    <nav class="links" id="navLinks">
-      <a href="index.html">Beranda</a>
-      <a href="index.html#sejarah">Sejarah</a>
-      <a href="index.html#struktur">Struktur</a>
-      <a href="index.html#negara">Delegasi</a>
-      <a href="profile.html" class="on">Kartu Saya</a>
-    </nav>
-    <div class="nav-right">
-      <button id="auth-button">Logout</button>
-      <button class="burger" id="burger" aria-label="Menu">☰</button>
-    </div>
-  </div>
-</header>
+---
+layout: default
+title: Kartu Delegasi — Grand Nations
+---
 
 <main class="wrap">
-  
   <div class="page-head reveal">
     <h1>Profil<br>Delegasi</h1>
     <div class="idx">DASHBOARD ANGGOTA</div>
@@ -153,13 +19,12 @@
     <div class="icon">?</div>
     <h2>Belum Ada Negara</h2>
     <p>Kamu belum mendaftarkan negara apa pun untuk bergabung dalam simulasi Grand Nations. Silakan isi formulir pendaftaran untuk memulai perjalanan diplomasimu.</p>
-    <a href="register.html" class="btn solid">Daftarkan Negara Sekarang</a>
+    <a href="/register.html" class="btn solid">Daftarkan Negara Sekarang</a>
   </div>
 
   <!-- STATE 2: SUDAH DAFTAR -->
   <div id="profile-state" class="reveal">
     <div class="card-grid">
-      
       <!-- Kiri: Bendera -->
       <div class="card-visual">
         <div class="flag-slot" id="flag-container">
@@ -169,13 +34,10 @@
           DELEGASI RESMI
         </div>
       </div>
-
       <!-- Kanan: Data -->
       <div class="card-details">
         <div id="status-badge" class="status-badge">PENDING</div>
-        
         <h2 id="nation-name-display" class="nation-name">Nama Negara</h2>
-        
         <div class="data-list">
           <div class="data-row">
             <span class="data-label">PEMIMPIN</span>
@@ -191,50 +53,19 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
-
 </main>
 
-<footer>
-  <div class="wrap">
-    <div class="foot-bottom">
-      <span>© 2026 GRAND NATIONS — ROLEPLAY COMMUNITY</span>
-      <span>DIRANCANG UNTUK SIMULASI GLOBAL</span>
-    </div>
-  </div>
-</footer>
-
-<!-- ================= SCRIPT BURGER MENU ================= -->
-<script>
-  (function () {
-    var burger = document.getElementById('burger'), links = document.getElementById('navLinks');
-    burger.addEventListener('click', function () { links.classList.toggle('open'); });
-    links.addEventListener('click', function (e) { if (e.target.tagName === 'A') links.classList.remove('open'); });
-  })();
-</script>
-
-<!-- ================= FIREBASE LOGIC ================= -->
+<!-- ================= SCRIPT KHUSUS PROFILE ================= -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+  
+  // Panggil auth yang sudah diinisialisasi di layout
+  const auth = getAuth();
+  const db = getFirestore();
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
-    authDomain: "grand-nations-bcf65.firebaseapp.com",
-    projectId: "grand-nations-bcf65",
-    storageBucket: "grand-nations-bcf65.firebasestorage.app",
-    messagingSenderId: "266950230750",
-    appId: "1:266950230750:web:60c88d8abae6590bd4384f"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  const authButton = document.getElementById('auth-button');
   const loading = document.getElementById('loading');
   const emptyState = document.getElementById('empty-state');
   const profileState = document.getElementById('profile-state');
@@ -266,18 +97,6 @@
       } else {
         emptyState.style.display = 'block';
       }
-
-    } else {
-      window.location.href = 'index.html';
     }
   });
-
-  authButton.addEventListener('click', () => {
-    signOut(auth).then(() => {
-      window.location.href = 'index.html';
-    });
-  });
 </script>
-
-</body>
-</html>
