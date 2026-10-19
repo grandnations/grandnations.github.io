@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
-  /* (CSS TETAP SAMA SEPERTI SEBELUMNYA - TIDAK ADA YANG DIUBAH) */
   :root{
     --bg:#000; --bg2:#0a0a0a; --bg3:#121212; --ink:#fff;
     --dim:#a9a9a9; --faint:#6a6a6a;
@@ -25,12 +24,16 @@
   img{display:block; max-width:100%;}
   ::selection{background:#fff; color:#000;}
   .wrap{max-width:var(--maxw); margin:0 auto; padding:0 32px; width:100%;}
+
+  /* IMAGE SLOT */
   .slot{position:relative; overflow:hidden; border:1px solid var(--line); background:repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 10px, transparent 10px 20px), var(--bg3);}
   .slot img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; transition:transform .8s ease, opacity .4s;}
   .slot::after{content:attr(data-path); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:12px; text-align:center; font-family:var(--mono); font-size:.68rem; color:var(--faint);}
   .slot.missing img{display:none;} .slot:not(.missing)::after{display:none;}
   .r1{aspect-ratio:1/1;} .r32{aspect-ratio:3/2;} .r43{aspect-ratio:4/3;} .r169{aspect-ratio:16/9;} .r1610{aspect-ratio:16/10;} .r45{aspect-ratio:4/5;}
   .zoom:hover img{transform:scale(1.06);}
+
+  /* NAV */
   header.nav{position:fixed; top:0; left:0; right:0; z-index:60; background:rgba(0,0,0,.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line);}
   .nav-inner{max-width:1480px; margin:0 auto; padding:0 28px; height:64px; display:flex; align-items:center; justify-content:space-between; gap:20px;}
   .brand{display:flex; align-items:center; gap:10px; text-decoration:none; font-weight:700; font-size:1.2rem; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap;}
@@ -49,6 +52,8 @@
     nav.links{display:none; position:absolute; top:64px; left:0; right:0; flex-direction:column; align-items:stretch; gap:0; background:rgba(0,0,0,.97); border-bottom:1px solid var(--line); padding:6px 28px 14px;}
     nav.links.open{display:flex;} nav.links a{padding:13px 0; border-bottom:1px solid var(--line);} .burger{display:block;}
   }
+
+  /* HERO */
   .hero{position:relative; min-height:78vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:130px 20px 90px; overflow:hidden; isolation:isolate; border-bottom:1px solid var(--line);}
   .hero-bg{position:absolute; inset:0; z-index:-3; background:#000;}
   .hero-bg img{width:100%; height:100%; object-fit:cover; opacity:.55;}
@@ -59,6 +64,8 @@
   .hero-banner-img{width:100%; max-width:900px; height:auto; aspect-ratio:4.5/1; object-fit:cover; margin:0 auto 30px; position:relative; z-index:1; display:block; mix-blend-mode:screen; -webkit-mask-image:radial-gradient(ellipse 75% 90% at 50% 50%, #000 55%, transparent 100%); mask-image:radial-gradient(ellipse 75% 90% at 50% 50%, #000 55%, transparent 100%);}
   .hero p.sub{max-width:660px; margin:28px auto 34px; color:#cfcfcf; font-size:1.05rem; position:relative; z-index:1;}
   .cta-row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; position:relative; z-index:1;}
+
+  /* GLOBAL UTILS */
   .btn{display:inline-block; padding:14px 30px; font-weight:600; font-size:.92rem; text-decoration:none; border:1px solid #fff; transition:all .2s; letter-spacing:.03em; cursor:pointer;}
   .btn.solid{background:#fff; color:#000;} .btn.solid:hover{background:transparent; color:#fff;}
   .btn.line{background:transparent; color:#fff;} .btn.line:hover{background:#fff; color:#000;}
@@ -67,6 +74,8 @@
   .sec-head{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:56px;}
   .sec-head h2{font-weight:800; text-transform:uppercase; font-size:clamp(2rem,5vw,3.6rem); line-height:1.05; letter-spacing:-.01em;}
   .sec-head .idx{font-family:var(--mono); font-size:.76rem; color:var(--faint); letter-spacing:.08em;}
+
+  /* SISA CSS INDEX & PROFILE */
   .slogan{background:linear-gradient(180deg,#050505,#000); padding-bottom:90px;}
   .slogan-top{display:grid; grid-template-columns:1.35fr 1fr; gap:50px; align-items:center; margin-bottom:80px;}
   .hashtag{font-weight:800; text-transform:uppercase; font-size:clamp(2.6rem,7vw,6rem); line-height:1; letter-spacing:-.02em;}
@@ -211,7 +220,7 @@
     })();
   </script>
 
-  <!-- FIREBASE GLOBAL -->
+  <!-- FIREBASE GLOBAL (Hanya untuk tombol Login di Navbar) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
@@ -237,32 +246,28 @@
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        authButton.textContent = 'Profil Saya';
-        authButton.style.background = 'transparent';
-        authButton.style.border = '1px solid #fff';
-        authButton.style.color = '#fff';
-        
-        // Cek apakah sedang di halaman profile
+        // Tampilan jika sudah login
         if (window.location.pathname.includes('profile')) {
             authButton.textContent = 'Logout';
             authButton.onclick = () => {
                 signOut(auth).then(() => { window.location.href = '/index.html'; });
             };
         } else {
+            authButton.textContent = 'Profil Saya';
             authButton.onclick = () => { window.location.href = '/profile.html'; };
         }
+        authButton.style.background = 'transparent';
+        authButton.style.border = '1px solid #fff';
+        authButton.style.color = '#fff';
       } else {
+        // Tampilan jika belum login
         authButton.textContent = 'Login Google';
         authButton.style.background = '#fff';
         authButton.style.border = 'none';
         authButton.style.color = '#000';
         authButton.onclick = loginWithGoogle;
         
-        // Jika belum login tapi maksa buka profile, kasih tau dan tendang
-        //if (window.location.pathname.includes('profile')) {
-            //alert("Silakan login menggunakan akun Google terlebih dahulu untuk mengakses halaman profil.");
-           // window.location.href = '/index.html';
-        //}
+        // TIDAK ADA LAGI REDIRECT DI SINI. APAPUN YANG TERJADI, TETAP DI HALAMAN.
       }
     });
   </script>
