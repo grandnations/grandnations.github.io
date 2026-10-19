@@ -414,6 +414,7 @@
     </div>
   </div>
 </section>
+
 <!-- ================= TIMELINE ================= -->
 <section id="timeline">
   <div class="wrap">
@@ -623,6 +624,7 @@
   </div>
 </footer>
 
+<!-- ================= SCRIPT INTERAKTIF BAWAAN ================= -->
 <script>
   /* Reveal on scroll */
   (function () {
@@ -676,6 +678,32 @@
     });
   })();
 </script>
+
+<!-- ================= SUPABASE INTEGRATION ================= -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Inisialisasi Supabase
+  const SUPABASE_URL = 'https://meftvtzaprefskfzomz.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZnR2dHphcHJyZWZza2Z6b216Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzNjQ5NTEsImV4cCI6MjEwNzk0MDk1MX0.dpQ-LO7cCtJQ2OeqQefF6IRrWIAyFyWDwZR7dFzno9Y';
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+  console.log("Supabase Client berhasil diinisialisasi!");
+
+  // Fungsi untuk ngetes koneksi ke database
+  async function cekKoneksi() {
+    const { data, error } = await supabaseClient.from('registrations').select('*').limit(1);
+    
+    if (error) {
+      console.error("❌ Gagal koneksi ke database:", error.message);
+    } else {
+      console.log("✅ Sukses! Web sudah terhubung ke tabel registrations. Data:", data);
+    }
+  }
+  
+  cekKoneksi();
+</script>
+<!-- ======================================================== -->
 
 </body>
 </html>
