@@ -221,10 +221,10 @@
     })();
   </script>
 
-  <!-- FIREBASE GLOBAL (Menggunakan Redirect) -->
+  <!-- FIREBASE GLOBAL (Menggunakan POPUP) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
@@ -240,21 +240,18 @@
     const provider = new GoogleAuthProvider();
     const authButton = document.getElementById('auth-button');
 
-    // Tangkap hasil redirect jika baru kembali dari Google
-    getRedirectResult(auth).then((result) => {
-      if (result && result.user) { console.log("Login via redirect sukses:", result.user.email); }
-    }).catch((error) => {
-      console.error("Error redirect:", error.message);
-    });
-
     async function loginWithGoogle() {
-      try { await signInWithRedirect(auth, provider); } 
-      catch (error) { alert("Gagal login: " + error.message); }
+      try {
+        // Menggunakan Popup, bukan Redirect
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        console.error(error);
+        alert("Gagal login: " + error.message);
+      }
     }
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // Cek jika sedang di halaman profile
         if (window.location.pathname.includes('profile')) {
             authButton.textContent = 'Logout';
             authButton.onclick = () => {
