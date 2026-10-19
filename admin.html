@@ -14,9 +14,10 @@ title: Dashboard Admin — Grand Nations
   .request-card { border: 1px solid var(--line); background: var(--bg3); padding: 20px; margin-bottom: 20px; border-radius: 4px; }
   .request-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed var(--line); padding-bottom: 15px; margin-bottom: 15px; }
   .nation-claim-box { display: flex; justify-content: space-between; align-items: center; background: var(--bg); padding: 10px 15px; margin-bottom: 10px; border: 1px solid var(--line); }
-  .btn-sm { padding: 6px 12px; font-size: 0.75rem; cursor: pointer; border: none; font-weight: 600; margin-left: 5px; }
+  .btn-sm { padding: 6px 12px; font-size: 0.75rem; cursor: pointer; border: none; font-weight: 600; margin-left: 5px; border-radius: 2px; }
   .btn-approve { background: #00ff64; color: #000; }
   .btn-reject { background: #ff4d4d; color: #fff; }
+  .btn-delete { background: #ff4d4d; color: #fff; }
 </style>
 
 <main class="wrap">
@@ -39,7 +40,7 @@ title: Dashboard Admin — Grand Nations
       <button class="tab-btn" data-target="master-data">Kelola Data</button>
     </div>
 
-    <!-- Tab Persetujuan (KOTAK-KOTAK) -->
+    <!-- Tab Persetujuan -->
     <div id="tab-nations" class="tab-content">
       <h3 style="font-family:var(--mono); color:var(--dim); font-size: 0.9rem; margin-bottom: 20px;">DAFTAR PENGAJUAN NEGARA</h3>
       <div id="requests-container"></div>
@@ -50,7 +51,7 @@ title: Dashboard Admin — Grand Nations
       <h3 style="font-family:var(--mono); color:var(--dim); font-size: 0.9rem;">TOTAL ANGGOTA: <span id="total-members" style="color: #fff;">0</span></h3>
       <div style="overflow-x:auto;">
         <table class="admin-table">
-          <thead><tr><th>Nama</th><th>Email</th><th>WhatsApp</th><th>Tgl Lahir</th></tr></thead>
+          <thead><tr><th>Nama</th><th>Email</th><th>WhatsApp</th><th>Tgl Lahir</th><th>Aksi</th></tr></thead>
           <tbody id="table-members-body"></tbody>
         </table>
       </div>
@@ -85,7 +86,8 @@ title: Dashboard Admin — Grand Nations
 
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  // Tambahkan deleteDoc
+  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -134,16 +136,13 @@ title: Dashboard Admin — Grand Nations
     container.innerHTML = '';
     const snap = await getDocs(collection(db, "registrations"));
 
-    // Gunakan loop for...of agar bisa nunggu (await) ambil data user
     for (const docSnap of snap.docs) {
       const data = docSnap.data();
       const uid = docSnap.id;
 
-      // Hanya tampilkan jika masih ada negara yang pending
       const hasPending = data.nations.some(n => n.status === 'pending');
       if (!hasPending && data.status !== 'pending') continue; 
 
-      // AMBIL DATA USER UNTUK MENDAPATKAN NO WA
       const userSnap = await getDoc(doc(db, "users", uid));
       const userData = userSnap.exists() ? userSnap.data() : {};
       const waNumber = userData.whatsapp || '-';
@@ -222,20 +221,74 @@ title: Dashboard Admin — Grand Nations
     }
   };
 
-  // --- LOAD TAB LAINNYA ---
+  // --- LOAD DATA ANGGOTA ---
   async function loadMembers() {
     const membersSnap = await getDocs(collection(db, "users"));
     const membersBody = document.getElementById('table-members-body');
     membersBody.innerHTML = '';
     let count = 0;
-    membersSnap.forEach((doc) => {
-      const data = doc.data();
+    
+    membersSnap.forEach((docSnap) => {
+      const data = docSnap.data();
       count++;
-      membersBody.innerHTML += `<tr><td>${data.full_name}</td><td>${data.email}</td><td>${data.whatsapp || '-'}</td><td>${data.dob || '-'}</td></tr>`;
+      // TOMBOL HAPUS DITAMBAHKAN DI SINI
+      membersBody.innerHTML += `
+        <tr>
+          <td>${data.full_name}</td>
+          <td>${data.email}</td>
+          <td>${data.whatsapp || '-'}</td>
+          <td>${data.dob || '-'}</td>
+          <td>
+            <button class="btn-sm btn-delete" onclick="deleteMember('${docSnap.id}', '${data.full_name}')">Hapus</button>
+          </td>
+        </tr>
+      `;
     });
     document.getElementById('total-members').textContent = count;
   }
 
+  // --- FUNGSI HAPUS ANGGOTA ---
+  window.deleteMember = async function(uid, name) {
+    const confirmDelete = confirm(`Yakin ingin menghapus keanggotaan "${name}"?\n\nSistem akan menghapus profil, riwayat negara, dan mengembalikan negara yang sudah diklaim menjadi Tersedia.`);
+    if (!confirmDelete) return;
+
+    try {
+      // 1. Cek dan Hapus Data Negara
+      const regDocRef = doc(db, "registrations", uid);
+      const regSnap = await getDoc(regDocRef);
+      
+      if (regSnap.exists()) {
+        const regData = regSnap.data();
+        // Kembalikan negara yang di-approve ke 'available'
+        if (regData.nations && Array.isArray(regData.nations)) {
+          for (const nation of regData.nations) {
+            if (nation.status === 'approved') {
+              const q = query(collection(db, "countries"), where("name", "==", nation.name));
+              const countrySnap = await getDocs(q);
+              for (const cDoc of countrySnap.docs) {
+                await updateDoc(doc(db, "countries", cDoc.id), { status: 'available' });
+              }
+            }
+          }
+        }
+        // Hapus data pengajuan
+        await deleteDoc(regDocRef);
+      }
+
+      // 2. Hapus Data User
+      await deleteDoc(doc(db, "users", uid));
+
+      alert("Anggota berhasil dihapus dari sistem.");
+      loadMembers();
+      loadRequests();
+      loadCountries();
+
+    } catch (e) {
+      alert("Gagal menghapus anggota: " + e.message);
+    }
+  };
+
+  // --- LOAD TAB LAINNYA ---
   async function loadTimelines() {
     const select = document.getElementById('select-timeline');
     select.innerHTML = '<option value="">-- Pilih Timeline --</option>';
