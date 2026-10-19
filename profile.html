@@ -4,7 +4,7 @@ title: Profil — Grand Nations
 ---
 
 <main class="wrap">
-  <div class="page-head reveal">
+  <div class="page-head">
     <h1>Profil<br>Anggota</h1>
     <div class="idx">DASHBOARD ANGGOTA</div>
   </div>
@@ -12,7 +12,7 @@ title: Profil — Grand Nations
   <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">Memuat data...</div>
 
   <!-- STATE 1: BELUM LOGIN -->
-  <div id="login-required-state" class="auth-box reveal" style="display:none;">
+  <div id="login-required-state" class="auth-box" style="display:none;">
     <div class="icon">🔒</div>
     <h2>Akses Dibatasi</h2>
     <p>Kamu harus login menggunakan akun Google terlebih dahulu.</p>
@@ -20,7 +20,7 @@ title: Profil — Grand Nations
   </div>
 
   <!-- STATE 2: BELUM DAFTAR ANGGOTA -->
-  <div id="empty-user-state" class="auth-box reveal" style="display:none;">
+  <div id="empty-user-state" class="auth-box" style="display:none;">
     <div class="icon">?</div>
     <h2>Belum Terdaftar</h2>
     <p>Kamu belum mendaftarkan diri sebagai anggota Grand Nations. Silakan isi formulir keanggotaan terlebih dahulu.</p>
@@ -28,7 +28,7 @@ title: Profil — Grand Nations
   </div>
 
   <!-- STATE 3: SUDAH DAFTAR ANGGOTA -->
-  <div id="profile-state" class="reveal" style="display:none;">
+  <div id="profile-state" style="display:none;">
     <div class="card-grid">
       
       <!-- Kiri: Kartu Anggota -->
@@ -48,7 +48,7 @@ title: Profil — Grand Nations
           <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DATA KEPENDUDUKAN</h3>
           <div class="data-list">
             <div class="data-row"><span class="data-label">TANGGAL LAHIR</span><span id="user-dob-display" class="data-value">-</span></div>
-            <div class="data-row"><span class="data-label">BEBERGAB SEJAK</span><span id="user-joined-display" class="data-value">-</span></div>
+            <div class="data-row"><span class="data-label">BERGABUNG SEJAK</span><span id="user-joined-display" class="data-value">-</span></div>
           </div>
         </div>
 
@@ -59,7 +59,6 @@ title: Profil — Grand Nations
           <!-- Jika belum punya negara -->
           <div id="no-nation-state" style="display:none; border:1px dashed var(--line-strong); padding:20px; text-align:center;">
             <p style="color:var(--dim); font-size:0.9rem; margin-bottom:15px;">Kamu belum mendaftarkan negara untuk berpartisipasi dalam simulasi.</p>
-            <!-- Tombol ini nanti akan mengarah ke form pendaftaran negara -->
             <button class="btn solid" onclick="alert('Fitur pendaftaran negara akan segera hadir!')" style="padding:10px 20px; font-size:0.85rem;">Daftarkan Negara</button>
           </div>
 
@@ -109,14 +108,12 @@ title: Profil — Grand Nations
     if (user) {
       loginRequiredState.style.display = 'none';
       
-      // 1. CEK DATA ANGGOTA (Tabel: users)
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
         
-        // Tampilkan Data Anggota
         document.getElementById('user-name-display').textContent = userData.full_name;
         document.getElementById('user-email-display').textContent = userData.email;
         
@@ -134,12 +131,10 @@ title: Profil — Grand Nations
           document.getElementById('user-joined-display').textContent = userData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
-        // 2. CEK DATA NEGARA (Tabel: registrations)
         const nationDocRef = doc(db, "registrations", user.uid);
         const nationDocSnap = await getDoc(nationDocRef);
 
         if (nationDocSnap.exists()) {
-          // Jika sudah punya negara
           const nationData = nationDocSnap.data();
           document.getElementById('no-nation-state').style.display = 'none';
           document.getElementById('has-nation-state').style.display = 'block';
@@ -153,7 +148,6 @@ title: Profil — Grand Nations
           badge.style.color = nationData.status === 'approved' ? '#00ff64' : '#ffc800';
 
         } else {
-          // Jika belum punya negara
           document.getElementById('no-nation-state').style.display = 'block';
           document.getElementById('has-nation-state').style.display = 'none';
         }
@@ -161,7 +155,6 @@ title: Profil — Grand Nations
         profileState.style.display = 'block';
 
       } else {
-        // Jika belum daftar anggota
         emptyUserState.style.display = 'block';
       }
 
