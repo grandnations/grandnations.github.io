@@ -686,28 +686,25 @@
 
 <!-- ================= FIREBASE INTEGRATION ================= -->
 <script type="module">
-  // 1. Import fungsi Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-  // 2. Konfigurasi Firebase (MENGGUNAKAN API KEY YANG BENAR)
+  // Konfigurasi Firebase dengan API Key terbaru
   const firebaseConfig = {
-    apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeS07pv3upsGXYc",
+    apiKey: "AIzaSyBssVziAlLqHa7LA4ND_KpInOh-fGQF0T0",
     authDomain: "grand-nations-bcf65.firebaseapp.com",
     projectId: "grand-nations-bcf65",
     storageBucket: "grand-nations-bcf65.firebasestorage.app",
     messagingSenderId: "266950230750",
-    appId: "1:266950230750:web:5de3abb0e5a9a726d4384f"
+    appId: "1:266950230750:web:60c88d8abae6590bd4384f"
   };
 
-  // 3. Inisialisasi Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
   const authButton = document.getElementById('auth-button');
 
-  // 4. Fungsi Login (Pop-up)
   async function loginWithGoogle() {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -718,7 +715,6 @@
     }
   }
 
-  // 5. Fungsi Logout
   async function logout() {
     try {
       await signOut(auth);
@@ -728,10 +724,8 @@
     }
   }
 
-  // 6. Pantau Status Login
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      // Jika sudah login
       const userName = user.displayName || user.email.split('@')[0];
       authButton.textContent = 'Logout (' + userName + ')';
       authButton.style.background = 'transparent';
@@ -739,7 +733,6 @@
       authButton.style.color = 'var(--ink)';
       authButton.onclick = logout;
     } else {
-      // Jika belum login
       authButton.textContent = 'Login Google';
       authButton.style.background = 'var(--ink)';
       authButton.style.color = 'var(--bg)';
