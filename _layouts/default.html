@@ -242,7 +242,6 @@
 
     async function loginWithGoogle() {
       try {
-        // Menggunakan Popup, bukan Redirect
         await signInWithPopup(auth, provider);
       } catch (error) {
         console.error(error);
@@ -271,6 +270,9 @@
         authButton.style.color = '#000';
         authButton.onclick = loginWithGoogle;
       }
+      
+      // MUNCULKAN TOMBOL SETELAH STATUS LOGIN DIKETAHUI
+      authButton.style.visibility = 'visible';
     });
   </script>
   
