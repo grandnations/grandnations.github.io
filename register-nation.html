@@ -1,0 +1,165 @@
+---
+layout: default
+title: Pendaftaran Negara — Grand Nations
+---
+
+<main class="wrap" style="padding-top: 140px; padding-bottom: 80px; flex: 1;">
+  <div class="page-head">
+    <h1>Formulir<br>Negara</h1>
+    <div class="idx">PENDAFTARAN DELEGASI NEGARA</div>
+  </div>
+
+  <!-- STATE: LOADING -->
+  <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">Memverifikasi data anggota...</div>
+
+  <!-- STATE: BELUM LOGIN -->
+  <div id="login-required-state" class="auth-box" style="display:none;">
+    <div class="icon">🔒</div>
+    <h2>Akses Dibatasi</h2>
+    <p>Kamu harus login sebagai anggota terlebih dahulu sebelum mendaftarkan negara.</p>
+  </div>
+
+  <!-- STATE: BELUM DAFTAR ANGGOTA -->
+  <div id="not-a-member-state" class="auth-box" style="display:none;">
+    <div class="icon">?</div>
+    <h2>Bukan Anggota</h2>
+    <p>Kamu belum mendaftar sebagai anggota Grand Nations. Silakan daftar anggota terlebih dahulu sebelum mendirikan negara.</p>
+    <a href="/register.html" class="btn solid">Daftar Anggota Dulu</a>
+  </div>
+
+  <!-- STATE: FORM PENDAFTARAN NEGARA -->
+  <div id="form-container" style="display:none; background:var(--bg2); border:1px solid var(--line); padding:40px; max-width:800px; margin:0 auto;">
+    <form id="nation-form">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+        <div>
+          <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">NAMA NEGARA</label>
+          <input type="text" id="nation_name" required placeholder="Contoh: Republik Nusantara" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
+        </div>
+        <div>
+          <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">NAMA PEMIMPIN</label>
+          <input type="text" id="leader_name" required placeholder="Contoh: Jenderal Soedirman" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+        <div>
+          <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">IDEOLOGI</label>
+          <input type="text" id="ideology" required placeholder="Contoh: Demokrasi Pancasila" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
+        </div>
+        <div>
+          <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">IBU KOTA</label>
+          <input type="text" id="capital" required placeholder="Contoh: Jakarta" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
+        </div>
+      </div>
+
+      <div style="margin-bottom:30px;">
+        <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">DESKRIPSI SINGKAT NEGARA</label>
+        <textarea id="description" rows="4" required placeholder="Jelaskan sedikit tentang latar belakang negaramu..." style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head); resize:vertical;"></textarea>
+      </div>
+
+      <div style="text-align:center;">
+        <button type="submit" id="submit-btn" class="btn solid" style="width:250px;">Kirim Pendaftaran Negara</button>
+      </div>
+      <p id="form-error" style="color:#ff4d4d; text-align:center; margin-top:15px; font-family:var(--mono); font-size:0.85rem; display:none;"></p>
+    </form>
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
+    authDomain: "grand-nations-bcf65.firebaseapp.com",
+    projectId: "grand-nations-bcf65",
+    storageBucket: "grand-nations-bcf65.firebasestorage.app",
+    messagingSenderId: "266950230750",
+    appId: "1:266950230750:web:60c88d8abae6590bd4384f"
+  };
+
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const loading = document.getElementById('loading');
+  const loginRequiredState = document.getElementById('login-required-state');
+  const notAMemberState = document.getElementById('not-a-member-state');
+  const formContainer = document.getElementById('form-container');
+  const form = document.getElementById('nation-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const formError = document.getElementById('form-error');
+
+  let currentUser = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    loading.style.display = 'none';
+
+    if (user) {
+      currentUser = user;
+      loginRequiredState.style.display = 'none';
+
+      // 1. Cek apakah dia sudah daftar sebagai anggota
+      const memberDocRef = doc(db, "users", user.uid);
+      const memberDocSnap = await getDoc(memberDocRef);
+
+      if (memberDocSnap.exists()) {
+        notAMemberState.style.display = 'none';
+
+        // 2. Cek apakah dia sudah punya negara
+        const nationDocRef = doc(db, "registrations", user.uid);
+        const nationDocSnap = await getDoc(nationDocRef);
+
+        if (nationDocSnap.exists()) {
+          // Jika sudah punya negara, lempar ke profil
+          window.location.href = '/profile.html';
+        } else {
+          // Jika belum punya negara, tampilkan form
+          formContainer.style.display = 'block';
+        }
+      } else {
+        // Jika belum daftar anggota
+        formContainer.style.display = 'none';
+        notAMemberState.style.display = 'block';
+      }
+
+    } else {
+      formContainer.style.display = 'none';
+      loginRequiredState.style.display = 'block';
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    submitBtn.textContent = 'Mengirim Data...';
+    submitBtn.disabled = true;
+    formError.style.display = 'none';
+
+    try {
+      // Simpan ke tabel registrations
+      await setDoc(doc(db, "registrations", currentUser.uid), {
+        nation_name: document.getElementById('nation_name').value,
+        leader_name: document.getElementById('leader_name').value,
+        ideology: document.getElementById('ideology').value,
+        capital: document.getElementById('capital').value,
+        description: document.getElementById('description').value,
+        status: 'pending', // Otomatis pending saat pertama didaftarkan
+        created_at: serverTimestamp(),
+        email: currentUser.email
+      });
+
+      // Berhasil, alihkan ke profil
+      window.location.href = '/profile.html';
+
+    } catch (error) {
+      console.error(error);
+      formError.textContent = "Gagal mendaftar: " + error.message;
+      formError.style.display = 'block';
+      submitBtn.textContent = 'Kirim Pendaftaran Negara';
+      submitBtn.disabled = false;
+    }
+  });
+</script>
