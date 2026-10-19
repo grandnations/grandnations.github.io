@@ -9,7 +9,8 @@ title: Dashboard Admin — Grand Nations
   .admin-table th { font-family: var(--mono); color: var(--dim); font-size: 0.75rem; background: var(--bg3); }
   .tab-btn { background: none; border: none; color: var(--dim); font-family: var(--head); font-weight: 700; font-size: 1rem; cursor: pointer; padding-bottom: 10px; }
   .tab-btn.active { color: #fff; border-bottom: 2px solid #fff; }
-  .admin-input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--line); color: #fff; margin-bottom: 10px; }
+  .admin-input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--line); color: #fff; margin-bottom: 10px; font-family: var(--head); }
+  textarea.admin-input { resize: vertical; min-height: 120px; }
   
   .request-card { border: 1px solid var(--line); background: var(--bg3); padding: 20px; margin-bottom: 20px; border-radius: 4px; }
   .request-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed var(--line); padding-bottom: 15px; margin-bottom: 15px; }
@@ -60,20 +61,27 @@ title: Dashboard Admin — Grand Nations
     <!-- Tab Master Data -->
     <div id="tab-master-data" class="tab-content" style="display:none;">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+        
+        <!-- Form Tambah Timeline -->
         <div style="background:var(--bg3); padding:20px; border:1px solid var(--line);">
-          <h3 style="margin-bottom:15px; font-size:1.1rem;">Tambah Timeline Baru</h3>
-          <input type="text" id="new-timeline-name" class="admin-input" placeholder="Contoh: 1945">
+          <h3 style="margin-bottom:15px; font-size:1.1rem;">1. Tambah Timeline Baru</h3>
+          <input type="text" id="new-timeline-name" class="admin-input" placeholder="Contoh: 1945 atau 1500">
           <button id="btn-add-timeline" class="btn solid" style="width:100%;">Tambah Timeline</button>
         </div>
+
+        <!-- Form Tambah Negara Massal -->
         <div style="background:var(--bg3); padding:20px; border:1px solid var(--line);">
-          <h3 style="margin-bottom:15px; font-size:1.1rem;">Tambah Negara ke Timeline</h3>
+          <h3 style="margin-bottom:15px; font-size:1.1rem;">2. Tambah Massal Negara</h3>
           <select id="select-timeline" class="admin-input">
             <option value="">-- Pilih Timeline --</option>
           </select>
-          <input type="text" id="new-country-name" class="admin-input" placeholder="Nama Negara">
-          <button id="btn-add-country" class="btn solid" style="width:100%;">Tambah Negara</button>
+          <textarea id="new-country-names" class="admin-input" placeholder="Paste daftar negara di sini. Satu negara per baris.&#10;Contoh:&#10;Indonesia&#10;Malaysia&#10;Singapura"></textarea>
+          <button id="btn-add-country" class="btn solid" style="width:100%;">Tambah Massal Negara</button>
         </div>
+
       </div>
+
+      <!-- Tabel Daftar Negara -->
       <h3 style="margin-top:40px; margin-bottom:15px; font-size:1.1rem;">Daftar Negara Terdaftar</h3>
       <table class="admin-table">
         <thead><tr><th>Timeline</th><th>Nama Negara</th><th>Status</th></tr></thead>
@@ -86,7 +94,6 @@ title: Dashboard Admin — Grand Nations
 
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-  // Tambahkan deleteDoc
   import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
@@ -194,26 +201,21 @@ title: Dashboard Admin — Grand Nations
       const docSnap = await getDoc(docRef);
       let data = docSnap.data();
 
-      // 1. Ubah status spesifik negara di array pendaftaran member
       data.nations[nationIndex].status = newStatus;
       const allProcessed = data.nations.every(n => n.status !== 'pending');
       
       let updateData = { nations: data.nations };
-      
       if (allProcessed) {
-        // Jika semua diproses, cek apakah ada yang disetujui
         const anyApproved = data.nations.some(n => n.status === 'approved');
         updateData.status = anyApproved ? 'approved' : 'rejected';
       }
 
       await updateDoc(docRef, updateData);
 
-      // 2. Ubah status di tabel countries (Agar tidak muncul lagi di dropdown)
       const targetNationName = data.nations[nationIndex].name;
       const q = query(collection(db, "countries"), where("name", "==", targetNationName));
       const countrySnap = await getDocs(q);
       
-      // PERBAIKAN: Gunakan for...of agar sistem menunggu proses update selesai
       for (const cDoc of countrySnap.docs) {
         await updateDoc(doc(db, "countries", cDoc.id), { 
           status: newStatus === 'approved' ? 'claimed' : 'available' 
@@ -221,13 +223,10 @@ title: Dashboard Admin — Grand Nations
       }
 
       alert(`Negara ${targetNationName} berhasil di-${newStatus === 'approved' ? 'setujui' : 'tolak'}!`);
-      
-      // 3. Refresh tampilan
       loadRequests(); 
       loadCountries(); 
 
     } catch (e) {
-      console.error(e);
       alert("Gagal memproses: " + e.message);
     }
   };
@@ -242,7 +241,6 @@ title: Dashboard Admin — Grand Nations
     membersSnap.forEach((docSnap) => {
       const data = docSnap.data();
       count++;
-      // TOMBOL HAPUS DITAMBAHKAN DI SINI
       membersBody.innerHTML += `
         <tr>
           <td>${data.full_name}</td>
@@ -264,13 +262,11 @@ title: Dashboard Admin — Grand Nations
     if (!confirmDelete) return;
 
     try {
-      // 1. Cek dan Hapus Data Negara
       const regDocRef = doc(db, "registrations", uid);
       const regSnap = await getDoc(regDocRef);
       
       if (regSnap.exists()) {
         const regData = regSnap.data();
-        // Kembalikan negara yang di-approve ke 'available'
         if (regData.nations && Array.isArray(regData.nations)) {
           for (const nation of regData.nations) {
             if (nation.status === 'approved') {
@@ -282,11 +278,9 @@ title: Dashboard Admin — Grand Nations
             }
           }
         }
-        // Hapus data pengajuan
         await deleteDoc(regDocRef);
       }
 
-      // 2. Hapus Data User
       await deleteDoc(doc(db, "users", uid));
 
       alert("Anggota berhasil dihapus dari sistem.");
@@ -299,7 +293,7 @@ title: Dashboard Admin — Grand Nations
     }
   };
 
-  // --- LOAD TAB LAINNYA ---
+  // --- LOAD TIMELINES & COUNTRIES ---
   async function loadTimelines() {
     const select = document.getElementById('select-timeline');
     select.innerHTML = '<option value="">-- Pilih Timeline --</option>';
@@ -325,14 +319,48 @@ title: Dashboard Admin — Grand Nations
     loadTimelines();
   });
 
+  // --- LOGIKA TAMBAH MASSAL NEGARA ---
   document.getElementById('btn-add-country').addEventListener('click', async () => {
     const timelineId = document.getElementById('select-timeline').value;
     const timelineName = document.getElementById('select-timeline').options[document.getElementById('select-timeline').selectedIndex]?.text;
-    const countryName = document.getElementById('new-country-name').value;
-    if (!timelineId || !countryName) return;
-    await addDoc(collection(db, "countries"), { name: countryName, timeline_id: timelineId, timeline_name: timelineName, status: 'available' });
-    document.getElementById('new-country-name').value = '';
-    loadCountries();
+    const countryNamesRaw = document.getElementById('new-country-names').value;
+
+    if (!timelineId) return alert("Pilih timeline terlebih dahulu!");
+    if (!countryNamesRaw.trim()) return alert("Isi daftar negara terlebih dahulu!");
+
+    // Pecah teks berdasarkan baris baru (enter), bersihkan spasi di awal/akhir, dan buang baris kosong
+    const countryNames = countryNamesRaw.split('\n')
+                        .map(name => name.trim())
+                        .filter(name => name !== '');
+
+    if (countryNames.length === 0) return alert("Format tidak valid atau tidak ada negara yang terbaca.");
+
+    const btn = document.getElementById('btn-add-country');
+    btn.textContent = 'Memproses...';
+    btn.disabled = true;
+
+    try {
+      let addedCount = 0;
+      // Looping untuk memasukkan setiap negara ke database
+      for (const countryName of countryNames) {
+        await addDoc(collection(db, "countries"), {
+          name: countryName,
+          timeline_id: timelineId,
+          timeline_name: timelineName,
+          status: 'available'
+        });
+        addedCount++;
+      }
+      
+      alert(`Berhasil! ${addedCount} negara telah ditambahkan ke timeline ${timelineName}.`);
+      document.getElementById('new-country-names').value = ''; // Bersihkan textarea
+      loadCountries(); // Refresh tabel
+    } catch (e) {
+      alert("Terjadi kesalahan saat menambahkan: " + e.message);
+    } finally {
+      btn.textContent = 'Tambah Massal Negara';
+      btn.disabled = false;
+    }
   });
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
