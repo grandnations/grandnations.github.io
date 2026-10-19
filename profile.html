@@ -1,49 +1,81 @@
 ---
 layout: default
-title: Kartu Delegasi — Grand Nations
+title: Profil — Grand Nations
 ---
 
 <main class="wrap">
   <div class="page-head reveal">
-    <h1>Profil<br>Delegasi</h1>
+    <h1>Profil<br>Anggota</h1>
     <div class="idx">DASHBOARD ANGGOTA</div>
   </div>
 
-  <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">Memuat data kementerian luar negeri...</div>
+  <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">Memuat data...</div>
 
+  <!-- STATE 1: BELUM LOGIN -->
   <div id="login-required-state" class="auth-box reveal" style="display:none;">
     <div class="icon">🔒</div>
     <h2>Akses Dibatasi</h2>
-    <p>Kamu harus login menggunakan akun Google terlebih dahulu untuk melihat Kartu Delegasi.</p>
+    <p>Kamu harus login menggunakan akun Google terlebih dahulu.</p>
     <p style="font-family:var(--mono); font-size:0.85rem; color:var(--ink);">Silakan klik tombol <strong>Login Google</strong> di pojok kanan atas.</p>
   </div>
 
-  <div id="empty-state" class="auth-box reveal" style="display:none;">
+  <!-- STATE 2: BELUM DAFTAR ANGGOTA -->
+  <div id="empty-user-state" class="auth-box reveal" style="display:none;">
     <div class="icon">?</div>
-    <h2>Belum Ada Negara</h2>
-    <p>Kamu belum mendaftarkan negara apa pun. Silakan isi formulir pendaftaran untuk memulai perjalanan diplomasimu.</p>
-    <a href="/register.html" class="btn solid">Daftarkan Negara Sekarang</a>
+    <h2>Belum Terdaftar</h2>
+    <p>Kamu belum mendaftarkan diri sebagai anggota Grand Nations. Silakan isi formulir keanggotaan terlebih dahulu.</p>
+    <a href="/register.html" class="btn solid">Daftar Anggota</a>
   </div>
 
+  <!-- STATE 3: SUDAH DAFTAR ANGGOTA -->
   <div id="profile-state" class="reveal" style="display:none;">
     <div class="card-grid">
+      
+      <!-- Kiri: Kartu Anggota -->
       <div class="card-visual">
         <div class="flag-slot" id="flag-container" style="border-radius: 50%; width: 200px; height: 200px; margin: 0 auto 20px; overflow: hidden;">
-          <span id="photo-placeholder" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">BELUM ADA FOTO</span>
+          <span id="photo-placeholder" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">MEMUAT FOTO</span>
           <img id="profile-pic-display" src="" alt="Foto Profil" style="display:none; border-radius: 50%; width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <div style="font-family:var(--mono); font-size:0.75rem; color:var(--faint); letter-spacing:0.1em;">DELEGASI RESMI</div>
+        <h2 id="user-name-display" style="font-size:1.5rem; font-weight:800; margin-bottom:4px;">Nama Anggota</h2>
+        <div id="user-email-display" style="font-family:var(--mono); font-size:0.8rem; color:var(--faint); margin-bottom:10px;">email@gmail.com</div>
+        <div style="font-family:var(--mono); font-size:0.75rem; color:var(--ink); border:1px solid var(--line); padding:4px 10px; display:inline-block;">ANGGOTA RESMI</div>
       </div>
-      <div class="card-details">
-        <div id="status-badge" class="status-badge">PENDING</div>
-        <h2 id="nation-name-display" class="nation-name">Nama Negara</h2>
-        <div class="data-list">
-          <div class="data-row"><span class="data-label">PEMIMPIN</span><span id="leader-name-display" class="data-value">-</span></div>
-          <div class="data-row"><span class="data-label">IDEOLOGI</span><span id="ideology-display" class="data-value">-</span></div>
-          <div class="data-row"><span class="data-label">TANGGAL LAHIR PENDIRI</span><span id="dob-display" class="data-value">-</span></div>
-          <div class="data-row"><span class="data-label">TERDAFTAR PADA</span><span id="date-display" class="data-value">-</span></div>
+
+      <!-- Kanan: Detail & Kartu Delegasi -->
+      <div class="card-details" style="display:flex; flex-direction:column; gap:20px;">
+        <div>
+          <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DATA KEPENDUDUKAN</h3>
+          <div class="data-list">
+            <div class="data-row"><span class="data-label">TANGGAL LAHIR</span><span id="user-dob-display" class="data-value">-</span></div>
+            <div class="data-row"><span class="data-label">BEBERGAB SEJAK</span><span id="user-joined-display" class="data-value">-</span></div>
+          </div>
+        </div>
+
+        <!-- Delegasi Negara -->
+        <div>
+          <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DELEGASI NEGARA</h3>
+          
+          <!-- Jika belum punya negara -->
+          <div id="no-nation-state" style="display:none; border:1px dashed var(--line-strong); padding:20px; text-align:center;">
+            <p style="color:var(--dim); font-size:0.9rem; margin-bottom:15px;">Kamu belum mendaftarkan negara untuk berpartisipasi dalam simulasi.</p>
+            <!-- Tombol ini nanti akan mengarah ke form pendaftaran negara -->
+            <button class="btn solid" onclick="alert('Fitur pendaftaran negara akan segera hadir!')" style="padding:10px 20px; font-size:0.85rem;">Daftarkan Negara</button>
+          </div>
+
+          <!-- Jika sudah punya negara -->
+          <div id="has-nation-state" style="display:none;">
+            <div class="data-list">
+              <div class="data-row"><span class="data-label">NAMA NEGARA</span><span id="nation-name-display" class="data-value" style="color:#00ff64;">-</span></div>
+              <div class="data-row"><span class="data-label">PEMIMPIN</span><span id="leader-name-display" class="data-value">-</span></div>
+              <div class="data-row"><span class="data-label">IDEOLOGI</span><span id="ideology-display" class="data-value">-</span></div>
+              <div class="data-row"><span class="data-label">STATUS</span><span id="status-badge" class="data-value">PENDING</span></div>
+            </div>
+          </div>
+
         </div>
       </div>
+
     </div>
   </div>
 </main>
@@ -68,45 +100,74 @@ title: Kartu Delegasi — Grand Nations
 
   const loading = document.getElementById('loading');
   const loginRequiredState = document.getElementById('login-required-state');
-  const emptyState = document.getElementById('empty-state');
+  const emptyUserState = document.getElementById('empty-user-state');
   const profileState = document.getElementById('profile-state');
 
   onAuthStateChanged(auth, async (user) => {
     loading.style.display = 'none';
+    
     if (user) {
       loginRequiredState.style.display = 'none';
-      const docRef = doc(db, "registrations", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        document.getElementById('nation-name-display').textContent = data.nation_name;
-        document.getElementById('leader-name-display').textContent = data.leader_name;
-        document.getElementById('ideology-display').textContent = data.ideology || '-';
+      
+      // 1. CEK DATA ANGGOTA (Tabel: users)
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
         
-        if (data.photo_url) {
+        // Tampilkan Data Anggota
+        document.getElementById('user-name-display').textContent = userData.full_name;
+        document.getElementById('user-email-display').textContent = userData.email;
+        
+        if (userData.photo_url) {
           document.getElementById('photo-placeholder').style.display = 'none';
           const img = document.getElementById('profile-pic-display');
-          img.src = data.photo_url;
+          img.src = userData.photo_url;
           img.style.display = 'block';
         }
-        if (data.dob) {
-          const dobDate = new Date(data.dob);
-          document.getElementById('dob-display').textContent = dobDate.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        if (userData.dob) {
+          document.getElementById('user-dob-display').textContent = new Date(userData.dob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
         }
-        if (data.created_at) {
-          const date = data.created_at.toDate();
-          document.getElementById('date-display').textContent = date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+        if (userData.created_at) {
+          document.getElementById('user-joined-display').textContent = userData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
         }
-        const badge = document.getElementById('status-badge');
-        badge.textContent = data.status === 'approved' ? 'DISETUJUI' : 'MENUNGGU REVIEW';
-        badge.className = 'status-badge ' + (data.status === 'approved' ? 'status-approved' : 'status-pending');
+
+        // 2. CEK DATA NEGARA (Tabel: registrations)
+        const nationDocRef = doc(db, "registrations", user.uid);
+        const nationDocSnap = await getDoc(nationDocRef);
+
+        if (nationDocSnap.exists()) {
+          // Jika sudah punya negara
+          const nationData = nationDocSnap.data();
+          document.getElementById('no-nation-state').style.display = 'none';
+          document.getElementById('has-nation-state').style.display = 'block';
+
+          document.getElementById('nation-name-display').textContent = nationData.nation_name;
+          document.getElementById('leader-name-display').textContent = nationData.leader_name;
+          document.getElementById('ideology-display').textContent = nationData.ideology || '-';
+          
+          const badge = document.getElementById('status-badge');
+          badge.textContent = nationData.status === 'approved' ? 'DISETUJUI' : 'MENUNGGU REVIEW';
+          badge.style.color = nationData.status === 'approved' ? '#00ff64' : '#ffc800';
+
+        } else {
+          // Jika belum punya negara
+          document.getElementById('no-nation-state').style.display = 'block';
+          document.getElementById('has-nation-state').style.display = 'none';
+        }
+
         profileState.style.display = 'block';
+
       } else {
-        emptyState.style.display = 'block';
+        // Jika belum daftar anggota
+        emptyUserState.style.display = 'block';
       }
+
     } else {
       loginRequiredState.style.display = 'block';
-      emptyState.style.display = 'none';
+      emptyUserState.style.display = 'none';
       profileState.style.display = 'none';
     }
   });
