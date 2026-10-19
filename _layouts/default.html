@@ -161,15 +161,17 @@
   @media (prefers-reduced-motion:reduce){ .reveal{opacity:1; transform:none; transition:none;} html{scroll-behavior:auto;} }
   a:focus-visible, button:focus-visible{outline:2px solid #fff; outline-offset:3px;}
 
-  /* CSS KHUSUS PROFILE.HTML */
+  /* CSS KHUSUS PROFILE.HTML & REGISTER.HTML */
   main{flex:1; padding-top:140px; padding-bottom:80px;}
   .page-head{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:50px; border-bottom:1px solid var(--line); padding-bottom:20px;}
   .page-head h1{font-weight:800; text-transform:uppercase; font-size:clamp(2.5rem,6vw,4.5rem); line-height:1.05; letter-spacing:-.01em;}
   .page-head .idx{font-family:var(--mono); font-size:.76rem; color:var(--faint); letter-spacing:.08em;}
-  #empty-state{border:1px solid var(--line); background:var(--bg2); padding:60px 30px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:400px;}
-  #empty-state .icon{width:80px; height:80px; border:2px dashed var(--line-strong); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:24px; font-family:var(--mono); font-size:2rem; color:var(--faint);}
-  #empty-state h2{font-weight:800; text-transform:uppercase; font-size:clamp(1.8rem,4vw,2.5rem); margin-bottom:14px;}
-  #empty-state p{color:var(--dim); max-width:500px; margin:0 auto 32px;}
+  
+  .auth-box{border:1px solid var(--line); background:var(--bg2); padding:60px 30px; text-align:center; min-height:400px; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .auth-box .icon{width:80px; height:80px; border:2px dashed var(--line-strong); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:24px; font-family:var(--mono); font-size:2rem; color:var(--faint);}
+  .auth-box h2{font-weight:800; text-transform:uppercase; font-size:clamp(1.8rem,4vw,2.5rem); margin-bottom:14px;}
+  .auth-box p{color:var(--dim); max-width:500px; margin:0 auto 32px;}
+  
   #profile-state{display:none;}
   .card-grid{display:grid; grid-template-columns:360px 1fr; gap:1px; background:var(--line); border:1px solid var(--line);}
   .card-visual{background:var(--bg2); padding:30px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative;}
@@ -198,7 +200,6 @@
 
   <!-- SCRIPT GLOBAL (Burger Menu & Scroll) -->
   <script>
-    /* Nav: burger, progress, active link, to-top */
     (function () {
       var burger = document.getElementById('burger'), links = document.getElementById('navLinks'),
           bar = document.getElementById('progress'), toTop = document.getElementById('toTop');
@@ -220,10 +221,10 @@
     })();
   </script>
 
-  <!-- FIREBASE GLOBAL (Hanya untuk tombol Login di Navbar) -->
+  <!-- FIREBASE GLOBAL (Menggunakan Redirect) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
@@ -239,14 +240,21 @@
     const provider = new GoogleAuthProvider();
     const authButton = document.getElementById('auth-button');
 
+    // Tangkap hasil redirect jika baru kembali dari Google
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) { console.log("Login via redirect sukses:", result.user.email); }
+    }).catch((error) => {
+      console.error("Error redirect:", error.message);
+    });
+
     async function loginWithGoogle() {
-      try { await signInWithPopup(auth, provider); } 
+      try { await signInWithRedirect(auth, provider); } 
       catch (error) { alert("Gagal login: " + error.message); }
     }
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // Tampilan jika sudah login
+        // Cek jika sedang di halaman profile
         if (window.location.pathname.includes('profile')) {
             authButton.textContent = 'Logout';
             authButton.onclick = () => {
@@ -260,14 +268,11 @@
         authButton.style.border = '1px solid #fff';
         authButton.style.color = '#fff';
       } else {
-        // Tampilan jika belum login
         authButton.textContent = 'Login Google';
         authButton.style.background = '#fff';
         authButton.style.border = 'none';
         authButton.style.color = '#000';
         authButton.onclick = loginWithGoogle;
-        
-        // TIDAK ADA LAGI REDIRECT DI SINI. APAPUN YANG TERJADI, TETAP DI HALAMAN.
       }
     });
   </script>
