@@ -193,6 +193,26 @@
 
   {% include header.html %}
 
+  <!-- SCRIPT INSTAN: Pasang tombol auth dari cache (localStorage) sebelum Firebase siap -->
+  <script>
+    (function () {
+      var b = document.getElementById('auth-button');
+      if (!b) return;
+      var cached = null;
+      try { cached = localStorage.getItem('gn_logged_in'); } catch (e) {}
+
+      if (cached === '1') {
+        var onProfile = location.pathname.indexOf('profile') > -1;
+        b.textContent = onProfile ? 'Logout' : 'Profil Saya';
+        b.style.background = 'transparent';
+        b.style.border = '1px solid #fff';
+        b.style.color = '#fff';
+        if (!onProfile) b.onclick = function () { location.href = '/profile.html'; };
+      }
+      b.style.visibility = 'visible';
+    })();
+  </script>
+
   <!-- MAIN CONTENT AREA -->
   {{ content }}
 
@@ -250,10 +270,14 @@
     }
 
     onAuthStateChanged(auth, (user) => {
+      // Simpan status asli dari Firebase ke localStorage
+      try { localStorage.setItem('gn_logged_in', user ? '1' : '0'); } catch (e) {}
+
       if (user) {
         if (window.location.pathname.includes('profile')) {
             authButton.textContent = 'Logout';
             authButton.onclick = () => {
+                try { localStorage.setItem('gn_logged_in', '0'); } catch (e) {}
                 signOut(auth).then(() => { window.location.href = '/index.html'; });
             };
         } else {
@@ -270,8 +294,6 @@
         authButton.style.color = '#000';
         authButton.onclick = loginWithGoogle;
       }
-      
-      // MUNCULKAN TOMBOL SETELAH STATUS LOGIN DIKETAHUI
       authButton.style.visibility = 'visible';
     });
   </script>
