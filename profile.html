@@ -56,13 +56,11 @@ title: Profil — Grand Nations
         <div>
           <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DELEGASI NEGARA</h3>
           
-          <!-- Jika belum punya negara -->
           <div id="no-nation-state" style="display:none; border:1px dashed var(--line-strong); padding:20px; text-align:center;">
             <p style="color:var(--dim); font-size:0.9rem; margin-bottom:15px;">Kamu belum mendaftarkan negara untuk berpartisipasi dalam simulasi.</p>
             <button class="btn solid" onclick="alert('Fitur pendaftaran negara akan segera hadir!')" style="padding:10px 20px; font-size:0.85rem;">Daftarkan Negara</button>
           </div>
 
-          <!-- Jika sudah punya negara -->
           <div id="has-nation-state" style="display:none;">
             <div class="data-list">
               <div class="data-row"><span class="data-label">NAMA NEGARA</span><span id="nation-name-display" class="data-value" style="color:#00ff64;">-</span></div>
@@ -80,7 +78,8 @@ title: Profil — Grand Nations
 </main>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+  // PERBAIKAN: Tambahkan getApps
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
   
@@ -93,7 +92,8 @@ title: Profil — Grand Nations
     appId: "1:266950230750:web:60c88d8abae6590bd4384f"
   };
 
-  const app = initializeApp(firebaseConfig);
+  // PERBAIKAN: Cek apakah app sudah ada
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   const auth = getAuth(app);
   const db = getFirestore(app);
 
