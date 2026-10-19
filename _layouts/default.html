@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ page.title | default: "Grand Nations" }}</title>
+<link rel="icon" type="image/jpeg" href="/assets/img/logogn.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- 
+  NANTI KITA AKAN MEMINDAHKAN SEMUA CSS KE FILE TERPISAH 
+  (Untuk sementara, kita pakai tag <style> dulu agar web tidak rusak)
+-->
+<style>
+  /* KITA AKAN MENGISI INI DI TAHAP 3 */
+</style>
+
+<!-- Jika ada CSS khusus per halaman, ditaruh di sini -->
+{{ page.custom_css }}
+
+</head>
+<body>
+
+  <!-- Memanggil Header -->
+  {% include header.html %}
+
+  <!-- Konten Utama Halaman -->
+  <main>
+    {{ content }}
+  </main>
+
+  <!-- Memanggil Footer -->
+  {% include footer.html %}
+
+  <!-- Script Firebase & Interaktif akan kita taruh di sini nanti -->
+  {{ page.custom_js }}
+
+</body>
+</html>
