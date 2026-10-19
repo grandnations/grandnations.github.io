@@ -21,12 +21,18 @@ title: Pendaftaran Anggota — Grand Nations
     <form id="registration-form">
       <div style="margin-bottom:20px;">
         <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">NAMA LENGKAP</label>
-        <input type="text" id="full_name" required style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
+        <input type="text" id="full_name" required placeholder="Nama kamu" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
       </div>
 
-      <div style="margin-bottom:20px;">
-        <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">TANGGAL LAHIR</label>
-        <input type="date" id="dob" required style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head); color-scheme: dark;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+        <div>
+          <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">NOMOR WHATSAPP</label>
+          <input type="tel" id="whatsapp" required placeholder="08123456789" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
+        </div>
+        <div>
+          <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">TANGGAL LAHIR</label>
+          <input type="date" id="dob" required style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head); color-scheme: dark;">
+        </div>
       </div>
 
       <div style="margin-bottom:30px;">
@@ -56,11 +62,8 @@ title: Pendaftaran Anggota — Grand Nations
     appId: "1:266950230750:web:60c88d8abae6590bd4384f"
   };
 
-  // --- KONFIGURASI CLOUDINARY ---
-    // --- KONFIGURASI CLOUDINARY ---
   const CLOUD_NAME = "s6xzozll"; 
   const UPLOAD_PRESET = "grand-nations-avatar"; 
-  // -----------------------------
 
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   const auth = getAuth(app);
@@ -98,7 +101,7 @@ title: Pendaftaran Anggota — Grand Nations
 
     const file = document.getElementById('profile_pic').files[0];
     if (file && file.size > 2 * 1024 * 1024) {
-      formError.textContent = "Ukuran foto terlalu besar! Maksimal 2MB.";
+      formError.textContent = "Ukuran foto maksimal 2MB!";
       formError.style.display = 'block';
       return;
     }
@@ -111,7 +114,6 @@ title: Pendaftaran Anggota — Grand Nations
       let photoURL = '';
 
       if (file) {
-        console.log("1. Mengunggah ke Cloudinary...");
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', UPLOAD_PRESET);
@@ -120,31 +122,27 @@ title: Pendaftaran Anggota — Grand Nations
           method: 'POST',
           body: formData
         });
-
+        
         const data = await response.json();
-        if (data.secure_url) {
-          photoURL = data.secure_url;
-          console.log("2. Upload sukses:", photoURL);
-        } else {
-          throw new Error(data.error.message || "Gagal upload ke Cloudinary");
-        }
+        if (!data.secure_url) throw new Error(data.error?.message || "Gagal upload foto");
+        photoURL = data.secure_url;
       }
 
-      console.log("3. Menyimpan data ke database...");
+      // Simpan ke tabel users, termasuk WhatsApp
       await setDoc(doc(db, "users", currentUser.uid), {
         full_name: document.getElementById('full_name').value,
+        whatsapp: document.getElementById('whatsapp').value, // <-- Disimpan di sini
         dob: document.getElementById('dob').value,
         photo_url: photoURL,
         created_at: serverTimestamp(),
         email: currentUser.email
       });
 
-      console.log("4. Sukses! Pindah ke profil...");
       window.location.href = '/profile.html';
 
     } catch (error) {
-      console.error("ERROR DETAIL:", error);
-      formError.textContent = "Gagal: " + error.message;
+      console.error(error);
+      formError.textContent = "Gagal mendaftar: " + error.message;
       formError.style.display = 'block';
       submitBtn.textContent = 'Daftar Anggota';
       submitBtn.disabled = false;
