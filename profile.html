@@ -9,69 +9,53 @@ title: Kartu Delegasi — Grand Nations
     <div class="idx">DASHBOARD ANGGOTA</div>
   </div>
 
-  <!-- LOADING -->
-  <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">
-    Memuat data kementerian luar negeri...
-  </div>
+  <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">Memuat data kementerian luar negeri...</div>
 
   <!-- STATE 1: BELUM LOGIN -->
-  <div id="login-required-state" class="reveal" style="display:none; border:1px solid var(--line); background:var(--bg2); padding:60px 30px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:400px;">
-    <div class="icon" style="width:80px; height:80px; border:2px dashed var(--line-strong); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:24px; font-family:var(--mono); font-size:2rem; color:var(--faint);">🔒</div>
-    <h2 style="font-weight:800; text-transform:uppercase; font-size:clamp(1.8rem,4vw,2.5rem); margin-bottom:14px;">Akses Dibatasi</h2>
-    <p style="color:var(--dim); max-width:500px; margin:0 auto 32px;">Kamu harus login menggunakan akun Google terlebih dahulu untuk melihat Kartu Delegasi dan mendaftarkan negara.</p>
+  <div id="login-required-state" class="auth-box reveal" style="display:none;">
+    <div class="icon">🔒</div>
+    <h2>Akses Dibatasi</h2>
+    <p>Kamu harus login menggunakan akun Google terlebih dahulu untuk melihat Kartu Delegasi.</p>
     <p style="font-family:var(--mono); font-size:0.85rem; color:var(--ink);">Silakan klik tombol <strong>Login Google</strong> di pojok kanan atas.</p>
   </div>
 
   <!-- STATE 2: BELUM DAFTAR NEGARA -->
-  <div id="empty-state" class="reveal" style="display:none; border:1px solid var(--line); background:var(--bg2); padding:60px 30px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:400px;">
-    <div class="icon" style="width:80px; height:80px; border:2px dashed var(--line-strong); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:24px; font-family:var(--mono); font-size:2rem; color:var(--faint);">?</div>
-    <h2 style="font-weight:800; text-transform:uppercase; font-size:clamp(1.8rem,4vw,2.5rem); margin-bottom:14px;">Belum Ada Negara</h2>
-    <p style="color:var(--dim); max-width:500px; margin:0 auto 32px;">Kamu belum mendaftarkan negara apa pun untuk bergabung dalam simulasi Grand Nations. Silakan isi formulir pendaftaran untuk memulai perjalanan diplomasimu.</p>
+  <div id="empty-state" class="auth-box reveal" style="display:none;">
+    <div class="icon">?</div>
+    <h2>Belum Ada Negara</h2>
+    <p>Kamu belum mendaftarkan negara apa pun. Silakan isi formulir pendaftaran untuk memulai perjalanan diplomasimu.</p>
     <a href="/register.html" class="btn solid">Daftarkan Negara Sekarang</a>
   </div>
 
   <!-- STATE 3: SUDAH DAFTAR -->
   <div id="profile-state" class="reveal" style="display:none;">
     <div class="card-grid">
-      <!-- Kiri: Bendera -->
       <div class="card-visual">
-        <div class="flag-slot" id="flag-container">
-          <span>BELUM ADA BENDERA</span>
+        <div class="flag-slot" id="flag-container" style="border-radius: 50%; width: 200px; height: 200px; margin: 0 auto 20px; overflow: hidden;">
+          <span id="photo-placeholder" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">BELUM ADA FOTO</span>
+          <img id="profile-pic-display" src="" alt="Foto Profil" style="display:none; border-radius: 50%; width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <div style="font-family:var(--mono); font-size:0.75rem; color:var(--faint); letter-spacing:0.1em;">
-          DELEGASI RESMI
-        </div>
+        <div style="font-family:var(--mono); font-size:0.75rem; color:var(--faint); letter-spacing:0.1em;">DELEGASI RESMI</div>
       </div>
-      <!-- Kanan: Data -->
       <div class="card-details">
         <div id="status-badge" class="status-badge">PENDING</div>
         <h2 id="nation-name-display" class="nation-name">Nama Negara</h2>
         <div class="data-list">
-          <div class="data-row">
-            <span class="data-label">PEMIMPIN</span>
-            <span id="leader-name-display" class="data-value">-</span>
-          </div>
-          <div class="data-row">
-            <span class="data-label">IDEOLOGI</span>
-            <span id="ideology-display" class="data-value">-</span>
-          </div>
-          <div class="data-row">
-            <span class="data-label">TERDAFTAR PADA</span>
-            <span id="date-display" class="data-value">-</span>
-          </div>
+          <div class="data-row"><span class="data-label">PEMIMPIN</span><span id="leader-name-display" class="data-value">-</span></div>
+          <div class="data-row"><span class="data-label">IDEOLOGI</span><span id="ideology-display" class="data-value">-</span></div>
+          <div class="data-row"><span class="data-label">TANGGAL LAHIR PENDIRI</span><span id="dob-display" class="data-value">-</span></div>
+          <div class="data-row"><span class="data-label">TERDAFTAR PADA</span><span id="date-display" class="data-value">-</span></div>
         </div>
       </div>
     </div>
   </div>
 </main>
 
-<!-- ================= SCRIPT KHUSUS PROFILE ================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
   
-  // Konfigurasi Firebase (Wajib ditulis ulang di sini agar terhubung)
   const firebaseConfig = {
     apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
     authDomain: "grand-nations-bcf65.firebaseapp.com",
@@ -91,40 +75,39 @@ title: Kartu Delegasi — Grand Nations
   const profileState = document.getElementById('profile-state');
 
   onAuthStateChanged(auth, async (user) => {
-    loading.style.display = 'none'; // Sembunyikan loading apapun yang terjadi
-    
+    loading.style.display = 'none';
     if (user) {
-      // JIKA SUDAH LOGIN
       loginRequiredState.style.display = 'none';
-      
       const docRef = doc(db, "registrations", user.uid);
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
-        // JIKA SUDAH DAFTAR NEGARA
         const data = docSnap.data();
-        
         document.getElementById('nation-name-display').textContent = data.nation_name;
         document.getElementById('leader-name-display').textContent = data.leader_name;
         document.getElementById('ideology-display').textContent = data.ideology || '-';
         
+        if (data.photo_url) {
+          document.getElementById('photo-placeholder').style.display = 'none';
+          const img = document.getElementById('profile-pic-display');
+          img.src = data.photo_url;
+          img.style.display = 'block';
+        }
+        if (data.dob) {
+          const dobDate = new Date(data.dob);
+          document.getElementById('dob-display').textContent = dobDate.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
         if (data.created_at) {
           const date = data.created_at.toDate();
           document.getElementById('date-display').textContent = date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
         }
-
         const badge = document.getElementById('status-badge');
         badge.textContent = data.status === 'approved' ? 'DISETUJUI' : 'MENUNGGU REVIEW';
         badge.className = 'status-badge ' + (data.status === 'approved' ? 'status-approved' : 'status-pending');
-
         profileState.style.display = 'block';
       } else {
-        // JIKA BELUM DAFTAR NEGARA
         emptyState.style.display = 'block';
       }
-
     } else {
-      // JIKA BELUM LOGIN
       loginRequiredState.style.display = 'block';
       emptyState.style.display = 'none';
       profileState.style.display = 'none';
