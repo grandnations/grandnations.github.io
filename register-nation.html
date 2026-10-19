@@ -3,6 +3,43 @@ layout: default
 title: Pendaftaran Negara — Grand Nations
 ---
 
+<!-- CSS UNTUK CUSTOM DROPDOWN -->
+<style>
+  .custom-select-wrapper { position: relative; user-select: none; width: 100%; margin-top: 8px; }
+  .custom-select { position: relative; display: flex; flex-direction: column; }
+  .custom-select-trigger {
+    position: relative; display: flex; align-items: center; justify-content: space-between;
+    padding: 12px; background: var(--bg); border: 1px solid var(--line);
+    font-family: var(--head); color: var(--dim); cursor: pointer; transition: border-color 0.2s;
+  }
+  .custom-select-trigger:hover { border-color: var(--line-strong); }
+  .custom-select.opened .custom-select-trigger { border-color: #fff; color: #fff; }
+  .custom-select-trigger .arrow { font-size: 0.7rem; transition: transform 0.2s; }
+  .custom-select.opened .arrow { transform: rotate(180deg); }
+  
+  .custom-options {
+    position: absolute; display: block; top: 100%; left: 0; right: 0;
+    background: var(--bg2); border: 1px solid var(--line-strong); border-top: none;
+    opacity: 0; visibility: hidden; pointer-events: none; z-index: 100;
+    transform: translateY(-10px); transition: all 0.25s ease;
+    max-height: 250px; overflow-y: auto;
+  }
+  .custom-select.opened .custom-options {
+    opacity: 1; visibility: visible; pointer-events: all; transform: translateY(0);
+  }
+  .custom-option {
+    padding: 12px; font-family: var(--head); color: var(--ink);
+    cursor: pointer; transition: background 0.2s;
+  }
+  .custom-option:hover { background: var(--glass-hover); }
+  .custom-option.selected { background: rgba(255,255,255,0.1); font-weight: bold; }
+  
+  /* Scrollbar styling */
+  .custom-options::-webkit-scrollbar { width: 6px; }
+  .custom-options::-webkit-scrollbar-track { background: var(--bg); }
+  .custom-options::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
+</style>
+
 <main class="wrap" style="padding-top: 140px; padding-bottom: 80px; flex: 1;">
   <div class="page-head">
     <h1>Formulir<br>Negara</h1>
@@ -31,10 +68,26 @@ title: Pendaftaran Negara — Grand Nations
   <div id="form-container" style="display:none; background:var(--bg2); border:1px solid var(--line); padding:40px; max-width:800px; margin:0 auto;">
     <form id="nation-form">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+        
+        <!-- CUSTOM DROPDOWN NAMA NEGARA -->
         <div>
-          <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">NAMA NEGARA</label>
-          <input type="text" id="nation_name" required placeholder="Contoh: Republik Nusantara" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
+          <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">PILIH NEGARA</label>
+          <div class="custom-select-wrapper" id="country-dropdown">
+            <div class="custom-select">
+              <div class="custom-select-trigger">
+                <span id="select-label">-- Pilih Negara --</span>
+                <span class="arrow">▼</span>
+              </div>
+              <div class="custom-options" id="select-options">
+                <!-- Opsi akan diisi otomatis lewat JavaScript -->
+                <div class="custom-option" data-value="">Memuat daftar negara...</div>
+              </div>
+            </div>
+          </div>
+          <!-- Input hidden untuk menyimpan value asli agar bisa dikirim ke Firebase -->
+          <input type="hidden" id="nation_name" required>
         </div>
+
         <div>
           <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">NAMA PEMIMPIN</label>
           <input type="text" id="leader_name" required placeholder="Contoh: Jenderal Soedirman" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
@@ -68,7 +121,7 @@ title: Pendaftaran Negara — Grand Nations
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
@@ -91,8 +144,70 @@ title: Pendaftaran Negara — Grand Nations
   const submitBtn = document.getElementById('submit-btn');
   const formError = document.getElementById('form-error');
 
+  // Elemen Custom Dropdown
+  const dropdownWrapper = document.getElementById('country-dropdown');
+  const selectTrigger = dropdownWrapper.querySelector('.custom-select-trigger');
+  const selectLabel = document.getElementById('select-label');
+  const selectOptions = document.getElementById('select-options');
+  const hiddenInput = document.getElementById('nation_name');
+
   let currentUser = null;
 
+  // 1. Inisialisasi Custom Dropdown Event
+  selectTrigger.addEventListener('click', () => {
+    dropdownWrapper.querySelector('.custom-select').classList.toggle('opened');
+  });
+
+  // Tutup dropdown jika klik di luar area
+  document.addEventListener('click', (e) => {
+    if (!dropdownWrapper.contains(e.target)) {
+      dropdownWrapper.querySelector('.custom-select').classList.remove('opened');
+    }
+  });
+
+  // 2. Ambil Daftar Negara dari Firestore
+  async function loadCountries() {
+    try {
+      // Hanya ambil negara yang statusnya 'available'
+      const q = query(collection(db, "countries"), where("status", "==", "available"));
+      const querySnapshot = await getDocs(q);
+      
+      selectOptions.innerHTML = ''; // Bersihkan loading state
+
+      if (querySnapshot.empty) {
+        selectOptions.innerHTML = '<div class="custom-option" data-value="">Belum ada negara tersedia</div>';
+        return;
+      }
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const option = document.createElement('div');
+        option.className = 'custom-option';
+        option.textContent = data.name;
+        option.dataset.value = data.name; // Simpan nama negara
+        
+        // Event saat opsi dipilih
+        option.addEventListener('click', () => {
+          selectLabel.textContent = data.name;
+          selectLabel.style.color = '#fff';
+          hiddenInput.value = data.name;
+          dropdownWrapper.querySelector('.custom-select').classList.remove('opened');
+          
+          // Hapus highlight dari opsi lain
+          document.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+          option.classList.add('selected');
+        });
+
+        selectOptions.appendChild(option);
+      });
+
+    } catch (error) {
+      console.error("Error loading countries:", error);
+      selectOptions.innerHTML = '<div class="custom-option" data-value="">Gagal memuat negara</div>';
+    }
+  }
+
+  // 3. Cek Status Login User
   onAuthStateChanged(auth, async (user) => {
     loading.style.display = 'none';
 
@@ -100,26 +215,22 @@ title: Pendaftaran Negara — Grand Nations
       currentUser = user;
       loginRequiredState.style.display = 'none';
 
-      // 1. Cek apakah dia sudah daftar sebagai anggota
       const memberDocRef = doc(db, "users", user.uid);
       const memberDocSnap = await getDoc(memberDocRef);
 
       if (memberDocSnap.exists()) {
         notAMemberState.style.display = 'none';
 
-        // 2. Cek apakah dia sudah punya negara
         const nationDocRef = doc(db, "registrations", user.uid);
         const nationDocSnap = await getDoc(nationDocRef);
 
         if (nationDocSnap.exists()) {
-          // Jika sudah punya negara, lempar ke profil
           window.location.href = '/profile.html';
         } else {
-          // Jika belum punya negara, tampilkan form
           formContainer.style.display = 'block';
+          loadCountries(); // Panggil fungsi load negara saat form siap
         }
       } else {
-        // Jika belum daftar anggota
         formContainer.style.display = 'none';
         notAMemberState.style.display = 'block';
       }
@@ -130,9 +241,17 @@ title: Pendaftaran Negara — Grand Nations
     }
   });
 
+  // 4. Submit Form
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!currentUser) return;
+
+    // Validasi jika belum pilih negara
+    if (!hiddenInput.value) {
+      formError.textContent = "Silakan pilih negara terlebih dahulu!";
+      formError.style.display = 'block';
+      return;
+    }
 
     submitBtn.textContent = 'Mengirim Data...';
     submitBtn.disabled = true;
@@ -141,17 +260,16 @@ title: Pendaftaran Negara — Grand Nations
     try {
       // Simpan ke tabel registrations
       await setDoc(doc(db, "registrations", currentUser.uid), {
-        nation_name: document.getElementById('nation_name').value,
+        nation_name: hiddenInput.value,
         leader_name: document.getElementById('leader_name').value,
         ideology: document.getElementById('ideology').value,
         capital: document.getElementById('capital').value,
         description: document.getElementById('description').value,
-        status: 'pending', // Otomatis pending saat pertama didaftarkan
+        status: 'pending', 
         created_at: serverTimestamp(),
         email: currentUser.email
       });
 
-      // Berhasil, alihkan ke profil
       window.location.href = '/profile.html';
 
     } catch (error) {
