@@ -7,13 +7,20 @@
       </span>
       Grand Nations
     </a>
+    
     <nav class="links" id="navLinks">
-      <a href="/index.html">Beranda</a>
+      <a href="/index.html#top" class="{% if page.url == '/' or page.url == '/index.html' %}on{% endif %}">Beranda</a>
       <a href="/index.html#sejarah">Sejarah</a>
       <a href="/index.html#struktur">Struktur</a>
+      <a href="/index.html#timeline">Timeline</a>
       <a href="/index.html#negara">Delegasi</a>
+      <a href="/index.html#galeri">Galeri</a>
+      <a href="/index.html#peristiwa">Peristiwa</a>
+      <a href="/index.html#gabung">Gabung!</a>
+      <!-- Menu Profil ditambahkan di sini -->
       <a href="/profile.html" class="{% if page.url contains 'profile' %}on{% endif %}">Kartu Saya</a>
     </nav>
+
     <div class="nav-right">
       <button id="auth-button">Login Google</button>
       <button class="burger" id="burger" aria-label="Menu">☰</button>
