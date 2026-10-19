@@ -1,689 +1,230 @@
-  <!DOCTYPE html>
-  <html lang="id">
-  <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grand Nations — Organisasi Roleplay</title>
-   <link rel="icon" type="image/png" href="assets/img/logogn.jpeg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+---
+layout: default
+title: Grand Nations — Organisasi Roleplay
+---
 
-  <style>
-    :root{
-      --bg:#000;
-      --bg2:#0a0a0a;
-      --bg3:#121212;
-      --ink:#fff;
-      --dim:#a9a9a9;
-      --faint:#6a6a6a;
-      --line:rgba(255,255,255,.18);
-      --line-strong:rgba(255,255,255,.5);
-      --head:'Poppins',sans-serif;
-      --mono:'IBM Plex Mono',monospace;
-      --maxw:1240px;
-    }
-    *{box-sizing:border-box; margin:0; padding:0;}
-    html{scroll-behavior:smooth; scroll-padding-top:72px;}
-    body{background:var(--bg); color:var(--ink); font-family:var(--head); font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased; overflow-x:hidden;}
-    a{color:inherit;}
-    img{display:block; max-width:100%;}
-    ::selection{background:#fff; color:#000;}
-    .wrap{max-width:var(--maxw); margin:0 auto; padding:0 32px;}
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <div class="hero-bg" data-path="/assets/img/hero-bg.jpg">
+    <img src="/assets/img/hero-bg.jpg" alt="" onerror="this.parentElement.classList.add('missing')">
+  </div>
+  <div class="horizon"></div>
+  <div class="badge">ORGANISASI ROLEPLAY WHATSAPP · SIMULASI · EST. 2025</div>
+  <img src="/assets/img/bannergn.jpeg" alt="Grand Nations Banner" class="hero-banner-img">
+  <p class="sub">Wadah simulasi global berbasis grup WhatsApp: diplomasi, konflik militer, kerja sama ekonomi, dan pengembangan teknologi, dengan lebih dari 300 anggota sebagai pemimpin negara.</p>
+  <div class="cta-row">
+    <a class="btn solid" href="#gabung">Gabung Sekarang</a>
+    <a class="btn line" href="#sejarah">Kenali Kami</a>
+  </div>
+</section>
 
-    /* ===== IMAGE SLOT ===== */
-    .slot{
-      position:relative; overflow:hidden; border:1px solid var(--line);
-      background:repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 10px, transparent 10px 20px), var(--bg3);
-    }
-    .slot img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; transition:transform .8s ease, opacity .4s;}
-    .slot::after{content:attr(data-path); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:12px; text-align:center; font-family:var(--mono); font-size:.68rem; color:var(--faint);}
-    .slot.missing img{display:none;}
-    .slot:not(.missing)::after{display:none;}
-    .r1{aspect-ratio:1/1;} .r32{aspect-ratio:3/2;} .r43{aspect-ratio:4/3;} .r169{aspect-ratio:16/9;} .r1610{aspect-ratio:16/10;} .r45{aspect-ratio:4/5;}
-    .zoom:hover img{transform:scale(1.06);}
-
-    /* ===== NAV ===== */
-    header.nav{position:fixed; top:0; left:0; right:0; z-index:60; background:rgba(0,0,0,.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line);}
-    .nav-inner{max-width:1480px; margin:0 auto; padding:0 28px; height:64px; display:flex; align-items:center; justify-content:space-between; gap:20px;}
-    .brand{display:flex; align-items:center; gap:10px; text-decoration:none; font-weight:700; font-size:1.2rem; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap;}
-    .logo-slot{width:34px; height:34px; position:relative; flex-shrink:0;}
-    .logo-slot img{width:100%; height:100%; object-fit:contain;}
-    .logo-slot svg{display:none; width:100%; height:100%;}
-    .logo-slot.missing svg{display:block;}
-    nav.links{display:flex; gap:22px; align-items:center;}
-    nav.links a{text-decoration:none; font-size:.9rem; font-weight:500; color:#d6d6d6; padding:6px 0; border-bottom:2px solid transparent; transition:color .2s, border-color .2s; white-space:nowrap;}
-    nav.links a:hover, nav.links a.on{color:#fff; border-color:#fff;}
-    #auth-button{background:#fff; color:#000; border:none; padding:9px 18px; font-family:var(--head); font-weight:600; font-size:.82rem; cursor:pointer; transition:opacity .2s; white-space:nowrap;}
-    #auth-button:hover{opacity:.82;}
-    .burger{display:none; background:none; border:1px solid var(--line-strong); color:#fff; width:40px; height:40px; cursor:pointer; font-size:1.1rem;}
-    .progress{position:absolute; left:0; bottom:-1px; height:2px; background:#fff; width:0;}
-    .nav-right{display:flex; align-items:center; gap:12px;}
-    @media (max-width:1180px){
-      nav.links{display:none; position:absolute; top:64px; left:0; right:0; flex-direction:column; align-items:stretch; gap:0; background:rgba(0,0,0,.97); border-bottom:1px solid var(--line); padding:6px 28px 14px;}
-      nav.links.open{display:flex;}
-      nav.links a{padding:13px 0; border-bottom:1px solid var(--line);}
-      .burger{display:block;}
-    }
-
-    /* ===== HERO ===== */
-    .hero{position:relative; min-height:78vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:130px 20px 90px; overflow:hidden; isolation:isolate; border-bottom:1px solid var(--line);}
-    .hero-bg{position:absolute; inset:0; z-index:-3; background:#000;}
-    .hero-bg img{width:100%; height:100%; object-fit:cover; opacity:.55;}
-    .hero-bg.missing img{display:none;}
-    .horizon{position:absolute; left:50%; bottom:-62vw; width:150vw; height:150vw; transform:translateX(-50%); border-radius:50%; z-index:-2;
-      background:radial-gradient(circle at 50% 0%, rgba(255,255,255,.22) 0%, rgba(255,255,255,.05) 8%, #050505 22%, #000 60%);
-      box-shadow:0 -2px 60px 6px rgba(255,255,255,.18), inset 0 2px 1px rgba(255,255,255,.35);}
-    .hero::after{content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,.15) 40%, rgba(0,0,0,.7));}
-    .hero .badge{font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; border:1px solid var(--line-strong); padding:6px 14px; margin-bottom:26px; color:#ddd;}
-    
-    /* CSS BANNER GAMBAR HERO (UPDATED) */
-    .hero-banner-img{
-      width:100%;
-      max-width:900px;
-      height:auto;
-      aspect-ratio:4.5/1;          /* potong ruang kosong atas-bawah gambar */
-      object-fit:cover;
-      margin:0 auto 30px;
-      position:relative;
-      z-index:1;
-      display:block;
-
-      mix-blend-mode:screen;       /* hitam jadi transparan, teks putih "melayang" */
-
-      /* tepi gambar memudar, jadi tidak ada garis kotak */
-      -webkit-mask-image:radial-gradient(ellipse 75% 90% at 50% 50%, #000 55%, transparent 100%);
-              mask-image:radial-gradient(ellipse 75% 90% at 50% 50%, #000 55%, transparent 100%);
-    }
-
-    .hero p.sub{max-width:660px; margin:28px auto 34px; color:#cfcfcf; font-size:1.05rem; position:relative; z-index:1;}
-    .cta-row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; position:relative; z-index:1;}
-    .btn{display:inline-block; padding:14px 30px; font-weight:600; font-size:.92rem; text-decoration:none; border:1px solid #fff; transition:all .2s; letter-spacing:.03em;}
-    .btn.solid{background:#fff; color:#000;}
-    .btn.solid:hover{background:transparent; color:#fff;}
-    .btn.line{background:transparent; color:#fff;}
-    .btn.line:hover{background:#fff; color:#000;}
-
-    /* ===== GENERIC SECTION ===== */
-    section{padding:110px 0; border-bottom:1px solid var(--line);}
-    .alt{background:var(--bg2);}
-    .sec-head{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:56px;}
-    .sec-head h2{font-weight:800; text-transform:uppercase; font-size:clamp(2rem,5vw,3.6rem); line-height:1.05; letter-spacing:-.01em;}
-    .sec-head .idx{font-family:var(--mono); font-size:.76rem; color:var(--faint); letter-spacing:.08em;}
-
-    /* ===== SLOGAN + EMBLEM ===== */
-    .slogan{background:linear-gradient(180deg,#050505,#000); padding-bottom:90px;}
-    .slogan-top{display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center; margin-bottom:80px;}
-    .hashtag{font-weight:800; text-transform:uppercase; font-size:clamp(2.6rem,7vw,6rem); line-height:1; letter-spacing:-.02em;}
-    .emblem{display:flex; justify-content:center;}
-    .emblem .logo-slot{width:min(460px,92%); height:auto; aspect-ratio:1/1;}
-    .emblem svg{width:100%; height:100%;}
-    @media (max-width:860px){ .slogan-top{grid-template-columns:1fr; text-align:center;} }
-
-    .pillars{display:grid; grid-template-columns:.8fr 3fr; gap:40px; align-items:center;}
-    .pillars h3{font-weight:700; font-size:clamp(1.8rem,3vw,2.6rem); line-height:1.2;}
-    .pillar-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
-    .pillar{border:1.5px solid #fff; padding:26px 12px 22px; aspect-ratio:1/1.28; display:flex; flex-direction:column; align-items:center; justify-content:space-between; text-align:center; transition:background .25s, color .25s, transform .25s;}
-    .pillar svg{width:62%; max-width:96px; height:auto; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round;}
-    .pillar b{font-weight:700; text-transform:uppercase; letter-spacing:.04em; font-size:clamp(.78rem,1.2vw,1.05rem); line-height:1.25;}
-    .pillar:hover{background:#fff; color:#000; transform:translateY(-6px);}
-    @media (max-width:960px){ .pillars{grid-template-columns:1fr;} }
-    @media (max-width:560px){ .pillar-grid{grid-template-columns:repeat(2,1fr);} }
-
-    /* ===== ANGKA BESAR ===== */
-    .numbers{display:grid; grid-template-columns:1.2fr 1fr; gap:60px; align-items:center;}
-    .num-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:0; border:1px solid var(--line);}
-    .num-cell{padding:34px 28px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);}
-    .num-cell:nth-child(2n){border-right:none;}
-    .num-cell:nth-last-child(-n+2){border-bottom:none;}
-    .num-cell .n{font-weight:800; font-size:clamp(3rem,7vw,5.8rem); line-height:1;}
-    .num-cell .t{font-family:var(--mono); font-size:.74rem; color:var(--dim); letter-spacing:.1em; margin-top:10px;}
-    .numbers h3{font-weight:700; font-size:clamp(1.5rem,2.6vw,2.2rem); margin-bottom:14px;}
-    .numbers p{color:var(--dim);}
-    @media (max-width:900px){ .numbers{grid-template-columns:1fr; gap:40px;} }
-
-    /* ===== SEJARAH ===== */
-    .history{display:grid; grid-template-columns:1.1fr .9fr; gap:64px; align-items:start;}
-    .history p{color:var(--dim); margin-bottom:20px; max-width:62ch;}
-    .history strong{color:#fff; font-weight:600;}
-    .quote{margin-top:24px; padding:26px 28px; border-left:3px solid #fff; background:var(--bg3); font-size:1.15rem; font-weight:500; line-height:1.55;}
-    .quote small{display:block; margin-top:12px; font-family:var(--mono); font-size:.7rem; color:var(--faint); font-weight:400;}
-    @media (max-width:860px){ .history{grid-template-columns:1fr; gap:36px;} }
-
-    /* ===== STRUKTUR ===== */
-    .konsul{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:20px;}
-    .k-card{border:1px solid var(--line); background:var(--bg2); transition:border-color .25s, transform .25s;}
-    .k-card:hover{border-color:#fff; transform:translateY(-4px);}
-    .k-card .slot{border:none; border-bottom:1px solid var(--line);}
-    .k-card .meta{padding:20px 22px;}
-    .k-card .role{font-family:var(--mono); font-size:.7rem; color:var(--faint); letter-spacing:.1em;}
-    .k-card .name{font-weight:700; font-size:1.25rem; margin-top:4px;}
-    .trias{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
-    .t-card{border:1px solid var(--line); background:var(--bg2); display:flex; flex-direction:column; transition:border-color .25s;}
-    .t-card:hover{border-color:#fff;}
-    .t-card .slot{border:none; border-bottom:1px solid var(--line);}
-    .t-body{padding:26px;}
-    .t-tag{font-family:var(--mono); font-size:.68rem; color:var(--faint); letter-spacing:.1em; margin-bottom:10px;}
-    .t-body h3{font-weight:700; font-size:1.3rem; margin-bottom:14px;}
-    .rl{display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-top:1px solid var(--line); font-size:.92rem;}
-    .rl span:first-child{color:var(--dim);}
-    .rl span:last-child{text-align:right; font-weight:500;}
-    .t-body .note{margin-top:14px; font-size:.86rem; color:var(--faint); line-height:1.6;}
-    @media (max-width:860px){ .konsul,.trias{grid-template-columns:1fr;} .k-card{display:grid; grid-template-columns:120px 1fr; align-items:center;} .k-card .slot{border-bottom:none; border-right:1px solid var(--line); height:100%; aspect-ratio:auto;} }
-
-    /* ===== TIMELINE ===== */
-    .era-tabs{display:flex; border:1px solid var(--line); margin-bottom:30px; overflow-x:auto;}
-    .era-tab{flex:1 1 0; min-width:110px; background:none; border:none; border-right:1px solid var(--line); color:var(--dim); font-family:var(--head); font-weight:700; font-size:clamp(1.1rem,2.2vw,1.7rem); padding:20px 10px; cursor:pointer; transition:background .2s, color .2s;}
-    .era-tab:last-child{border-right:none;}
-    .era-tab:hover{color:#fff; background:var(--bg3);}
-    .era-tab.active{background:#fff; color:#000;}
-    .era-panel{display:grid; grid-template-columns:1.1fr 1fr; gap:50px; align-items:center;}
-    .era-panel .slot img{transition:opacity .35s;}
-    .era-yr{font-family:var(--mono); font-size:.78rem; color:var(--faint); letter-spacing:.1em; margin-bottom:10px;}
-    .era-panel h3{font-weight:800; font-size:clamp(1.6rem,3vw,2.4rem); line-height:1.15; margin-bottom:16px; text-transform:uppercase;}
-    .era-panel p{color:var(--dim); margin-bottom:16px;}
-    .legend{display:flex; align-items:center; gap:10px; margin-top:22px; font-family:var(--mono); font-size:.7rem; color:var(--faint); letter-spacing:.08em;}
-    .legend i{display:block; width:28px; height:3px; background:#fff;}
-    @media (max-width:860px){ .era-panel{grid-template-columns:1fr; gap:30px;} }
-
-    /* ===== DELEGASI ===== */
-    .countries{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
-    .c-card{border:1px solid var(--line); background:var(--bg2); padding:16px; display:flex; flex-direction:column; gap:14px; transition:border-color .25s, transform .25s;}
-    .c-card:hover{border-color:#fff; transform:translateY(-4px);}
-    .c-card .slot img{filter:grayscale(1); transition:filter .4s, transform .8s;}
-    .c-card:hover .slot img{filter:none;}
-    .c-card .cn{font-weight:600; font-size:1rem; line-height:1.3;}
-    .c-card .cc{font-family:var(--mono); font-size:.68rem; color:var(--faint); letter-spacing:.08em; margin-top:auto;}
-    @media (max-width:980px){ .countries{grid-template-columns:repeat(2,1fr);} }
-    @media (max-width:480px){ .countries{grid-template-columns:1fr;} }
-
-    /* ===== GALERI ===== */
-    .gallery{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
-    .gallery .slot:nth-child(1){grid-column:span 2; grid-row:span 2; aspect-ratio:auto; min-height:320px;}
-    .gallery .slot:nth-child(4){grid-column:span 2;}
-    .gallery .slot:nth-child(4){aspect-ratio:2/1;}
-    @media (max-width:760px){ .gallery{grid-template-columns:repeat(2,1fr);} .gallery .slot:nth-child(1){aspect-ratio:4/3; min-height:0;} .gallery .slot:nth-child(4){aspect-ratio:4/3; grid-column:span 2;} }
-
-    /* ===== PERISTIWA ===== */
-    .events{position:relative; padding-left:34px; display:flex; flex-direction:column; gap:22px;}
-    .events::before{content:''; position:absolute; left:7px; top:6px; bottom:6px; width:1px; background:var(--line-strong);}
-    .ev{position:relative; border:1px solid var(--line); background:var(--bg2); display:grid; grid-template-columns:260px 1fr; transition:border-color .25s;}
-    .ev:hover{border-color:#fff;}
-    .ev::before{content:''; position:absolute; left:-34px; top:30px; width:15px; height:15px; background:#000; border:2px solid #fff; border-radius:50%;}
-    .ev .slot{border:none; border-right:1px solid var(--line); height:100%; min-height:170px;}
-    .ev-body{padding:28px 30px;}
-    .ev-year{font-family:var(--mono); font-size:.76rem; color:var(--faint); letter-spacing:.1em; margin-bottom:8px;}
-    .ev-body h3{font-weight:700; font-size:1.35rem; margin-bottom:10px;}
-    .ev-body p{color:var(--dim); max-width:62ch;}
-    @media (max-width:760px){ .ev{grid-template-columns:1fr;} .ev .slot{border-right:none; border-bottom:1px solid var(--line); aspect-ratio:16/9; min-height:0;} }
-
-    /* ===== CTA ===== */
-    .cta{background:#fff; color:#000; text-align:center; padding:100px 0; border-bottom:none;}
-    .cta h2{font-weight:800; text-transform:uppercase; font-size:clamp(2.2rem,6vw,4.6rem); line-height:1.02; margin-bottom:18px;}
-    .cta p{max-width:560px; margin:0 auto 32px; color:#444;}
-    .cta .btn{border-color:#000; background:#000; color:#fff;}
-    .cta .btn:hover{background:transparent; color:#000;}
-
-    /* ===== FOOTER ===== */
-    footer{padding:70px 0 40px; background:#000; border-top:1px solid var(--line);}
-    .foot-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:40px; margin-bottom:46px;}
-    footer h4{font-family:var(--mono); font-size:.72rem; color:var(--faint); letter-spacing:.12em; margin-bottom:16px; font-weight:400;}
-    footer .col a{display:block; color:var(--dim); font-size:.92rem; text-decoration:none; margin-bottom:9px;}
-    footer .col a:hover{color:#fff;}
-    footer .lede{color:var(--faint); font-size:.9rem; max-width:34ch;}
-    .foot-brand{font-weight:800; font-size:1.5rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:12px;}
-    .disclaimer{border:1px dashed var(--line-strong); padding:20px; font-size:.8rem; color:var(--faint); line-height:1.6; text-align:center; margin-bottom:28px;}
-    .foot-bottom{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-family:var(--mono); font-size:.72rem; color:var(--faint); border-top:1px solid var(--line); padding-top:22px;}
-    @media (max-width:760px){ .foot-grid{grid-template-columns:1fr;} }
-
-    .to-top{position:fixed; right:22px; bottom:22px; z-index:50; width:44px; height:44px; background:#fff; color:#000; border:none; cursor:pointer; font-size:1.1rem; opacity:0; pointer-events:none; transform:translateY(8px); transition:opacity .25s, transform .25s;}
-    .to-top.show{opacity:1; pointer-events:auto; transform:none;}
-
-    .reveal{opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease;}
-    .reveal.in{opacity:1; transform:none;}
-    @media (prefers-reduced-motion:reduce){ .reveal{opacity:1; transform:none; transition:none;} html{scroll-behavior:auto;} }
-    a:focus-visible, button:focus-visible{outline:2px solid #fff; outline-offset:3px;}
-  </style>
-  </head>
-  <body>
-
-  <header class="nav">
-    <div class="nav-inner">
-      <a class="brand" href="#top">
+<!-- ================= SLOGAN + PILAR ================= -->
+<section class="slogan">
+  <div class="wrap">
+    <div class="slogan-top">
+      <h2 class="hashtag reveal">#Tulis<br>Sejarahmu</h2>
+      <div class="emblem reveal">
         <span class="logo-slot">
-          <img src="assets/img/logogn.jpeg" alt="Logo" onerror="this.parentElement.classList.add('missing')">
-          <svg viewBox="0 0 100 100" fill="none" stroke="#fff" aria-hidden="true"><circle cx="50" cy="50" r="30" stroke-width="3"/><ellipse cx="50" cy="50" rx="12" ry="30" stroke-width="2"/><path d="M20 50h60M50 20v60" stroke-width="2"/></svg>
+          <img src="/assets/img/logogn.jpeg" alt="Emblem Grand Nations" onerror="this.parentElement.classList.add('missing')">
+          <svg viewBox="0 0 200 200" fill="none" stroke="#fff" aria-hidden="true"><circle cx="100" cy="100" r="92" stroke-opacity=".25" stroke-width="1"/><circle cx="100" cy="100" r="76" stroke-opacity=".45" stroke-width="1.2" stroke-dasharray="1 5"/><circle cx="100" cy="100" r="58" stroke-width="3"/><ellipse cx="100" cy="100" rx="24" ry="58" stroke-width="2"/><ellipse cx="100" cy="100" rx="58" ry="24" stroke-opacity=".7" stroke-width="2"/><path d="M100 42v116M42 100h116" stroke-width="2"/><circle cx="100" cy="100" r="5" fill="#fff"/></svg>
         </span>
-        Grand Nations
-      </a>
-      <nav class="links" id="navLinks">
-        <a href="#top" class="on">Beranda</a>
-        <a href="#sejarah">Sejarah</a>
-        <a href="#struktur">Struktur</a>
-        <a href="#timeline">Timeline</a>
-        <a href="#negara">Delegasi</a>
-        <a href="#galeri">Galeri</a>
-        <a href="#peristiwa">Peristiwa</a>
-        <a href="#gabung">Gabung!</a>
-      </nav>
-      <div class="nav-right">
-        <button id="auth-button">Login Google</button>
-        <button class="burger" id="burger" aria-label="Menu">☰</button>
       </div>
     </div>
-    <div class="progress" id="progress"></div>
-  </header>
-
-  <!-- ================= HERO ================= -->
-  <section class="hero" id="top">
-    <div class="hero-bg" data-path="assets/img/hero-bg.jpg">
-      <img src="assets/img/hero-bg.jpg" alt="" onerror="this.parentElement.classList.add('missing')">
-    </div>
-    <div class="horizon"></div>
-    <div class="badge">ORGANISASI ROLEPLAY WHATSAPP · SIMULASI · EST. 2025</div>
-    
-    <img src="assets/img/bannergn.jpeg" alt="Grand Nations Banner" class="hero-banner-img">
-
-    <p class="sub">Wadah simulasi global berbasis grup WhatsApp: diplomasi, konflik militer, kerja sama ekonomi, dan pengembangan teknologi, dengan lebih dari 300 anggota sebagai pemimpin negara.</p>
-    <div class="cta-row">
-      <a class="btn solid" href="#gabung">Gabung Sekarang</a>
-      <a class="btn line" href="#sejarah">Kenali Kami</a>
-    </div>
-  </section>
-
-  <!-- ================= SLOGAN + PILAR ================= -->
-  <section class="slogan">
-    <div class="wrap">
-      <div class="slogan-top">
-        <h2 class="hashtag reveal">#Tulis<br>Sejarahmu</h2>
-        <div class="emblem reveal">
-          <span class="logo-slot">
-            <img src="assets/img/logogn.jpeg" alt="Emblem Grand Nations" onerror="this.parentElement.classList.add('missing')">
-            <svg viewBox="0 0 200 200" fill="none" stroke="#fff" aria-hidden="true">
-              <circle cx="100" cy="100" r="92" stroke-opacity=".25" stroke-width="1"/>
-              <circle cx="100" cy="100" r="76" stroke-opacity=".45" stroke-width="1.2" stroke-dasharray="1 5"/>
-              <circle cx="100" cy="100" r="58" stroke-width="3"/>
-              <ellipse cx="100" cy="100" rx="24" ry="58" stroke-width="2"/>
-              <ellipse cx="100" cy="100" rx="58" ry="24" stroke-opacity=".7" stroke-width="2"/>
-              <path d="M100 42v116M42 100h116" stroke-width="2"/>
-              <circle cx="100" cy="100" r="5" fill="#fff"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <div class="pillars">
-        <h3 class="reveal">Pilar-Pilar<br>Grand Nations</h3>
-        <div class="pillar-grid">
-          <div class="pillar reveal">
-            <svg viewBox="0 0 64 64"><circle cx="32" cy="30" r="20"/><ellipse cx="32" cy="30" rx="8" ry="20"/><path d="M12 30h40M32 10v40"/><path d="M14 54c10 5 26 5 36 0"/></svg>
-            <b>Diplomasi</b>
-          </div>
-          <div class="pillar reveal">
-            <svg viewBox="0 0 64 64"><path d="M32 6l20 8v16c0 14-9 24-20 28C21 54 12 44 12 30V14z"/><path d="M32 20l4 8 9 1-6 6 2 9-9-5-9 5 2-9-6-6 9-1z"/></svg>
-            <b>Militer</b>
-          </div>
-          <div class="pillar reveal">
-            <svg viewBox="0 0 64 64"><path d="M8 52h48"/><rect x="12" y="34" width="8" height="18"/><rect x="28" y="24" width="8" height="28"/><rect x="44" y="12" width="8" height="40"/><path d="M12 24l14-10 10 6 16-12"/></svg>
-            <b>Ekonomi</b>
-          </div>
-          <div class="pillar reveal">
-            <svg viewBox="0 0 64 64"><rect x="18" y="18" width="28" height="28" rx="3"/><rect x="26" y="26" width="12" height="12"/><path d="M24 10v8M32 10v8M40 10v8M24 46v8M32 46v8M40 46v8M10 24h8M10 32h8M10 40h8M46 24h8M46 32h8M46 40h8"/></svg>
-            <b>Teknologi</b>
-          </div>
-        </div>
+    <div class="pillars">
+      <h3 class="reveal">Pilar-Pilar<br>Grand Nations</h3>
+      <div class="pillar-grid">
+        <div class="pillar reveal"><svg viewBox="0 0 64 64"><circle cx="32" cy="30" r="20"/><ellipse cx="32" cy="30" rx="8" ry="20"/><path d="M12 30h40M32 10v40"/><path d="M14 54c10 5 26 5 36 0"/></svg><b>Diplomasi</b></div>
+        <div class="pillar reveal"><svg viewBox="0 0 64 64"><path d="M32 6l20 8v16c0 14-9 24-20 28C21 54 12 44 12 30V14z"/><path d="M32 20l4 8 9 1-6 6 2 9-9-5-9 5 2-9-6-6 9-1z"/></svg><b>Militer</b></div>
+        <div class="pillar reveal"><svg viewBox="0 0 64 64"><path d="M8 52h48"/><rect x="12" y="34" width="8" height="18"/><rect x="28" y="24" width="8" height="28"/><rect x="44" y="12" width="8" height="40"/><path d="M12 24l14-10 10 6 16-12"/></svg><b>Ekonomi</b></div>
+        <div class="pillar reveal"><svg viewBox="0 0 64 64"><rect x="18" y="18" width="28" height="28" rx="3"/><rect x="26" y="26" width="12" height="12"/><path d="M24 10v8M32 10v8M40 10v8M24 46v8M32 46v8M40 46v8M10 24h8M10 32h8M10 40h8M46 24h8M46 32h8M46 40h8"/></svg><b>Teknologi</b></div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ================= ANGKA ================= -->
-  <section class="alt">
-    <div class="wrap numbers">
-      <div class="num-grid reveal">
-        <div class="num-cell"><div class="n" data-count="325">0</div><div class="t">ANGGOTA</div></div>
-        <div class="num-cell"><div class="n" data-count="2025">0</div><div class="t">TAHUN BERDIRI</div></div>
-        <div class="num-cell"><div class="n" data-count="3">0</div><div class="t">KONSUL</div></div>
-        <div class="num-cell"><div class="n" data-count="5" data-suffix="+">0</div><div class="t">ERA TIMELINE</div></div>
-      </div>
+<!-- ================= ANGKA ================= -->
+<section class="alt">
+  <div class="wrap numbers">
+    <div class="num-grid reveal">
+      <div class="num-cell"><div class="n" data-count="325">0</div><div class="t">ANGGOTA</div></div>
+      <div class="num-cell"><div class="n" data-count="2025">0</div><div class="t">TAHUN BERDIRI</div></div>
+      <div class="num-cell"><div class="n" data-count="3">0</div><div class="t">KONSUL</div></div>
+      <div class="num-cell"><div class="n" data-count="5" data-suffix="+">0</div><div class="t">ERA TIMELINE</div></div>
+    </div>
+    <div class="reveal">
+      <h3>Sistem Timeline Dinamis</h3>
+      <p>Latar simulasi tidak dikunci pada satu masa. Anggota memilih era lewat voting: dari kolonialisme 1800 sampai perlombaan antariksa 2050. Era dengan suara terbanyak jadi panggung roleplay berikutnya.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SEJARAH ================= -->
+<section id="sejarah">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2>Sejarah<br>Singkat</h2><div class="idx">01 — ASAL MULA</div></div>
+    <div class="history">
       <div class="reveal">
-        <h3>Sistem Timeline Dinamis</h3>
-        <p>Latar simulasi tidak dikunci pada satu masa. Anggota memilih era lewat voting: dari kolonialisme 1800 sampai perlombaan antariksa 2050. Era dengan suara terbanyak jadi panggung roleplay berikutnya.</p>
+        <p>Grand Nations resmi didirikan pada <strong>15 Juni 2025</strong> oleh Samuel Verensia dan Muhammad Al Fatih sebagai <em>Founding Fathers</em>. Berawal dari saran Al Fatih kepada Samuel untuk membangun kembali organisasi roleplay, Grand Nations hadir sebagai kelanjutan dari seri United Nations yang telah berjalan sejak tahun 2021.</p>
+        <p>Seiring berkembangnya komunitas, sistem roleplay mengalami penyempurnaan. Grand Nations meresmikan pembentukannya sebagai rekonsiliasi dengan seri sebelumnya, membawa sistem yang lebih terstruktur dengan penerapan <strong>Trias Politica</strong>, mekanisme voting yang fleksibel, serta <strong>sistem timeline dinamis</strong> yang menjadi ciri khas utama.</p>
+        <p>Anggota Grand Nations bersifat terbuka untuk umum dan berperan sebagai pemimpin negara. Negara fiksi diizinkan berdiri selama memiliki konsistensi geografis, budaya, dan identitas agar tetap menjaga realisme dalam simulasi global.</p>
+        <div class="quote">“Perdamaian bukanlah ketiadaan konflik, melainkan kehadiran mekanisme yang membuat konflik dapat dibicarakan.”<small>FILOSOFI SIMULASI · GRAND NATIONS</small></div>
+      </div>
+      <div class="slot r45 zoom reveal" data-path="/assets/img/sejarah.jpg"><img src="/assets/img/sejarah.jpg" alt="Sejarah Grand Nations" onerror="this.parentElement.classList.add('missing')"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STRUKTUR ================= -->
+<section id="struktur" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2>Struktur<br>Organisasi</h2><div class="idx">02 — TRIAS POLITICA</div></div>
+    <div class="konsul reveal">
+      <div class="k-card"><div class="slot r45" data-path="/assets/img/konsul-1.jpg"><img src="/assets/img/konsul-1.jpg" alt="Samuel Verensia" onerror="this.parentElement.classList.add('missing')"></div><div class="meta"><div class="role">KONSUL I</div><div class="name">Samuel Verensia</div></div></div>
+      <div class="k-card"><div class="slot r45" data-path="/assets/img/konsul-2.jpg"><img src="/assets/img/konsul-2.jpg" alt="Agnes Yohannes" onerror="this.parentElement.classList.add('missing')"></div><div class="meta"><div class="role">KONSUL II</div><div class="name">Agnes Yohannes</div></div></div>
+      <div class="k-card"><div class="slot r45" data-path="/assets/img/konsul-3.jpg"><img src="/assets/img/konsul-3.jpg" alt="Joshua Gatvar" onerror="this.parentElement.classList.add('missing')"></div><div class="meta"><div class="role">KONSUL III</div><div class="name">Joshua Gatvar</div></div></div>
+    </div>
+    <div class="trias">
+      <div class="t-card reveal"><div class="slot r169 zoom" data-path="/assets/img/eksekutif.jpg"><img src="/assets/img/eksekutif.jpg" alt="Eksekutif" onerror="this.parentElement.classList.add('missing')"></div><div class="t-body"><div class="t-tag">EKSEKUTIF · OPERASIONAL</div><h3>Presiden Direktur</h3><div class="rl"><span>Presiden Direktur</span><span>DTM Irfan Nizam</span></div><div class="rl"><span>Wakil Presiden</span><span>Arjuna Prasetyo</span></div><p class="note">Bertanggung jawab atas operasional harian dan pelaksanaan kebijakan organisasi dalam menjalankan jalannya roleplay.</p></div></div>
+      <div class="t-card reveal"><div class="slot r169 zoom" data-path="/assets/img/legislatif.jpg"><img src="/assets/img/legislatif.jpg" alt="Legislatif" onerror="this.parentElement.classList.add('missing')"></div><div class="t-body"><div class="t-tag">LEGISLATIF · REGULASI</div><h3>Parlemen Grand Nations</h3><div class="rl"><span>Ketua Parlemen</span><span>Udin</span></div><div class="rl"><span>Fungsi</span><span>Penyusunan Aturan</span></div><p class="note">Berfungsi menyusun dan menetapkan aturan yang mengikat seluruh anggota, termasuk regulasi tata tertib dan mekanisme voting.</p></div></div>
+      <div class="t-card reveal"><div class="slot r169 zoom" data-path="/assets/img/yudikatif.jpg"><img src="/assets/img/yudikatif.jpg" alt="Yudikatif" onerror="this.parentElement.classList.add('missing')"></div><div class="t-body"><div class="t-tag">YUDIKATIF · PERADILAN</div><h3>Grand Nations Supreme (GNSC)</h3><div class="rl"><span>Hakim Agung</span><span>Kosong</span></div><div class="rl"><span>Sistem Veto</span><span>Tidak Ada</span></div><p class="note">Menangani pelanggaran serius di luar konteks roleplay seperti penyalahgunaan kekuasaan atau pengkhianatan.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TIMELINE ================= -->
+<section id="timeline">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2>Dynamic<br>Timeline</h2><div class="idx">03 — ERA SIMULASI</div></div>
+    <div class="era-tabs reveal" id="eraTabs">
+      <button class="era-tab active" data-year="1800" data-img="/assets/img/era-1800.jpg" data-title="Era Revolusi & Kolonialisme" data-text="Latar simulasi yang berfokus pada ekspansi kekaisaran, revolusi industri awal, dan perebutan wilayah kolonial di berbagai belahan dunia.">1800</button>
+      <button class="era-tab" data-year="1920" data-img="/assets/img/era-1920.jpg" data-title="Pasca Perang Dunia I" data-text="Masa antar-perang dunia, di mana negara-negara baru mulai muncul, Liga Bangsa-Bangsa dibentuk, dan ketegangan politik Eropa memanas.">1920</button>
+      <button class="era-tab" data-year="1945" data-img="/assets/img/era-1945.jpg" data-title="Awal Perang Dingin" data-text="Dunia terbagi dalam dua blok besar (Timur dan Barat). Persaingan ideologi, perlombaan senjata nuklir, dan proxy war menjadi tema utama.">1945</button>
+      <button class="era-tab" data-year="2000" data-img="/assets/img/era-2000.jpg" data-title="Era Modernisasi" data-text="Fokus pada globalisasi, kerja sama ekonomi internasional, krisis iklim, dan operasi perdamaian internasional di berbagai konflik regional.">2000</button>
+      <button class="era-tab" data-year="2050" data-img="/assets/img/era-2050.jpg" data-title="Space Race 2050" data-text="Era fiksi ilmiah di mana persaingan luar angkasa antara blok Barat (AS) dan blok Timur (Tiongkok) mencapai puncaknya.">2050</button>
+    </div>
+    <div class="era-panel reveal">
+      <div class="slot r1610" id="eraSlot" data-path="/assets/img/era-1800.jpg">
+        <img id="eraImg" src="/assets/img/era-1800.jpg" alt="Gambar era" onerror="this.parentElement.classList.add('missing')">
+      </div>
+      <div>
+        <div class="era-yr" id="eraYear">ERA 1800</div>
+        <h3 id="eraTitle">Era Revolusi & Kolonialisme</h3>
+        <p id="eraText">Latar simulasi yang berfokus pada ekspansi kekaisaran, revolusi industri awal, dan perebutan wilayah kolonial di berbagai belahan dunia.</p>
+        <p>Anggota dapat mengubah timeline melalui mekanisme voting. Era dengan suara terbanyak akan menjadi latar utama simulasi berikutnya.</p>
+        <div class="legend"><i></i> DINAMIS BERDASARKAN VOTING</div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ================= SEJARAH ================= -->
-  <section id="sejarah">
-    <div class="wrap">
-      <div class="sec-head reveal"><h2>Sejarah<br>Singkat</h2><div class="idx">01 — ASAL MULA</div></div>
-      <div class="history">
-        <div class="reveal">
-          <p>Grand Nations resmi didirikan pada <strong>15 Juni 2025</strong> oleh Samuel Verensia dan Muhammad Al Fatih sebagai <em>Founding Fathers</em>. Berawal dari saran Al Fatih kepada Samuel untuk membangun kembali organisasi roleplay, Grand Nations hadir sebagai kelanjutan dari seri United Nations yang telah berjalan sejak tahun 2021.</p>
-          <p>Seiring berkembangnya komunitas, sistem roleplay mengalami penyempurnaan. Grand Nations meresmikan pembentukannya sebagai rekonsiliasi dengan seri sebelumnya, membawa sistem yang lebih terstruktur dengan penerapan <strong>Trias Politica</strong>, mekanisme voting yang fleksibel, serta <strong>sistem timeline dinamis</strong> yang menjadi ciri khas utama.</p>
-          <p>Anggota Grand Nations bersifat terbuka untuk umum dan berperan sebagai pemimpin negara. Negara fiksi diizinkan berdiri selama memiliki konsistensi geografis, budaya, dan identitas agar tetap menjaga realisme dalam simulasi global.</p>
-          <div class="quote">“Perdamaian bukanlah ketiadaan konflik, melainkan kehadiran mekanisme yang membuat konflik dapat dibicarakan.”<small>FILOSOFI SIMULASI · GRAND NATIONS</small></div>
-        </div>
-        <div class="slot r45 zoom reveal" data-path="assets/img/sejarah.jpg"><img src="assets/img/sejarah.jpg" alt="Sejarah Grand Nations" onerror="this.parentElement.classList.add('missing')"></div>
-      </div>
+<!-- ================= DELEGASI ================= -->
+<section id="negara" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2>Delegasi<br>Terdaftar</h2><div class="idx">04 — SEBAGIAN DARI NEGARA PESERTA</div></div>
+    <div class="countries">
+      <div class="c-card reveal"><div class="slot r32" data-path="/assets/img/flags/cn.png"><img src="/assets/img/flags/cn.png" alt="Tiongkok" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">People's Republic of China</div><div class="cc">CN · NEGARA NYATA</div></div>
+      <div class="c-card reveal"><div class="slot r32" data-path="/assets/img/flags/jp.png"><img src="/assets/img/flags/jp.png" alt="Dai Nippon" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Dai Nippon (大日本)</div><div class="cc">JP · NEGARA NYATA</div></div>
+      <div class="c-card reveal"><div class="slot r32" data-path="/assets/img/flags/il.png"><img src="/assets/img/flags/il.png" alt="Greater Israel" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Greater Israel</div><div class="cc">IL · NEGARA NYATA</div></div>
+      <div class="c-card reveal"><div class="slot r32" data-path="/assets/img/flags/do.png"><img src="/assets/img/flags/do.png" alt="Santo Domingo" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Santo Domingo</div><div class="cc">DO · NEGARA NYATA</div></div>
+      <div class="c-card reveal"><div class="slot r32" data-path="/assets/img/flags/su.png"><img src="/assets/img/flags/su.png" alt="USSR" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Union of Soviet Socialist Republics</div><div class="cc">SU · NEGARA NYATA</div></div>
+      <div class="c-card reveal"><div class="slot r32" data-path="/assets/img/flags/lr.png"><img src="/assets/img/flags/lr.png" alt="Liberia" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Republic of Liberia</div><div class="cc">LR · NEGARA NYATA</div></div>
+      <div class="c-card reveal"><div class="slot r32" data-path="/assets/img/flags/us.png"><img src="/assets/img/flags/us.png" alt="Amerika Serikat" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">United States of America</div><div class="cc">US · NEGARA NYATA</div></div>
+      <div class="c-card reveal"><div class="slot r32" data-path="/assets/img/flags/fv.png"><img src="/assets/img/flags/fv.png" alt="Negara fiksi" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Negara Fiksi Lainnya</div><div class="cc">FV · KONSISTENSI GEOGRAFIS</div></div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ================= STRUKTUR ================= -->
-  <section id="struktur" class="alt">
-    <div class="wrap">
-      <div class="sec-head reveal"><h2>Struktur<br>Organisasi</h2><div class="idx">02 — TRIAS POLITICA</div></div>
-
-      <div class="konsul reveal">
-        <div class="k-card">
-          <div class="slot r45" data-path="assets/img/konsul-1.jpg"><img src="assets/img/konsul-1.jpg" alt="Samuel Verensia" onerror="this.parentElement.classList.add('missing')"></div>
-          <div class="meta"><div class="role">KONSUL I</div><div class="name">Samuel Verensia</div></div>
-        </div>
-        <div class="k-card">
-          <div class="slot r45" data-path="assets/img/konsul-2.jpg"><img src="assets/img/konsul-2.jpg" alt="Agnes Yohannes" onerror="this.parentElement.classList.add('missing')"></div>
-          <div class="meta"><div class="role">KONSUL II</div><div class="name">Agnes Yohannes</div></div>
-        </div>
-        <div class="k-card">
-          <div class="slot r45" data-path="assets/img/konsul-3.jpg"><img src="assets/img/konsul-3.jpg" alt="Joshua Gatvar" onerror="this.parentElement.classList.add('missing')"></div>
-          <div class="meta"><div class="role">KONSUL III</div><div class="name">Joshua Gatvar</div></div>
-        </div>
-      </div>
-
-      <div class="trias">
-        <div class="t-card reveal">
-          <div class="slot r169 zoom" data-path="assets/img/eksekutif.jpg"><img src="assets/img/eksekutif.jpg" alt="Eksekutif" onerror="this.parentElement.classList.add('missing')"></div>
-          <div class="t-body">
-            <div class="t-tag">EKSEKUTIF · OPERASIONAL</div>
-            <h3>Presiden Direktur</h3>
-            <div class="rl"><span>Presiden Direktur</span><span>DTM Irfan Nizam</span></div>
-            <div class="rl"><span>Wakil Presiden</span><span>Arjuna Prasetyo</span></div>
-            <p class="note">Bertanggung jawab atas operasional harian dan pelaksanaan kebijakan organisasi dalam menjalankan jalannya roleplay.</p>
-          </div>
-        </div>
-        <div class="t-card reveal">
-          <div class="slot r169 zoom" data-path="assets/img/legislatif.jpg"><img src="assets/img/legislatif.jpg" alt="Legislatif" onerror="this.parentElement.classList.add('missing')"></div>
-          <div class="t-body">
-            <div class="t-tag">LEGISLATIF · REGULASI</div>
-            <h3>Parlemen Grand Nations</h3>
-            <div class="rl"><span>Ketua Parlemen</span><span>Udin</span></div>
-            <div class="rl"><span>Fungsi</span><span>Penyusunan Aturan</span></div>
-            <p class="note">Berfungsi menyusun dan menetapkan aturan yang mengikat seluruh anggota, termasuk regulasi tata tertib dan mekanisme voting.</p>
-          </div>
-        </div>
-        <div class="t-card reveal">
-          <div class="slot r169 zoom" data-path="assets/img/yudikatif.jpg"><img src="assets/img/yudikatif.jpg" alt="Yudikatif" onerror="this.parentElement.classList.add('missing')"></div>
-          <div class="t-body">
-            <div class="t-tag">YUDIKATIF · PERADILAN</div>
-            <h3>Grand Nations Supreme (GNSC)</h3>
-            <div class="rl"><span>Hakim Agung</span><span>Kosong</span></div>
-            <div class="rl"><span>Sistem Veto</span><span>Tidak Ada</span></div>
-            <p class="note">Menangani pelanggaran serius di luar konteks roleplay seperti penyalahgunaan kekuasaan atau pengkhianatan.</p>
-          </div>
-        </div>
-      </div>
+<!-- ================= GALERI ================= -->
+<section id="galeri">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2>Galeri<br>Simulasi</h2><div class="idx">05 — DOKUMENTASI</div></div>
+    <div class="gallery reveal">
+      <div class="slot zoom" data-path="/assets/img/galeri-1.jpg"><img src="/assets/img/galeri-1.jpg" alt="Galeri 1" onerror="this.parentElement.classList.add('missing')"></div>
+      <div class="slot r43 zoom" data-path="/assets/img/galeri-2.jpg"><img src="/assets/img/galeri-2.jpg" alt="Galeri 2" onerror="this.parentElement.classList.add('missing')"></div>
+      <div class="slot r43 zoom" data-path="/assets/img/galeri-3.jpg"><img src="/assets/img/galeri-3.jpg" alt="Galeri 3" onerror="this.parentElement.classList.add('missing')"></div>
+      <div class="slot zoom" data-path="/assets/img/galeri-4.jpg"><img src="/assets/img/galeri-4.jpg" alt="Galeri 4" onerror="this.parentElement.classList.add('missing')"></div>
+      <div class="slot r43 zoom" data-path="/assets/img/galeri-5.jpg"><img src="/assets/img/galeri-5.jpg" alt="Galeri 5" onerror="this.parentElement.classList.add('missing')"></div>
+      <div class="slot r43 zoom" data-path="/assets/img/galeri-6.jpg"><img src="/assets/img/galeri-6.jpg" alt="Galeri 6" onerror="this.parentElement.classList.add('missing')"></div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ================= TIMELINE ================= -->
-  <section id="timeline">
-    <div class="wrap">
-      <div class="sec-head reveal"><h2>Dynamic<br>Timeline</h2><div class="idx">03 — ERA SIMULASI</div></div>
-
-      <div class="era-tabs reveal" id="eraTabs">
-        <button class="era-tab active" data-year="1800" data-img="assets/img/era-1800.jpg" data-title="Era Revolusi & Kolonialisme" data-text="Latar simulasi yang berfokus pada ekspansi kekaisaran, revolusi industri awal, dan perebutan wilayah kolonial di berbagai belahan dunia.">1800</button>
-        <button class="era-tab" data-year="1920" data-img="assets/img/era-1920.jpg" data-title="Pasca Perang Dunia I" data-text="Masa antar-perang dunia, di mana negara-negara baru mulai muncul, Liga Bangsa-Bangsa dibentuk, dan ketegangan politik Eropa memanas.">1920</button>
-        <button class="era-tab" data-year="1945" data-img="assets/img/era-1945.jpg" data-title="Awal Perang Dingin" data-text="Dunia terbagi dalam dua blok besar (Timur dan Barat). Persaingan ideologi, perlombaan senjata nuklir, dan proxy war menjadi tema utama.">1945</button>
-        <button class="era-tab" data-year="2000" data-img="assets/img/era-2000.jpg" data-title="Era Modernisasi" data-text="Fokus pada globalisasi, kerja sama ekonomi internasional, krisis iklim, dan operasi perdamaian internasional di berbagai konflik regional.">2000</button>
-        <button class="era-tab" data-year="2050" data-img="assets/img/era-2050.jpg" data-title="Space Race 2050" data-text="Era fiksi ilmiah di mana persaingan luar angkasa antara blok Barat (AS) dan blok Timur (Tiongkok) mencapai puncaknya.">2050</button>
-      </div>
-
-      <div class="era-panel reveal">
-        <div class="slot r1610" id="eraSlot" data-path="assets/img/era-1800.jpg">
-          <img id="eraImg" src="assets/img/era-1800.jpg" alt="Gambar era" onerror="this.parentElement.classList.add('missing')">
-        </div>
-        <div>
-          <div class="era-yr" id="eraYear">ERA 1800</div>
-          <h3 id="eraTitle">Era Revolusi & Kolonialisme</h3>
-          <p id="eraText">Latar simulasi yang berfokus pada ekspansi kekaisaran, revolusi industri awal, dan perebutan wilayah kolonial di berbagai belahan dunia.</p>
-          <p>Anggota dapat mengubah timeline melalui mekanisme voting. Era dengan suara terbanyak akan menjadi latar utama simulasi berikutnya.</p>
-          <div class="legend"><i></i> DINAMIS BERDASARKAN VOTING</div>
-        </div>
-      </div>
+<!-- ================= PERISTIWA ================= -->
+<section id="peristiwa" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal"><h2>Peristiwa<br>Penting</h2><div class="idx">06 — RISALAH SIMULASI</div></div>
+    <div class="events">
+      <div class="ev reveal"><div class="slot zoom" data-path="/assets/img/peristiwa-1.jpg"><img src="/assets/img/peristiwa-1.jpg" alt="Pendirian" onerror="this.parentElement.classList.add('missing')"></div><div class="ev-body"><div class="ev-year">2025</div><h3>Pendirian Grand Nations</h3><p>Pada 15 Juni 2025, Samuel Verensia dan Muhammad Al Fatih secara resmi membentuk Grand Nations sebagai kelanjutan dari seri roleplay sebelumnya dan rekonsiliasi dengan seri kelima.</p></div></div>
+      <div class="ev reveal"><div class="slot zoom" data-path="/assets/img/peristiwa-2.jpg"><img src="/assets/img/peristiwa-2.jpg" alt="CSTO-NATO" onerror="this.parentElement.classList.add('missing')"></div><div class="ev-body"><div class="ev-year">—</div><h3>CSTO–NATO Counter-terrorism Alliance</h3><p>Sebuah aliansi besar antara blok Timur (CSTO) dan Barat (NATO) yang bersatu dalam operasi global melawan terorisme. Sebuah momen langka di mana dua kekuatan besar bekerja sama.</p></div></div>
+      <div class="ev reveal"><div class="slot zoom" data-path="/assets/img/peristiwa-3.jpg"><img src="/assets/img/peristiwa-3.jpg" alt="Space Race" onerror="this.parentElement.classList.add('missing')"></div><div class="ev-body"><div class="ev-year">2050</div><h3>Space Race 2050</h3><p>Persaingan teknologi luar angkasa yang sangat intens antara blok Barat yang dipimpin Amerika Serikat dan blok Timur yang dipimpin Tiongkok. Eksplorasi luar angkasa menjadi medan pertempuran baru.</p></div></div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ================= DELEGASI ================= -->
-  <section id="negara" class="alt">
-    <div class="wrap">
-      <div class="sec-head reveal"><h2>Delegasi<br>Terdaftar</h2><div class="idx">04 — SEBAGIAN DARI NEGARA PESERTA</div></div>
-      <div class="countries">
-        <div class="c-card reveal"><div class="slot r32" data-path="assets/img/flags/cn.png"><img src="assets/img/flags/cn.png" alt="Tiongkok" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">People's Republic of China</div><div class="cc">CN · NEGARA NYATA</div></div>
-        <div class="c-card reveal"><div class="slot r32" data-path="assets/img/flags/jp.png"><img src="assets/img/flags/jp.png" alt="Dai Nippon" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Dai Nippon (大日本)</div><div class="cc">JP · NEGARA NYATA</div></div>
-        <div class="c-card reveal"><div class="slot r32" data-path="assets/img/flags/il.png"><img src="assets/img/flags/il.png" alt="Greater Israel" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Greater Israel</div><div class="cc">IL · NEGARA NYATA</div></div>
-        <div class="c-card reveal"><div class="slot r32" data-path="assets/img/flags/do.png"><img src="assets/img/flags/do.png" alt="Santo Domingo" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Santo Domingo</div><div class="cc">DO · NEGARA NYATA</div></div>
-        <div class="c-card reveal"><div class="slot r32" data-path="assets/img/flags/su.png"><img src="assets/img/flags/su.png" alt="USSR" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Union of Soviet Socialist Republics</div><div class="cc">SU · NEGARA NYATA</div></div>
-        <div class="c-card reveal"><div class="slot r32" data-path="assets/img/flags/lr.png"><img src="assets/img/flags/lr.png" alt="Liberia" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Republic of Liberia</div><div class="cc">LR · NEGARA NYATA</div></div>
-        <div class="c-card reveal"><div class="slot r32" data-path="assets/img/flags/us.png"><img src="assets/img/flags/us.png" alt="Amerika Serikat" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">United States of America</div><div class="cc">US · NEGARA NYATA</div></div>
-        <div class="c-card reveal"><div class="slot r32" data-path="assets/img/flags/fv.png"><img src="assets/img/flags/fv.png" alt="Negara fiksi" onerror="this.parentElement.classList.add('missing')"></div><div class="cn">Negara Fiksi Lainnya</div><div class="cc">FV · KONSISTENSI GEOGRAFIS</div></div>
-      </div>
-    </div>
-  </section>
+<!-- ================= CTA ================= -->
+<section class="cta" id="gabung">
+  <div class="wrap reveal">
+    <h2>Siap Memimpin<br>Negaramu?</h2>
+    <p>Keanggotaan terbuka untuk umum. Pilih negara, tentukan arah diplomasimu, dan jadi bagian dari sejarah Grand Nations.</p>
+    <a class="btn" href="GANTI_LINK_WA" target="_blank" rel="noopener">Gabung Grup WhatsApp</a>
+  </div>
+</section>
 
-  <!-- ================= GALERI ================= -->
-  <section id="galeri">
-    <div class="wrap">
-      <div class="sec-head reveal"><h2>Galeri<br>Simulasi</h2><div class="idx">05 — DOKUMENTASI</div></div>
-      <div class="gallery reveal">
-        <div class="slot zoom" data-path="assets/img/galeri-1.jpg"><img src="assets/img/galeri-1.jpg" alt="Galeri 1" onerror="this.parentElement.classList.add('missing')"></div>
-        <div class="slot r43 zoom" data-path="assets/img/galeri-2.jpg"><img src="assets/img/galeri-2.jpg" alt="Galeri 2" onerror="this.parentElement.classList.add('missing')"></div>
-        <div class="slot r43 zoom" data-path="assets/img/galeri-3.jpg"><img src="assets/img/galeri-3.jpg" alt="Galeri 3" onerror="this.parentElement.classList.add('missing')"></div>
-        <div class="slot zoom" data-path="assets/img/galeri-4.jpg"><img src="assets/img/galeri-4.jpg" alt="Galeri 4" onerror="this.parentElement.classList.add('missing')"></div>
-        <div class="slot r43 zoom" data-path="assets/img/galeri-5.jpg"><img src="assets/img/galeri-5.jpg" alt="Galeri 5" onerror="this.parentElement.classList.add('missing')"></div>
-        <div class="slot r43 zoom" data-path="assets/img/galeri-6.jpg"><img src="assets/img/galeri-6.jpg" alt="Galeri 6" onerror="this.parentElement.classList.add('missing')"></div>
-      </div>
-    </div>
-  </section>
+<!-- ================= SCRIPT KHUSUS INDEX ================= -->
+<script>
+  /* Reveal on scroll */
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(function (el) { el.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(function (el, i) { el.style.transitionDelay = (i % 4) * 70 + 'ms'; io.observe(el); });
+  })();
 
-  <!-- ================= PERISTIWA ================= -->
-  <section id="peristiwa" class="alt">
-    <div class="wrap">
-      <div class="sec-head reveal"><h2>Peristiwa<br>Penting</h2><div class="idx">06 — RISALAH SIMULASI</div></div>
-      <div class="events">
-        <div class="ev reveal">
-          <div class="slot zoom" data-path="assets/img/peristiwa-1.jpg"><img src="assets/img/peristiwa-1.jpg" alt="Pendirian" onerror="this.parentElement.classList.add('missing')"></div>
-          <div class="ev-body"><div class="ev-year">2025</div><h3>Pendirian Grand Nations</h3><p>Pada 15 Juni 2025, Samuel Verensia dan Muhammad Al Fatih secara resmi membentuk Grand Nations sebagai kelanjutan dari seri roleplay sebelumnya dan rekonsiliasi dengan seri kelima.</p></div>
-        </div>
-        <div class="ev reveal">
-          <div class="slot zoom" data-path="assets/img/peristiwa-2.jpg"><img src="assets/img/peristiwa-2.jpg" alt="CSTO-NATO" onerror="this.parentElement.classList.add('missing')"></div>
-          <div class="ev-body"><div class="ev-year">—</div><h3>CSTO–NATO Counter-terrorism Alliance</h3><p>Sebuah aliansi besar antara blok Timur (CSTO) dan Barat (NATO) yang bersatu dalam operasi global melawan terorisme. Sebuah momen langka di mana dua kekuatan besar bekerja sama.</p></div>
-        </div>
-        <div class="ev reveal">
-          <div class="slot zoom" data-path="assets/img/peristiwa-3.jpg"><img src="assets/img/peristiwa-3.jpg" alt="Space Race" onerror="this.parentElement.classList.add('missing')"></div>
-          <div class="ev-body"><div class="ev-year">2050</div><h3>Space Race 2050</h3><p>Persaingan teknologi luar angkasa yang sangat intens antara blok Barat yang dipimpin Amerika Serikat dan blok Timur yang dipimpin Tiongkok. Eksplorasi luar angkasa menjadi medan pertempuran baru.</p></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= CTA ================= -->
-  <section class="cta" id="gabung">
-    <div class="wrap reveal">
-      <h2>Siap Memimpin<br>Negaramu?</h2>
-      <p>Keanggotaan terbuka untuk umum. Pilih negara, tentukan arah diplomasimu, dan jadi bagian dari sejarah Grand Nations.</p>
-      <a class="btn" href="GANTI_LINK_WA" target="_blank" rel="noopener">Gabung Grup WhatsApp</a>
-    </div>
-  </section>
-
-  <!-- ================= FOOTER ================= -->
-  <footer>
-    <div class="wrap">
-      <div class="foot-grid">
-        <div class="col">
-          <div class="foot-brand">Grand Nations</div>
-          <p class="lede">Organisasi roleplay berbasis WhatsApp yang mensimulasikan dinamika hubungan internasional, diplomasi, dan konflik global.</p>
-        </div>
-        <div class="col">
-          <h4>SEKRETARIAT</h4>
-          <a href="#struktur">Konsul</a>
-          <a href="#struktur">Presiden Direktur</a>
-          <a href="#struktur">Parlemen</a>
-          <a href="#timeline">Sistem Timeline</a>
-        </div>
-        <div class="col">
-          <h4>INFORMASI</h4>
-          <a href="#sejarah">Sejarah Pendirian</a>
-          <a href="#negara">Keanggotaan</a>
-          <a href="#galeri">Galeri</a>
-          <a href="#peristiwa">Peristiwa Penting</a>
-        </div>
-      </div>
-
-      <div class="disclaimer">
-        <strong>SANGKALAN (DISCLAIMER):</strong> Situs web ini adalah bagian dari organisasi roleplay berbasis grup WhatsApp (Grand Nations).
-        "Grand Nations" bukanlah badan resmi, tidak berafiliasi dengan, dan tidak didukung oleh Perserikatan Bangsa-Bangsa (PBB) yang asli.
-        Seluruh skenario, aliansi, dan peristiwa yang disebutkan di sini adalah bagian dari simulasi komunitas.
-      </div>
-
-      <div class="foot-bottom">
-        <span>© 2026 GRAND NATIONS — ROLEPLAY COMMUNITY</span>
-        <span>DIRANCANG UNTUK SIMULASI GLOBAL</span>
-      </div>
-    </div>
-  </footer>
-
-  <button class="to-top" id="toTop" aria-label="Kembali ke atas">↑</button>
-
-  <script>
-    /* Reveal on scroll */
-    (function () {
-      var els = document.querySelectorAll('.reveal');
-      if (!('IntersectionObserver' in window)) { els.forEach(function (el) { el.classList.add('in'); }); return; }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-      els.forEach(function (el, i) { el.style.transitionDelay = (i % 4) * 70 + 'ms'; io.observe(el); });
-    })();
-
-    /* Count-up angka */
-    (function () {
-      var nums = document.querySelectorAll('[data-count]');
-      function run(el) {
-        var target = +el.dataset.count, suffix = el.dataset.suffix || '', t0 = null, dur = 1400;
-        function step(t) {
-          if (!t0) t0 = t;
-          var p = Math.min((t - t0) / dur, 1), eased = 1 - Math.pow(1 - p, 3);
-          el.textContent = Math.round(target * eased) + (p === 1 ? suffix : '');
-          if (p < 1) requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
+  /* Count-up angka */
+  (function () {
+    var nums = document.querySelectorAll('[data-count]');
+    function run(el) {
+      var target = +el.dataset.count, suffix = el.dataset.suffix || '', t0 = null, dur = 1400;
+      function step(t) {
+        if (!t0) t0 = t;
+        var p = Math.min((t - t0) / dur, 1), eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * eased) + (p === 1 ? suffix : '');
+        if (p < 1) requestAnimationFrame(step);
       }
-      if (!('IntersectionObserver' in window)) { nums.forEach(function (n) { n.textContent = n.dataset.count + (n.dataset.suffix || ''); }); return; }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { if (e.isIntersecting) { run(e.target); io.unobserve(e.target); } });
-      }, { threshold: 0.5 });
-      nums.forEach(function (n) { io.observe(n); });
-    })();
-
-    /* Timeline era */
-    (function () {
-      var tabs = Array.prototype.slice.call(document.querySelectorAll('.era-tab'));
-      var yearEl = document.getElementById('eraYear'), titleEl = document.getElementById('eraTitle'),
-          textEl = document.getElementById('eraText'), imgEl = document.getElementById('eraImg'),
-          slotEl = document.getElementById('eraSlot');
-      if (!tabs.length) return;
-      function setEra(tab) {
-        if (tab.classList.contains('active')) return;
-        tabs.forEach(function (t) { t.classList.remove('active'); });
-        tab.classList.add('active');
-        yearEl.textContent = 'ERA ' + tab.dataset.year;
-        titleEl.textContent = tab.dataset.title;
-        textEl.textContent = tab.dataset.text;
-        slotEl.setAttribute('data-path', tab.dataset.img);
-        slotEl.classList.remove('missing');
-        imgEl.style.opacity = 0;
-        imgEl.onload = function () { imgEl.style.opacity = 1; slotEl.classList.remove('missing'); };
-        imgEl.src = tab.dataset.img;
-      }
-      tabs.forEach(function (t) {
-        t.addEventListener('click', function () { setEra(t); });
-        t.addEventListener('mouseenter', function () { setEra(t); });
-      });
-    })();
-
-    /* Nav: burger, progress, active link, to-top */
-    (function () {
-      var burger = document.getElementById('burger'), links = document.getElementById('navLinks'),
-          bar = document.getElementById('progress'), toTop = document.getElementById('toTop');
-      var anchors = Array.prototype.slice.call(links.querySelectorAll('a'));
-      var secs = anchors.map(function (a) { return document.querySelector(a.getAttribute('href')); });
-
-      burger.addEventListener('click', function () { links.classList.toggle('open'); });
-      links.addEventListener('click', function (e) { if (e.target.tagName === 'A') links.classList.remove('open'); });
-
-      function onScroll() {
-        var h = document.documentElement, max = h.scrollHeight - h.clientHeight;
-        bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
-        toTop.classList.toggle('show', h.scrollTop > 600);
-        var cur = 0, y = h.scrollTop + 120;
-        secs.forEach(function (s, i) { if (s && s.offsetTop <= y) cur = i; });
-        anchors.forEach(function (a, i) { a.classList.toggle('on', i === cur); });
-      }
-      window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
-      toTop.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
-    })();
-  </script>
-
-  <!-- ================= FIREBASE INTEGRATION ================= -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
-      authDomain: "grand-nations-bcf65.firebaseapp.com",
-      projectId: "grand-nations-bcf65",
-      storageBucket: "grand-nations-bcf65.firebasestorage.app",
-      messagingSenderId: "266950230750",
-      appId: "1:266950230750:web:60c88d8abae6590bd4384f"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    const authButton = document.getElementById('auth-button');
-
-    async function loginWithGoogle() {
-      try {
-        const result = await signInWithPopup(auth, provider);
-        console.log("Login berhasil:", result.user.email);
-      } catch (error) {
-        console.error("Login gagal:", error.message);
-        alert("Gagal login: " + error.message);
-      }
+      requestAnimationFrame(step);
     }
+    if (!('IntersectionObserver' in window)) { nums.forEach(function (n) { n.textContent = n.dataset.count + (n.dataset.suffix || ''); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { run(e.target); io.unobserve(e.target); } });
+    }, { threshold: 0.5 });
+    nums.forEach(function (n) { io.observe(n); });
+  })();
 
-    async function logout() {
-      try { await signOut(auth); console.log("Logout berhasil"); }
-      catch (error) { console.error("Logout gagal:", error.message); }
+  /* Timeline era */
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.era-tab'));
+    var yearEl = document.getElementById('eraYear'), titleEl = document.getElementById('eraTitle'),
+        textEl = document.getElementById('eraText'), imgEl = document.getElementById('eraImg'),
+        slotEl = document.getElementById('eraSlot');
+    if (!tabs.length) return;
+    function setEra(tab) {
+      if (tab.classList.contains('active')) return;
+      tabs.forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      yearEl.textContent = 'ERA ' + tab.dataset.year;
+      titleEl.textContent = tab.dataset.title;
+      textEl.textContent = tab.dataset.text;
+      slotEl.setAttribute('data-path', tab.dataset.img);
+      slotEl.classList.remove('missing');
+      imgEl.style.opacity = 0;
+      imgEl.onload = function () { imgEl.style.opacity = 1; slotEl.classList.remove('missing'); };
+      imgEl.src = tab.dataset.img;
     }
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userName = user.displayName || user.email.split('@')[0];
-        authButton.textContent = 'Profil Saya';
-        authButton.style.background = 'transparent';
-        authButton.style.border = '1px solid #fff';
-        authButton.style.color = '#fff';
-        authButton.onclick = () => { window.location.href = 'profile.html'; };
-      } else {
-        authButton.textContent = 'Login Google';
-        authButton.style.background = '#fff';
-        authButton.style.border = 'none';
-        authButton.style.color = '#000';
-        authButton.onclick = loginWithGoogle;
-      }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { setEra(t); });
+      t.addEventListener('mouseenter', function () { setEra(t); });
     });
-  </script>
-
-  </body>
-  </html>
+  })();
+</script>
