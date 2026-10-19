@@ -10,16 +10,13 @@ title: Dashboard Admin — Grand Nations
   .admin-table tr:hover { background: var(--glass-hover); }
   .badge-pending { color: #ffc800; font-family: var(--mono); font-size: 0.75rem; }
   .badge-approved { color: #00ff64; font-family: var(--mono); font-size: 0.75rem; }
-  .badge-rejected { color: #ff4d4d; font-family: var(--mono); font-size: 0.75rem; }
   .btn-sm { padding: 6px 12px; font-size: 0.75rem; cursor: pointer; border: none; font-weight: 600; margin-right: 5px; border-radius: 2px; }
   .btn-approve { background: #00ff64; color: #000; }
   .btn-reject { background: #ff4d4d; color: #fff; }
-  .btn-approve:hover, .btn-reject:hover { opacity: 0.8; }
-  
-  /* Styling Tab */
-  .tab-btn { background: none; border: none; color: var(--dim); font-family: var(--head); font-weight: 700; font-size: 1.1rem; cursor: pointer; padding-bottom: 10px; transition: color 0.2s; }
+  .tab-btn { background: none; border: none; color: var(--dim); font-family: var(--head); font-weight: 700; font-size: 1rem; cursor: pointer; padding-bottom: 10px; transition: color 0.2s; }
   .tab-btn:hover { color: #fff; }
   .tab-btn.active { color: #fff; border-bottom: 2px solid #fff; }
+  .admin-input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--line); color: #fff; margin-bottom: 10px; font-family: var(--head); }
 </style>
 
 <main class="wrap">
@@ -28,65 +25,75 @@ title: Dashboard Admin — Grand Nations
     <div class="idx">PANEL KONTROL PUSAT</div>
   </div>
 
-  <!-- STATE: LOADING -->
-  <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">Memverifikasi akses administrator...</div>
+  <div id="loading" style="font-family:var(--mono); color:var(--dim); padding:40px 0; text-align:center;">Memverifikasi akses...</div>
 
-  <!-- STATE: AKSES DITOLAK -->
   <div id="access-denied" class="auth-box" style="display:none;">
     <div class="icon" style="color: #ff4d4d; border-color: #ff4d4d;">⛔</div>
     <h2>Akses Ditolak</h2>
-    <p>Maaf, akun Google kamu (<span id="denied-email" style="color:#fff; font-weight:bold;"></span>) tidak terdaftar sebagai Administrator di sistem kami.</p>
-    <a href="/index.html" class="btn solid" style="margin-top: 20px;">Kembali ke Beranda</a>
+    <p>Akun (<span id="denied-email" style="color:#fff;"></span>) bukan Administrator.</p>
+    <a href="/index.html" class="btn solid">Kembali</a>
   </div>
 
-  <!-- STATE: ADMIN DASHBOARD -->
   <div id="admin-panel" style="display:none; background:var(--bg2); border:1px solid var(--line); padding:40px;">
     
     <!-- Navigasi Tab -->
-    <div style="display:flex; gap:20px; border-bottom:1px solid var(--line); margin-bottom:20px;">
-      <button class="tab-btn active" data-target="members">Data Anggota</button>
-      <button class="tab-btn" data-target="nations">Persetujuan Negara</button>
+    <div style="display:flex; gap:20px; border-bottom:1px solid var(--line); margin-bottom:20px; flex-wrap:wrap;">
+      <button class="tab-btn active" data-target="members">Anggota</button>
+      <button class="tab-btn" data-target="nations">Persetujuan</button>
+      <button class="tab-btn" data-target="master-data">Kelola Data (Timeline & Negara)</button>
     </div>
 
     <!-- Konten Tab Anggota -->
     <div id="tab-members" class="tab-content">
-      <h3 style="font-family:var(--mono); color:var(--dim); margin-bottom:10px; font-size: 0.9rem;">TOTAL ANGGOTA TERDAFTAR: <span id="total-members" style="color: #fff;">0</span></h3>
+      <h3 style="font-family:var(--mono); color:var(--dim); font-size: 0.9rem;">TOTAL ANGGOTA: <span id="total-members" style="color: #fff;">0</span></h3>
       <div style="overflow-x:auto;">
         <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Nama Lengkap</th>
-              <th>Email</th>
-              <th>Tanggal Lahir</th>
-              <th>Bergabung</th>
-            </tr>
-          </thead>
-          <tbody id="table-members-body">
-            <!-- Data dimuat via JS -->
-          </tbody>
+          <thead><tr><th>Nama</th><th>Email</th><th>Tgl Lahir</th><th>Bergabung</th></tr></thead>
+          <tbody id="table-members-body"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- Konten Tab Negara -->
+    <!-- Konten Tab Persetujuan Negara -->
     <div id="tab-nations" class="tab-content" style="display:none;">
-      <h3 style="font-family:var(--mono); color:var(--dim); margin-bottom:10px; font-size: 0.9rem;">PENDAFTARAN NEGARA</h3>
+      <h3 style="font-family:var(--mono); color:var(--dim); font-size: 0.9rem;">PENDAFTARAN NEGARA (AKAN DATANG)</h3>
       <div style="overflow-x:auto;">
         <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Negara</th>
-              <th>Pemimpin</th>
-              <th>Ideologi</th>
-              <th>Status</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="table-nations-body">
-            <!-- Data dimuat via JS -->
-          </tbody>
+          <thead><tr><th>Negara</th><th>Pemimpin</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="table-nations-body"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- Konten Tab Master Data (Kelola Timeline & Negara) -->
+    <div id="tab-master-data" class="tab-content" style="display:none;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+        
+        <!-- Form Tambah Timeline -->
+        <div style="background:var(--bg3); padding:20px; border:1px solid var(--line);">
+          <h3 style="margin-bottom:15px; font-size:1.1rem;">Tambah Timeline Baru</h3>
+          <input type="text" id="new-timeline-name" class="admin-input" placeholder="Contoh: 1945 atau 1500">
+          <button id="btn-add-timeline" class="btn solid" style="width:100%;">Tambah Timeline</button>
+        </div>
+
+        <!-- Form Tambah Negara -->
+        <div style="background:var(--bg3); padding:20px; border:1px solid var(--line);">
+          <h3 style="margin-bottom:15px; font-size:1.1rem;">Tambah Negara ke Timeline</h3>
+          <select id="select-timeline" class="admin-input">
+            <option value="">-- Pilih Timeline --</option>
+          </select>
+          <input type="text" id="new-country-name" class="admin-input" placeholder="Nama Negara">
+          <button id="btn-add-country" class="btn solid" style="width:100%;">Tambah Negara</button>
+        </div>
+
+      </div>
+
+      <!-- Tabel Daftar Negara -->
+      <h3 style="margin-top:40px; margin-bottom:15px; font-size:1.1rem;">Daftar Negara Terdaftar</h3>
+      <table class="admin-table">
+        <thead><tr><th>Timeline</th><th>Nama Negara</th><th>Status</th></tr></thead>
+        <tbody id="table-countries-body"></tbody>
+      </table>
     </div>
 
   </div>
@@ -94,7 +101,7 @@ title: Dashboard Admin — Grand Nations
 
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -116,126 +123,111 @@ title: Dashboard Admin — Grand Nations
 
   onAuthStateChanged(auth, async (user) => {
     loading.style.display = 'none';
-
     if (user) {
-      // Pengecekan Admin ke Database
       const adminDocRef = doc(db, "admins", user.email);
       const adminDocSnap = await getDoc(adminDocRef);
 
       if (adminDocSnap.exists()) {
-        // JIKA EMAIL TERDAFTAR DI TABEL ADMINS
         accessDenied.style.display = 'none';
         adminPanel.style.display = 'block';
-        loadData(); 
+        loadMembers(); 
+        loadTimelines();
+        loadCountries();
       } else {
-        // JIKA EMAIL TIDAK TERDAFTAR
         adminPanel.style.display = 'none';
         accessDenied.style.display = 'block';
         document.getElementById('denied-email').textContent = user.email;
       }
     } else {
-      // JIKA BELUM LOGIN
       adminPanel.style.display = 'none';
       accessDenied.style.display = 'block';
       document.getElementById('denied-email').textContent = "Belum Login";
     }
   });
 
-  // Fungsi Mengambil Data dari Firestore
-  async function loadData() {
-    // 1. Ambil Data Anggota
-    const membersRef = collection(db, "users");
-    const membersSnap = await getDocs(membersRef);
+  // --- LOAD DATA FUNCTIONS ---
+  async function loadMembers() {
+    const membersSnap = await getDocs(collection(db, "users"));
     const membersBody = document.getElementById('table-members-body');
     membersBody.innerHTML = '';
-    
     let count = 0;
     membersSnap.forEach((doc) => {
       const data = doc.data();
       count++;
-      const dobStr = data.dob ? new Date(data.dob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
-      const joinStr = data.created_at ? data.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
-      
-      membersBody.innerHTML += `
-        <tr>
-          <td style="font-weight:600;">${data.full_name}</td>
-          <td style="color:var(--dim);">${data.email}</td>
-          <td>${dobStr}</td>
-          <td>${joinStr}</td>
-        </tr>
-      `;
+      membersBody.innerHTML += `<tr>
+        <td style="font-weight:600;">${data.full_name}</td>
+        <td style="color:var(--dim);">${data.email}</td>
+        <td>${data.dob || '-'}</td>
+        <td>${data.created_at ? data.created_at.toDate().toLocaleDateString('id-ID') : '-'}</td>
+      </tr>`;
     });
     document.getElementById('total-members').textContent = count;
+  }
 
-    // 2. Ambil Data Pendaftaran Negara
-    const nationsRef = collection(db, "registrations");
-    const nationsSnap = await getDocs(nationsRef);
-    const nationsBody = document.getElementById('table-nations-body');
-    nationsBody.innerHTML = '';
-
-    nationsSnap.forEach((docSnap) => {
-      const data = docSnap.data();
-      let statusClass = 'badge-pending';
-      let statusText = data.status.toUpperCase();
-      
-      if (data.status === 'approved') {
-        statusClass = 'badge-approved';
-        statusText = 'DISETUJUI';
-      } else if (data.status === 'rejected') {
-        statusClass = 'badge-rejected';
-        statusText = 'DITOLAK';
-      }
-
-      // Tampilkan tombol hanya jika status masih pending
-      const actionButtons = data.status === 'pending' ? `
-        <button class="btn-sm btn-approve" onclick="approveNation('${docSnap.id}')">Setujui</button>
-        <button class="btn-sm btn-reject" onclick="rejectNation('${docSnap.id}')">Tolak</button>
-      ` : '-';
-      
-      nationsBody.innerHTML += `
-        <tr id="row-${docSnap.id}">
-          <td style="font-weight:600; color:#00ff64;">${data.nation_name}</td>
-          <td>${data.leader_name}</td>
-          <td>${data.ideology}</td>
-          <td><span class="${statusClass}">${statusText}</span></td>
-          <td>${actionButtons}</td>
-        </tr>
-      `;
+  async function loadTimelines() {
+    const select = document.getElementById('select-timeline');
+    select.innerHTML = '<option value="">-- Pilih Timeline --</option>';
+    
+    const timelinesSnap = await getDocs(collection(db, "timelines"));
+    timelinesSnap.forEach((doc) => {
+      const data = doc.data();
+      select.innerHTML += `<option value="${doc.id}">${data.name}</option>`;
     });
   }
 
-  // Fungsi Approve
-  window.approveNation = async function(docId) {
-    if(!confirm("Yakin ingin menyetujui negara ini?")) return;
-    try {
-      await updateDoc(doc(db, "registrations", docId), { status: 'approved' });
-      alert("Negara berhasil disetujui!");
-      loadData(); // Reload tabel
-    } catch (e) {
-      alert("Gagal menyetujui: " + e.message);
-    }
-  };
+  async function loadCountries() {
+    const countriesBody = document.getElementById('table-countries-body');
+    countriesBody.innerHTML = '';
+    
+    const countriesSnap = await getDocs(collection(db, "countries"));
+    countriesSnap.forEach((doc) => {
+      const data = doc.data();
+      countriesBody.innerHTML += `<tr>
+        <td style="color:var(--dim);">${data.timeline_name || 'Unknown'}</td>
+        <td style="font-weight:600; color:#00ff64;">${data.name}</td>
+        <td>${data.status === 'available' ? 'Tersedia' : 'Diklaim'}</td>
+      </tr>`;
+    });
+  }
 
-  // Fungsi Reject
-  window.rejectNation = async function(docId) {
-    if(!confirm("Yakin ingin menolak pendaftaran negara ini?")) return;
+  // --- ADD DATA FUNCTIONS ---
+  document.getElementById('btn-add-timeline').addEventListener('click', async () => {
+    const name = document.getElementById('new-timeline-name').value;
+    if (!name) return alert("Isi nama timeline!");
+    
     try {
-      await updateDoc(doc(db, "registrations", docId), { status: 'rejected' });
-      alert("Pendaftaran negara ditolak.");
-      loadData(); // Reload tabel
-    } catch (e) {
-      alert("Gagal menolak: " + e.message);
-    }
-  };
+      await addDoc(collection(db, "timelines"), { name: name });
+      document.getElementById('new-timeline-name').value = '';
+      alert("Timeline berhasil ditambahkan!");
+      loadTimelines();
+    } catch (e) { alert("Error: " + e.message); }
+  });
 
-  // Logika Pindah Tab
+  document.getElementById('btn-add-country').addEventListener('click', async () => {
+    const timelineId = document.getElementById('select-timeline').value;
+    const timelineName = document.getElementById('select-timeline').options[document.getElementById('select-timeline').selectedIndex]?.text;
+    const countryName = document.getElementById('new-country-name').value;
+
+    if (!timelineId || !countryName) return alert("Pilih timeline dan isi nama negara!");
+
+    try {
+      await addDoc(collection(db, "countries"), {
+        name: countryName,
+        timeline_id: timelineId,
+        timeline_name: timelineName,
+        status: 'available'
+      });
+      document.getElementById('new-country-name').value = '';
+      alert("Negara berhasil ditambahkan!");
+      loadCountries();
+    } catch (e) { alert("Error: " + e.message); }
+  });
+
+  // --- TAB LOGIC ---
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      // Reset semua tab
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-
-      // Aktifkan tab yang diklik
       btn.classList.add('active');
       document.getElementById('tab-' + btn.dataset.target).style.display = 'block';
     });
