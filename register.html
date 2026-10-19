@@ -1,0 +1,130 @@
+---
+layout: default
+title: Pendaftaran Anggota — Grand Nations
+---
+
+<main class="wrap" style="padding-top: 140px; padding-bottom: 80px; flex: 1;">
+  <div class="page-head reveal">
+    <h1>Formulir<br>Anggota</h1>
+    <div class="idx">PENDAFTARAN KEANGGOTAAN BARU</div>
+  </div>
+
+  <!-- STATE: BELUM LOGIN -->
+  <div id="login-required-state" class="auth-box reveal" style="display:none;">
+    <div class="icon">🔒</div>
+    <h2>Akses Dibatasi</h2>
+    <p>Kamu harus login menggunakan akun Google terlebih dahulu sebelum mendaftar sebagai anggota.</p>
+    <p style="font-family:var(--mono); font-size:0.85rem; color:var(--ink);">Silakan klik tombol <strong>Login Google</strong> di pojok kanan atas.</p>
+  </div>
+
+  <!-- FORM PENDAFTARAN -->
+  <div id="form-container" class="reveal" style="display:none; background:var(--bg2); border:1px solid var(--line); padding:40px; max-width:800px; margin:0 auto;">
+    <form id="registration-form">
+      <div style="margin-bottom:20px;">
+        <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">NAMA LENGKAP</label>
+        <input type="text" id="full_name" required style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">TANGGAL LAHIR</label>
+        <input type="date" id="dob" required style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head); color-scheme: dark;">
+      </div>
+
+      <div style="margin-bottom:30px;">
+        <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">FOTO PROFIL (Max 2MB)</label>
+        <input type="file" id="profile_pic" accept="image/*" required style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
+      </div>
+
+      <div style="text-align:center;">
+        <button type="submit" id="submit-btn" class="btn solid" style="width:200px;">Daftar Anggota</button>
+      </div>
+      <p id="form-error" style="color:#ff4d4d; text-align:center; margin-top:15px; font-family:var(--mono); font-size:0.85rem; display:none;"></p>
+    </form>
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
+    authDomain: "grand-nations-bcf65.firebaseapp.com",
+    projectId: "grand-nations-bcf65",
+    storageBucket: "grand-nations-bcf65.firebasestorage.app",
+    messagingSenderId: "266950230750",
+    appId: "1:266950230750:web:60c88d8abae6590bd4384f"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  const loginRequiredState = document.getElementById('login-required-state');
+  const formContainer = document.getElementById('form-container');
+  const form = document.getElementById('registration-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const formError = document.getElementById('form-error');
+
+  let currentUser = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = user;
+      // Cek apakah user sudah terdaftar sebagai anggota di tabel "users"
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        window.location.href = '/profile.html'; // Jika sudah, ke profil
+      } else {
+        loginRequiredState.style.display = 'none';
+        formContainer.style.display = 'block';
+      }
+    } else {
+      formContainer.style.display = 'none';
+      loginRequiredState.style.display = 'block';
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    submitBtn.textContent = 'Memproses...';
+    submitBtn.disabled = true;
+    formError.style.display = 'none';
+
+    try {
+      const file = document.getElementById('profile_pic').files[0];
+      let photoURL = '';
+
+      if (file) {
+        const storageRef = ref(storage, 'avatars/' + currentUser.uid + '_' + file.name);
+        await uploadBytes(storageRef, file);
+        photoURL = await getDownloadURL(storageRef);
+      }
+
+      // Simpan ke tabel "users"
+      await setDoc(doc(db, "users", currentUser.uid), {
+        full_name: document.getElementById('full_name').value,
+        dob: document.getElementById('dob').value,
+        photo_url: photoURL,
+        created_at: serverTimestamp(),
+        email: currentUser.email
+      });
+
+      window.location.href = '/profile.html';
+
+    } catch (error) {
+      console.error(error);
+      formError.textContent = "Gagal mendaftar: " + error.message;
+      formError.style.display = 'block';
+      submitBtn.textContent = 'Daftar Anggota';
+      submitBtn.disabled = false;
+    }
+  });
+</script>
