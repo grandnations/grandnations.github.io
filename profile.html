@@ -3,13 +3,11 @@ layout: default
 title: Profil — Grand Nations
 ---
 
-<!-- CSS KHUSUS MODAL EDIT -->
 <style>
-  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.active { display: flex; }
-  .modal-content { background: var(--bg2); border: 1px solid var(--line-strong); padding: 40px; width: 100%; max-width: 500px; position: relative; border-radius: 4px; animation: modalIn 0.3s ease; }
-  @keyframes modalIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  .modal-close { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.8rem; color: var(--dim); transition: color 0.2s; }
+  .modal-content { background: var(--bg2); border: 1px solid var(--line-strong); padding: 40px; width: 100%; max-width: 500px; position: relative; border-radius: 4px; }
+  .modal-close { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.8rem; color: var(--dim); }
   .modal-close:hover { color: #fff; }
   .form-group { margin-bottom: 20px; }
   .form-group label { display: block; font-family: var(--mono); font-size: 0.8rem; color: var(--dim); margin-bottom: 8px; }
@@ -28,27 +26,16 @@ title: Profil — Grand Nations
 
   <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">Memuat data...</div>
 
-  <!-- STATE 1: BELUM LOGIN -->
   <div id="login-required-state" class="auth-box" style="display:none;">
-    <div class="icon">🔒</div>
-    <h2>Akses Dibatasi</h2>
-    <p>Kamu harus login menggunakan akun Google terlebih dahulu.</p>
-    <p style="font-family:var(--mono); font-size:0.85rem; color:var(--ink);">Silakan klik tombol <strong>Login Google</strong> di pojok kanan atas.</p>
+    <div class="icon">🔒</div><h2>Akses Dibatasi</h2><p>Kamu harus login menggunakan akun Google terlebih dahulu.</p>
   </div>
 
-  <!-- STATE 2: BELUM DAFTAR ANGGOTA -->
   <div id="empty-user-state" class="auth-box" style="display:none;">
-    <div class="icon">?</div>
-    <h2>Belum Terdaftar</h2>
-    <p>Kamu belum mendaftarkan diri sebagai anggota Grand Nations. Silakan isi formulir keanggotaan terlebih dahulu.</p>
-    <a href="/register.html" class="btn solid">Daftar Anggota</a>
+    <div class="icon">?</div><h2>Belum Terdaftar</h2><p>Kamu belum mendaftarkan diri sebagai anggota.</p><a href="/register.html" class="btn solid">Daftar Anggota</a>
   </div>
 
-  <!-- STATE 3: SUDAH DAFTAR ANGGOTA -->
   <div id="profile-state" style="display:none;">
     <div class="card-grid">
-      
-      <!-- Kiri: Kartu Anggota -->
       <div class="card-visual">
         <div class="flag-slot" id="flag-container" style="border-radius: 50%; width: 200px; height: 200px; margin: 0 auto 20px; overflow: hidden;">
           <span id="photo-placeholder" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">MEMUAT FOTO</span>
@@ -58,16 +45,10 @@ title: Profil — Grand Nations
         <div id="user-email-display" style="font-family:var(--mono); font-size:0.8rem; color:var(--faint); margin-bottom:15px;">email@gmail.com</div>
         <div style="font-family:var(--mono); font-size:0.75rem; color:var(--ink); border:1px solid var(--line); padding:4px 10px; display:inline-block; margin-bottom: 20px;">ANGGOTA RESMI</div>
         
-        <!-- TOMBOL EDIT PROFIL -->
         <button id="btn-edit-profile" class="btn solid" style="padding: 8px 20px; font-size: 0.8rem; width: 100%;">Edit Profil</button>
-
-        <!-- TOMBOL DASHBOARD ADMIN (Tersembunyi, hanya muncul untuk Admin) -->
-        <a href="/admin.html" id="btn-admin-panel" class="btn line" style="display: none; padding: 8px 20px; font-size: 0.8rem; width: 100%; margin-top: 10px; border-color: #ffc800; color: #ffc800; text-decoration: none; text-align: center;">
-          ⚡ Dashboard Admin
-        </a>
+        <a href="/admin.html" id="btn-admin-panel" class="btn line" style="display: none; padding: 8px 20px; font-size: 0.8rem; width: 100%; margin-top: 10px; border-color: #ffc800; color: #ffc800; text-decoration: none; text-align: center;">⚡ Dashboard Admin</a>
       </div>
 
-      <!-- Kanan: Detail & Kartu Delegasi -->
       <div class="card-details" style="display:flex; flex-direction:column; gap:20px;">
         <div>
           <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DATA KEPENDUDUKAN</h3>
@@ -78,18 +59,22 @@ title: Profil — Grand Nations
           </div>
         </div>
 
-        <!-- Delegasi Negara -->
         <div>
           <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DELEGASI NEGARA</h3>
           
           <div id="no-nation-state" style="display:none; border:1px dashed var(--line-strong); padding:20px; text-align:center;">
-            <p style="color:var(--dim); font-size:0.9rem; margin-bottom:15px;">Kamu belum mendaftarkan negara untuk berpartisipasi dalam simulasi.</p>
+            <p style="color:var(--dim); font-size:0.9rem; margin-bottom:15px;">Kamu belum mendaftarkan negara.</p>
             <a href="/register-nation.html" class="btn solid" style="padding:10px 20px; font-size:0.85rem; display:inline-block; text-decoration:none;">Daftarkan Negara</a>
           </div>
 
           <div id="has-nation-state" style="display:none;">
-            <!-- Daftar negara akan di-render di sini -->
             <div id="nations-list-container"></div>
+            
+            <!-- TOMBOL DAFTAR ULANG (Hanya muncul jika semua ditolak) -->
+            <div id="re-apply-container" style="display:none; margin-top:20px; text-align:center; border-top:1px solid var(--line); padding-top:20px;">
+              <p style="color:#ff4d4d; font-size:0.9rem; margin-bottom:15px;">Semua pengajuan negaramu ditolak.</p>
+              <a href="/register-nation.html" class="btn solid" style="padding:10px 20px; font-size:0.85rem; display:inline-block; text-decoration:none; border-color:#ff4d4d; background:#ff4d4d; color:#fff;">Ajukan Ulang Pendaftaran</a>
+            </div>
           </div>
         </div>
       </div>
@@ -97,36 +82,20 @@ title: Profil — Grand Nations
   </div>
 </main>
 
-<!-- MODAL EDIT PROFIL -->
 <div id="edit-modal" class="modal-overlay">
   <div class="modal-content">
     <span class="modal-close" id="btn-close-modal">&times;</span>
     <h2 style="font-family:var(--head); font-weight:800; font-size:1.5rem; margin-bottom:20px;">Edit Profil</h2>
-    
     <form id="edit-form">
-      <div class="form-group">
-        <label>NAMA LENGKAP</label>
-        <input type="text" id="edit-name" required>
-      </div>
-      <div class="form-group">
-        <label>NOMOR WHATSAPP</label>
-        <input type="tel" id="edit-wa" required placeholder="08123456789">
-      </div>
-      <div class="form-group">
-        <label>TANGGAL LAHIR</label>
-        <input type="date" id="edit-dob" required style="color-scheme: dark;">
-      </div>
-      <div class="form-group">
-        <label>GANTI FOTO (Kosongkan jika tidak diubah)</label>
-        <input type="file" id="edit-photo" accept="image/*">
-      </div>
-      
+      <div class="form-group"><label>NAMA LENGKAP</label><input type="text" id="edit-name" required></div>
+      <div class="form-group"><label>NOMOR WHATSAPP</label><input type="tel" id="edit-wa" required></div>
+      <div class="form-group"><label>TANGGAL LAHIR</label><input type="date" id="edit-dob" required style="color-scheme: dark;"></div>
+      <div class="form-group"><label>GANTI FOTO (Kosongkan jika tidak diubah)</label><input type="file" id="edit-photo" accept="image/*"></div>
       <button type="submit" id="btn-save-edit" class="btn solid" style="width:100%; margin-top:10px;">Simpan Perubahan</button>
       <p id="edit-error" style="color:#ff4d4d; text-align:center; margin-top:10px; font-family:var(--mono); font-size:0.8rem; display:none;"></p>
     </form>
   </div>
 </div>
-
 
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
@@ -142,10 +111,8 @@ title: Profil — Grand Nations
     appId: "1:266950230750:web:60c88d8abae6590bd4384f"
   };
 
-  // --- KONFIGURASI CLOUDINARY ---
   const CLOUD_NAME = "s6xzozll"; 
   const UPLOAD_PRESET = "grand-nations-avatar"; 
-  // -----------------------------
 
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   const auth = getAuth(app);
@@ -156,7 +123,6 @@ title: Profil — Grand Nations
   const emptyUserState = document.getElementById('empty-user-state');
   const profileState = document.getElementById('profile-state');
 
-  // Elemen Modal
   const editModal = document.getElementById('edit-modal');
   const btnEditProfile = document.getElementById('btn-edit-profile');
   const btnCloseModal = document.getElementById('btn-close-modal');
@@ -169,30 +135,19 @@ title: Profil — Grand Nations
 
   onAuthStateChanged(auth, async (user) => {
     loading.style.display = 'none';
-    
     if (user) {
       currentUser = user;
       loginRequiredState.style.display = 'none';
       
-      // 1. Ambil Data Anggota
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
-
+      const userDocSnap = await getDoc(doc(db, "users", user.uid));
       if (userDocSnap.exists()) {
         currentUserData = userDocSnap.data();
         
-        // --- 2. LOGIKA CEK ADMIN ---
         try {
-          const adminDocRef = doc(db, "admins", user.email);
-          const adminDocSnap = await getDoc(adminDocRef);
-          if (adminDocSnap.exists()) {
-            document.getElementById('btn-admin-panel').style.display = 'block'; 
-          }
-        } catch (error) {
-          console.log("Bukan admin atau akses ditolak.");
-        }
+          const adminDocSnap = await getDoc(doc(db, "admins", user.email));
+          if (adminDocSnap.exists()) document.getElementById('btn-admin-panel').style.display = 'block'; 
+        } catch (error) { }
 
-        // Tampilkan Data ke Layar
         document.getElementById('user-name-display').textContent = currentUserData.full_name;
         document.getElementById('user-email-display').textContent = currentUserData.email;
         document.getElementById('user-wa-display').textContent = currentUserData.whatsapp || '-';
@@ -203,18 +158,11 @@ title: Profil — Grand Nations
           img.src = currentUserData.photo_url;
           img.style.display = 'block';
         }
+        if (currentUserData.dob) document.getElementById('user-dob-display').textContent = new Date(currentUserData.dob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+        if (currentUserData.created_at) document.getElementById('user-joined-display').textContent = currentUserData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        if (currentUserData.dob) {
-          document.getElementById('user-dob-display').textContent = new Date(currentUserData.dob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-        }
-        if (currentUserData.created_at) {
-          document.getElementById('user-joined-display').textContent = currentUserData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-        }
-
-        // 3. Cek Data Negara
-        const nationDocRef = doc(db, "registrations", user.uid);
-        const nationDocSnap = await getDoc(nationDocRef);
-
+        // CEK DATA NEGARA
+        const nationDocSnap = await getDoc(doc(db, "registrations", user.uid));
         if (nationDocSnap.exists()) {
           const nationData = nationDocSnap.data();
           document.getElementById('no-nation-state').style.display = 'none';
@@ -223,11 +171,14 @@ title: Profil — Grand Nations
           const listContainer = document.getElementById('nations-list-container');
           listContainer.innerHTML = `<div class="data-row" style="border-bottom:2px solid var(--line); margin-bottom:10px;"><span class="data-label">NAMA NEGARA</span><span class="data-label">STATUS</span></div>`;
           
+          let allRejected = true; // Anggap semua ditolak dulu
+
           if (nationData.nations && Array.isArray(nationData.nations)) {
             nationData.nations.forEach(nation => {
               let statusColor = '#ffc800'; 
               if (nation.status === 'approved') statusColor = '#00ff64';
               if (nation.status === 'rejected') statusColor = '#ff4d4d';
+              else allRejected = false; // Jika ada yg pending/approved, berarti tidak semua ditolak
 
               listContainer.innerHTML += `
                 <div class="nation-item">
@@ -237,17 +188,23 @@ title: Profil — Grand Nations
               `;
             });
           }
+
+          // Tampilkan tombol daftar ulang jika semua negara ditolak
+          if (allRejected && nationData.nations.length > 0) {
+            document.getElementById('re-apply-container').style.display = 'block';
+          } else {
+            document.getElementById('re-apply-container').style.display = 'none';
+          }
+
         } else {
           document.getElementById('no-nation-state').style.display = 'block';
           document.getElementById('has-nation-state').style.display = 'none';
         }
 
         profileState.style.display = 'block';
-
       } else {
         emptyUserState.style.display = 'block';
       }
-
     } else {
       loginRequiredState.style.display = 'block';
       emptyUserState.style.display = 'none';
@@ -255,7 +212,6 @@ title: Profil — Grand Nations
     }
   });
 
-  // --- LOGIKA MODAL EDIT ---
   btnEditProfile.addEventListener('click', () => {
     if (!currentUserData) return;
     document.getElementById('edit-name').value = currentUserData.full_name || '';
@@ -266,13 +222,8 @@ title: Profil — Grand Nations
     editModal.classList.add('active');
   });
 
-  btnCloseModal.addEventListener('click', () => {
-    editModal.classList.remove('active');
-  });
-
-  editModal.addEventListener('click', (e) => {
-    if (e.target === editModal) editModal.classList.remove('active');
-  });
+  btnCloseModal.addEventListener('click', () => editModal.classList.remove('active'));
+  editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.remove('active'); });
 
   editForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -291,43 +242,27 @@ title: Profil — Grand Nations
 
       if (file) {
         if (file.size > 2 * 1024 * 1024) throw new Error("Ukuran foto maksimal 2MB!");
-        
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', UPLOAD_PRESET);
-
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-          method: 'POST',
-          body: formData
-        });
-        
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
         const data = await response.json();
         if (!data.secure_url) throw new Error(data.error?.message || "Gagal upload foto");
         newPhotoURL = data.secure_url;
       }
 
-      // Update data di Firestore (Termasuk WhatsApp)
-      const userDocRef = doc(db, "users", currentUser.uid);
-      await updateDoc(userDocRef, {
-        full_name: newName,
-        whatsapp: newWa,
-        dob: newDob,
-        photo_url: newPhotoURL
-      });
+      await updateDoc(doc(db, "users", currentUser.uid), { full_name: newName, whatsapp: newWa, dob: newDob, photo_url: newPhotoURL });
 
-      // Update tampilan secara instan tanpa reload
       document.getElementById('user-name-display').textContent = newName;
       document.getElementById('user-wa-display').textContent = newWa;
       document.getElementById('user-dob-display').textContent = new Date(newDob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
       
       if (newPhotoURL) {
         document.getElementById('photo-placeholder').style.display = 'none';
-        const img = document.getElementById('profile-pic-display');
-        img.src = newPhotoURL;
-        img.style.display = 'block';
+        document.getElementById('profile-pic-display').src = newPhotoURL;
+        document.getElementById('profile-pic-display').style.display = 'block';
       }
 
-      // Update data cache lokal
       currentUserData.full_name = newName;
       currentUserData.whatsapp = newWa;
       currentUserData.dob = newDob;
@@ -335,9 +270,7 @@ title: Profil — Grand Nations
 
       editModal.classList.remove('active');
       alert("Profil berhasil diperbarui!");
-
     } catch (error) {
-      console.error(error);
       editError.textContent = "Gagal menyimpan: " + error.message;
       editError.style.display = 'block';
     } finally {
