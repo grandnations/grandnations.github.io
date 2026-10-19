@@ -193,7 +193,7 @@
 
   {% include header.html %}
 
-  <!-- SCRIPT INSTAN: Pasang tombol auth dari cache (localStorage) sebelum Firebase siap -->
+  <!-- SCRIPT INSTAN: Pasang tombol auth dari cache -->
   <script>
     (function () {
       var b = document.getElementById('auth-button');
@@ -201,15 +201,23 @@
       var cached = null;
       try { cached = localStorage.getItem('gn_logged_in'); } catch (e) {}
 
+      var onProfile = location.pathname.indexOf('profile') > -1;
+
       if (cached === '1') {
-        var onProfile = location.pathname.indexOf('profile') > -1;
         b.textContent = onProfile ? 'Logout' : 'Profil Saya';
         b.style.background = 'transparent';
         b.style.border = '1px solid #fff';
         b.style.color = '#fff';
         if (!onProfile) b.onclick = function () { location.href = '/profile.html'; };
+        b.style.visibility = 'visible'; // Hanya munculkan jika status login jelas
+      } else if (cached === '0') {
+        b.textContent = 'Login Google';
+        b.style.background = '#fff';
+        b.style.color = '#000';
+        b.style.border = 'none';
+        b.style.visibility = 'visible'; // Hanya munculkan jika status belum login jelas
       }
-      b.style.visibility = 'visible';
+      // Jika cached kosong (null), biarkan tetap hidden. Firebase yang akan memunculkannya.
     })();
   </script>
 
@@ -294,6 +302,7 @@
         authButton.style.color = '#000';
         authButton.onclick = loginWithGoogle;
       }
+      // Pastikan selalu muncul setelah Firebase selesai mengecek
       authButton.style.visibility = 'visible';
     });
   </script>
