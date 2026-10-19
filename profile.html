@@ -3,97 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profil Delegasi — Grand Nations</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<title>Kartu Delegasi — Grand Nations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #070707; --bg-soft: #0f0f0f; --ink: #f2f2ee; --ink-dim: #9b9b95;
-    --line: rgba(242,242,238,0.14); --glass: rgba(242,242,238,0.045);
-    --serif: 'Fraunces', serif; --sans: 'IBM Plex Sans', sans-serif; --mono: 'IBM Plex Mono', monospace;
+  :root{
+    --bg:#000;
+    --bg2:#0a0a0a;
+    --bg3:#121212;
+    --ink:#fff;
+    --dim:#a9a9a9;
+    --faint:#6a6a6a;
+    --line:rgba(255,255,255,.18);
+    --line-strong:rgba(255,255,255,.5);
+    --head:'Poppins',sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+    --maxw:1240px;
   }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans);
-    display: flex; flex-direction: column; min-height: 100vh;
-  }
-  header {
-    padding: 20px 28px; border-bottom: 1px solid var(--line);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .brand { font-family: var(--serif); font-size: 1.2rem; text-decoration: none; color: var(--ink); }
-  .btn {
-    background: transparent; color: var(--ink); border: 1px solid var(--line);
-    padding: 8px 16px; border-radius: 2px; cursor: pointer; font-family: var(--sans);
-    text-decoration: none; font-size: 0.85rem; transition: 0.2s;
-  }
-  .btn:hover { background: var(--ink); color: var(--bg); }
-  .btn-primary { background: var(--ink); color: var(--bg); border: none; font-weight: 600; }
-  .btn-primary:hover { opacity: 0.8; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--head); font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100vh; display:flex; flex-direction:column;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 32px; width:100%;}
+
+  /* ===== NAV (Sama persis dengan index) ===== */
+  header.nav{position:fixed; top:0; left:0; right:0; z-index:60; background:rgba(0,0,0,.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line);}
+  .nav-inner{max-width:1480px; margin:0 auto; padding:0 28px; height:64px; display:flex; align-items:center; justify-content:space-between; gap:20px;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.2rem; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap;}
+  .logo-slot{width:34px; height:34px; position:relative; flex-shrink:0;}
+  .logo-slot svg{width:100%; height:100%;}
+  nav.links{display:flex; gap:22px; align-items:center;}
+  nav.links a{text-decoration:none; font-size:.9rem; font-weight:500; color:#d6d6d6; padding:6px 0; border-bottom:2px solid transparent; transition:color .2s, border-color .2s; white-space:nowrap;}
+  nav.links a:hover, nav.links a.on{color:#fff; border-color:#fff;}
+  #auth-button{background:#fff; color:#000; border:none; padding:9px 18px; font-family:var(--head); font-weight:600; font-size:.82rem; cursor:pointer; transition:opacity .2s; white-space:nowrap;}
+  #auth-button:hover{opacity:.82;}
+  .nav-right{display:flex; align-items:center; gap:12px;}
+
+  /* ===== MAIN AREA ===== */
+  main{flex:1; padding-top:140px; padding-bottom:80px;}
   
-  .container {
-    flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px;
+  .page-head{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:50px; border-bottom:1px solid var(--line); padding-bottom:20px;}
+  .page-head h1{font-weight:800; text-transform:uppercase; font-size:clamp(2.5rem,6vw,4.5rem); line-height:1.05; letter-spacing:-.01em;}
+  .page-head .idx{font-family:var(--mono); font-size:.76rem; color:var(--faint); letter-spacing:.08em;}
+
+  /* ===== STATE 1: BELUM DAFTAR ===== */
+  #empty-state{
+    border:1px solid var(--line); background:var(--bg2); padding:60px 30px; text-align:center;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:400px;
   }
-  .card {
-    background: var(--glass); border: 1px solid var(--line); padding: 40px;
-    border-radius: 4px; width: 100%; max-width: 500px; text-align: center;
-    backdrop-filter: blur(10px);
+  #empty-state .icon{width:80px; height:80px; border:2px dashed var(--line-strong); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:24px; font-family:var(--mono); font-size:2rem; color:var(--faint);}
+  #empty-state h2{font-weight:800; text-transform:uppercase; font-size:clamp(1.8rem,4vw,2.5rem); margin-bottom:14px;}
+  #empty-state p{color:var(--dim); max-width:500px; margin:0 auto 32px;}
+  .btn{display:inline-block; padding:14px 30px; font-weight:600; font-size:.92rem; text-decoration:none; border:1px solid #fff; transition:all .2s; letter-spacing:.03em; cursor:pointer;}
+  .btn.solid{background:#fff; color:#000;}
+  .btn.solid:hover{background:transparent; color:#fff;}
+
+  /* ===== STATE 2: SUDAH DAFTAR (KARTU) ===== */
+  #profile-state{display:none;}
+  .card-grid{display:grid; grid-template-columns:360px 1fr; gap:1px; background:var(--line); border:1px solid var(--line);}
+  
+  /* Visual (Bendera) */
+  .card-visual{background:var(--bg2); padding:30px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative;}
+  .flag-slot{width:100%; aspect-ratio:3/2; border:1px solid var(--line-strong); position:relative; background:repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 10px, transparent 10px 20px); margin-bottom:20px; display:flex; align-items:center; justify-content:center;}
+  .flag-slot span{font-family:var(--mono); font-size:.7rem; color:var(--faint);}
+  .flag-slot img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0;}
+
+  /* Detail (Data) */
+  .card-details{background:var(--bg2); padding:40px;}
+  .status-badge{display:inline-block; font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; padding:6px 12px; border:1px solid; margin-bottom:24px; text-transform:uppercase;}
+  .status-approved{border-color:#00ff64; color:#00ff64; background:rgba(0,255,100,.05);}
+  .status-pending{border-color:#ffc800; color:#ffc800; background:rgba(255,200,0,.05);}
+  
+  .nation-name{font-weight:800; font-size:clamp(2rem,4vw,3.5rem); line-height:1.1; margin-bottom:30px;}
+  
+  .data-list{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line);}
+  .data-row{display:flex; justify-content:space-between; padding:16px 0; border-bottom:1px solid var(--line); align-items:center;}
+  .data-label{font-family:var(--mono); font-size:.78rem; color:var(--dim); letter-spacing:.08em;}
+  .data-value{font-weight:600; font-size:1.1rem; text-align:right;}
+
+  /* ===== FOOTER ===== */
+  footer{padding:40px 0; background:#000; border-top:1px solid var(--line); margin-top:auto;}
+  .foot-bottom{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-family:var(--mono); font-size:.72rem; color:var(--faint);}
+  
+  @media (max-width:860px){
+    .card-grid{grid-template-columns:1fr;}
+    .card-visual{padding:40px;}
+    .flag-slot{max-width:300px; margin:0 auto 20px;}
+    nav.links{display:none;}
   }
-  .kicker { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-dim); margin-bottom: 10px; letter-spacing: 0.1em; }
-  h1 { font-family: var(--serif); font-size: 2rem; margin: 0 0 20px; }
-  .data-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 12px 0; }
-  .data-row:last-child { border-bottom: none; }
-  .data-label { color: var(--ink-dim); }
-  .status-badge {
-    display: inline-block; padding: 4px 10px; font-family: var(--mono); font-size: 0.7rem;
-    border-radius: 2px; margin-top: 20px;
-  }
-  .status-pending { background: rgba(255, 200, 0, 0.1); color: #ffc800; border: 1px solid #ffc800; }
-  .status-approved { background: rgba(0, 255, 100, 0.1); color: #00ff64; border: 1px solid #00ff64; }
 </style>
 </head>
 <body>
 
-<header>
-  <a href="index.html" class="brand">Grand Nations</a>
-  <button id="logout-btn" class="btn">Logout</button>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="logo-slot">
+        <svg viewBox="0 0 100 100" fill="none" stroke="#fff" aria-hidden="true">
+          <circle cx="50" cy="50" r="30" stroke-width="3"/>
+          <ellipse cx="50" cy="50" rx="12" ry="30" stroke-width="2"/>
+          <path d="M20 50h60M50 20v60" stroke-width="2"/>
+        </svg>
+      </span>
+      Grand Nations
+    </a>
+    <nav class="links">
+      <a href="index.html">Beranda</a>
+      <a href="index.html#sejarah">Sejarah</a>
+      <a href="index.html#struktur">Struktur</a>
+      <a href="index.html#negara">Delegasi</a>
+      <a href="profile.html" class="on">Kartu Saya</a>
+    </nav>
+    <div class="nav-right">
+      <button id="auth-button">Logout</button>
+    </div>
+  </div>
 </header>
 
-<div class="container">
-  <!-- Loading State -->
-  <div id="loading" style="color: var(--ink-dim); font-family: var(--mono);">Memuat data profil...</div>
-
-  <!-- State 1: Belum Daftar Negara -->
-  <div id="empty-state" class="card" style="display: none;">
-    <div class="kicker">DELEGASI BELUM TERDAFTAR</div>
-    <h1>Selamat Datang, <span id="user-name-display"></span></h1>
-    <p style="color: var(--ink-dim); margin-bottom: 30px;">
-      Kamu belum mendaftarkan negara apa pun untuk bergabung dalam simulasi. Daftarkan negaramu sekarang.
-    </p>
-    <a href="register.html" class="btn btn-primary">Daftarkan Negara</a>
+<main class="wrap">
+  
+  <div class="page-head reveal">
+    <h1>Profil<br>Delegasi</h1>
+    <div class="idx">DASHBOARD ANGGOTA</div>
   </div>
 
-  <!-- State 2: Sudah Daftar Negara -->
-  <div id="profile-state" class="card" style="display: none;">
-    <div class="kicker">KARTU DELEGASI RESMI</div>
-    <h1 id="nation-name-display">Nama Negara</h1>
-    
-    <div class="data-row">
-      <span class="data-label">Pemimpin</span>
-      <span id="leader-name-display">-</span>
-    </div>
-    <div class="data-row">
-      <span class="data-label">Ideologi</span>
-      <span id="ideology-display">-</span>
-    </div>
-    
-    <div id="status-badge" class="status-badge">STATUS</div>
+  <!-- LOADING -->
+  <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">
+    Memuat data kementerian luar negeri...
   </div>
-</div>
 
+  <!-- STATE 1: BELUM DAFTAR -->
+  <div id="empty-state" class="reveal" style="display:none;">
+    <div class="icon">?</div>
+    <h2>Belum Ada Negara</h2>
+    <p>Kamu belum mendaftarkan negara apa pun untuk bergabung dalam simulasi Grand Nations. Silakan isi formulir pendaftaran untuk memulai perjalanan diplomasimu.</p>
+    <a href="register.html" class="btn solid">Daftarkan Negara Sekarang</a>
+  </div>
+
+  <!-- STATE 2: SUDAH DAFTAR -->
+  <div id="profile-state" class="reveal">
+    <div class="card-grid">
+      
+      <!-- Kiri: Bendera -->
+      <div class="card-visual">
+        <div class="flag-slot" id="flag-container">
+          <span>BELUM ADA BENDERA</span>
+        </div>
+        <div style="font-family:var(--mono); font-size:0.75rem; color:var(--faint); letter-spacing:0.1em;">
+          DELEGASI RESMI
+        </div>
+      </div>
+
+      <!-- Kanan: Data -->
+      <div class="card-details">
+        <div id="status-badge" class="status-badge">PENDING</div>
+        
+        <h2 id="nation-name-display" class="nation-name">Nama Negara</h2>
+        
+        <div class="data-list">
+          <div class="data-row">
+            <span class="data-label">PEMIMPIN</span>
+            <span id="leader-name-display" class="data-value">-</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">IDEOLOGI</span>
+            <span id="ideology-display" class="data-value">-</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">TERDAFTAR PADA</span>
+            <span id="date-display" class="data-value">-</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-bottom">
+      <span>© 2026 GRAND NATIONS — ROLEPLAY COMMUNITY</span>
+      <span>DIRANCANG UNTUK SIMULASI GLOBAL</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= FIREBASE LOGIC ================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
+  // Konfigurasi Firebase kamu
   const firebaseConfig = {
     apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
     authDomain: "grand-nations-bcf65.firebaseapp.com",
@@ -107,48 +211,53 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  const authButton = document.getElementById('auth-button');
   const loading = document.getElementById('loading');
   const emptyState = document.getElementById('empty-state');
   const profileState = document.getElementById('profile-state');
 
-  // Cek Status Login
+  // 1. Cek Status Login
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // Jika login, ambil nama panggilan
-      const userName = user.displayName || user.email.split('@')[0];
-      document.getElementById('user-name-display').textContent = userName;
-
-      // Ambil data dari tabel "registrations" berdasarkan UID user
+      // Ambil data dari Firestore (Tabel: registrations)
       const docRef = doc(db, "registrations", user.uid);
       const docSnap = await getDoc(docRef);
 
       loading.style.display = 'none';
 
       if (docSnap.exists()) {
-        // Jika data negara ditemukan
+        // JIKA SUDAH DAFTAR
         const data = docSnap.data();
+        
         document.getElementById('nation-name-display').textContent = data.nation_name;
         document.getElementById('leader-name-display').textContent = data.leader_name;
         document.getElementById('ideology-display').textContent = data.ideology || '-';
         
+        // Format Tanggal
+        if (data.created_at) {
+          const date = data.created_at.toDate();
+          document.getElementById('date-display').textContent = date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // Status Badge
         const badge = document.getElementById('status-badge');
-        badge.textContent = data.status.toUpperCase();
-        badge.classList.add(data.status === 'approved' ? 'status-approved' : 'status-pending');
+        badge.textContent = data.status === 'approved' ? 'DISETUJUI' : 'MENUNGGU REVIEW';
+        badge.className = 'status-badge ' + (data.status === 'approved' ? 'status-approved' : 'status-pending');
 
         profileState.style.display = 'block';
       } else {
-        // Jika tidak ada data (belum daftar)
+        // JIKA BELUM DAFTAR
         emptyState.style.display = 'block';
       }
 
     } else {
-      // Jika tidak login, tendang ke halaman utama
+      // Jika belum login, tendang ke beranda
       window.location.href = 'index.html';
     }
   });
 
-  // Tombol Logout
-  document.getElementById('logout-btn').addEventListener('click', () => {
+  // 2. Tombol Logout
+  authButton.addEventListener('click', () => {
     signOut(auth).then(() => {
       window.location.href = 'index.html';
     });
