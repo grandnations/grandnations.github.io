@@ -290,7 +290,12 @@
       <a href="#negara">Negara</a>
       <a href="#peristiwa">Peristiwa</a>
     </nav>
-    <div class="nav-status"><span class="dot"></span>ROLEPLAY AKTIF</div>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div class="nav-status"><span class="dot"></span>ROLEPLAY AKTIF</div>
+      <button id="auth-button" style="background:var(--ink); color:var(--bg); border:none; padding:8px 16px; font-family:var(--sans); font-weight:600; cursor:pointer; border-radius:2px; font-size:0.85rem; transition:opacity 0.2s;">
+        Login Google
+      </button>
+    </div>
   </div>
 </header>
 
@@ -679,31 +684,63 @@
   })();
 </script>
 
-<!-- ================= SUPABASE INTEGRATION ================= -->
+<!-- ================= SUPABASE INTEGRATION (UPGRADE AUTH) ================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // Inisialisasi Supabase
   const SUPABASE_URL = 'https://meftvtzaprefskfzomz.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZnR2dHphcHJyZWZza2Z6b216Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzNjQ5NTEsImV4cCI6MjEwNzk0MDk1MX0.dpQ-LO7cCtJQ2OeqQefF6IRrWIAyFyWDwZR7dFzno9Y';
 
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  
-  console.log("Supabase Client berhasil diinisialisasi!");
+  const authButton = document.getElementById('auth-button');
 
-  // Fungsi untuk ngetes koneksi ke database
-  async function cekKoneksi() {
-    const { data, error } = await supabaseClient.from('registrations').select('*').limit(1);
+  // 1. Fungsi Login Google
+  async function loginWithGoogle() {
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin // Kembali ke web setelah login
+      }
+    });
+    if (error) console.error("Login Error:", error.message);
+  }
+
+  // 2. Fungsi Logout
+  async function logout() {
+    await supabaseClient.auth.signOut();
+    window.location.reload();
+  }
+
+  // 3. Cek Status Login Saat Web Dibuka
+  async function checkUser() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
     
-    if (error) {
-      console.error("❌ Gagal koneksi ke database:", error.message);
+    if (session) {
+      // Jika sudah login
+      const userEmail = session.user.email;
+      authButton.textContent = 'Logout (' + userEmail.split('@')[0] + ')';
+      authButton.style.background = 'transparent';
+      authButton.style.border = '1px solid var(--ink)';
+      authButton.style.color = 'var(--ink)';
+      authButton.onclick = logout;
     } else {
-      console.log("✅ Sukses! Web sudah terhubung ke tabel registrations. Data:", data);
+      // Jika belum login
+      authButton.textContent = 'Login Google';
+      authButton.style.background = 'var(--ink)';
+      authButton.style.color = 'var(--bg)';
+      authButton.style.border = 'none';
+      authButton.onclick = loginWithGoogle;
     }
   }
-  
-  cekKoneksi();
+
+  // Jalankan pengecekan pertama kali
+  checkUser();
+
+  // Pantau perubahan (misal saat redirect balik dari halaman Google)
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    checkUser();
+  });
 </script>
-<!-- ======================================================== -->
+<!-- =================================================================== -->
 
 </body>
 </html>
