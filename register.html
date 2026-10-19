@@ -9,11 +9,19 @@ title: Pendaftaran Anggota — Grand Nations
     <div class="idx">PENDAFTARAN KEANGGOTAAN BARU</div>
   </div>
 
+  <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">Memeriksa data...</div>
+
   <!-- STATE: BELUM LOGIN -->
   <div id="login-required-state" class="auth-box" style="display:none;">
-    <div class="icon">🔒</div>
-    <h2>Akses Dibatasi</h2>
-    <p>Kamu harus login menggunakan akun Google terlebih dahulu sebelum mendaftar sebagai anggota.</p>
+    <div class="icon">🔒</div><h2>Akses Dibatasi</h2><p>Kamu harus login menggunakan akun Google terlebih dahulu sebelum mendaftar sebagai anggota.</p>
+  </div>
+
+  <!-- STATE: SUDAH TERDAFTAR (Mencegah Redirect Loop) -->
+  <div id="already-registered-state" class="auth-box" style="display:none;">
+    <div class="icon" style="color: #00ff64; border-color: #00ff64;">✓</div>
+    <h2>Sudah Terdaftar</h2>
+    <p>Data keanggotaanmu sudah ada di sistem Grand Nations. Kamu tidak perlu mendaftar lagi.</p>
+    <a href="/profile.html" class="btn solid">Kembali ke Profil</a>
   </div>
 
   <!-- FORM PENDAFTARAN -->
@@ -69,7 +77,9 @@ title: Pendaftaran Anggota — Grand Nations
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  const loading = document.getElementById('loading');
   const loginRequiredState = document.getElementById('login-required-state');
+  const alreadyRegisteredState = document.getElementById('already-registered-state');
   const formContainer = document.getElementById('form-container');
   const form = document.getElementById('registration-form');
   const submitBtn = document.getElementById('submit-btn');
@@ -80,17 +90,34 @@ title: Pendaftaran Anggota — Grand Nations
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
       
-      if (docSnap.exists()) {
-        window.location.href = '/profile.html';
-      } else {
-        loginRequiredState.style.display = 'none';
+      try {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        loading.style.display = 'none';
+
+        if (docSnap.exists()) {
+          // JIKA SUDAH ADA DATANYA, TAMPILKAN PESAN INI (Bukan redirect)
+          loginRequiredState.style.display = 'none';
+          formContainer.style.display = 'none';
+          alreadyRegisteredState.style.display = 'block'; 
+        } else {
+          // JIKA BELUM ADA, TAMPILKAN FORM
+          loginRequiredState.style.display = 'none';
+          alreadyRegisteredState.style.display = 'none';
+          formContainer.style.display = 'block';
+        }
+      } catch (error) {
+        loading.style.display = 'none';
+        console.error(error);
+        // Jika error database, tampilkan form saja agar user bisa coba daftar
         formContainer.style.display = 'block';
       }
+
     } else {
+      loading.style.display = 'none';
       formContainer.style.display = 'none';
+      alreadyRegisteredState.style.display = 'none';
       loginRequiredState.style.display = 'block';
     }
   });
@@ -128,10 +155,9 @@ title: Pendaftaran Anggota — Grand Nations
         photoURL = data.secure_url;
       }
 
-      // Simpan ke tabel users, termasuk WhatsApp
       await setDoc(doc(db, "users", currentUser.uid), {
         full_name: document.getElementById('full_name').value,
-        whatsapp: document.getElementById('whatsapp').value, // <-- Disimpan di sini
+        whatsapp: document.getElementById('whatsapp').value,
         dob: document.getElementById('dob').value,
         photo_url: photoURL,
         created_at: serverTimestamp(),
