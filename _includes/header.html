@@ -1,0 +1,24 @@
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/index.html">
+      <span class="logo-slot">
+        <img src="/assets/img/logogn.jpeg" alt="Logo" onerror="this.parentElement.classList.add('missing')">
+        <svg viewBox="0 0 100 100" fill="none" stroke="#fff" aria-hidden="true"><circle cx="50" cy="50" r="30" stroke-width="3"/><ellipse cx="50" cy="50" rx="12" ry="30" stroke-width="2"/><path d="M20 50h60M50 20v60" stroke-width="2"/></svg>
+      </span>
+      Grand Nations
+    </a>
+    <nav class="links" id="navLinks">
+      <a href="/index.html">Beranda</a>
+      <a href="/index.html#sejarah">Sejarah</a>
+      <a href="/index.html#struktur">Struktur</a>
+      <a href="/index.html#negara">Delegasi</a>
+      <a href="/profile.html" class="{% if page.url contains 'profile' %}on{% endif %}">Kartu Saya</a>
+    </nav>
+    <div class="nav-right">
+      <button id="auth-button">Login Google</button>
+      <button class="burger" id="burger" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <!-- Progress bar khusus halaman index -->
+  <div class="progress" id="progress"></div>
+</header>
