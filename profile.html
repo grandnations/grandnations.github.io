@@ -14,16 +14,24 @@ title: Kartu Delegasi — Grand Nations
     Memuat data kementerian luar negeri...
   </div>
 
-  <!-- STATE 1: BELUM DAFTAR -->
-  <div id="empty-state" class="reveal" style="display:none;">
-    <div class="icon">?</div>
-    <h2>Belum Ada Negara</h2>
-    <p>Kamu belum mendaftarkan negara apa pun untuk bergabung dalam simulasi Grand Nations. Silakan isi formulir pendaftaran untuk memulai perjalanan diplomasimu.</p>
+  <!-- STATE 1: BELUM LOGIN -->
+  <div id="login-required-state" class="reveal" style="display:none; border:1px solid var(--line); background:var(--bg2); padding:60px 30px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:400px;">
+    <div class="icon" style="width:80px; height:80px; border:2px dashed var(--line-strong); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:24px; font-family:var(--mono); font-size:2rem; color:var(--faint);">🔒</div>
+    <h2 style="font-weight:800; text-transform:uppercase; font-size:clamp(1.8rem,4vw,2.5rem); margin-bottom:14px;">Akses Dibatasi</h2>
+    <p style="color:var(--dim); max-width:500px; margin:0 auto 32px;">Kamu harus login menggunakan akun Google terlebih dahulu untuk melihat Kartu Delegasi dan mendaftarkan negara.</p>
+    <p style="font-family:var(--mono); font-size:0.85rem; color:var(--ink);">Silakan klik tombol <strong>Login Google</strong> di pojok kanan atas.</p>
+  </div>
+
+  <!-- STATE 2: BELUM DAFTAR NEGARA -->
+  <div id="empty-state" class="reveal" style="display:none; border:1px solid var(--line); background:var(--bg2); padding:60px 30px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:400px;">
+    <div class="icon" style="width:80px; height:80px; border:2px dashed var(--line-strong); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:24px; font-family:var(--mono); font-size:2rem; color:var(--faint);">?</div>
+    <h2 style="font-weight:800; text-transform:uppercase; font-size:clamp(1.8rem,4vw,2.5rem); margin-bottom:14px;">Belum Ada Negara</h2>
+    <p style="color:var(--dim); max-width:500px; margin:0 auto 32px;">Kamu belum mendaftarkan negara apa pun untuk bergabung dalam simulasi Grand Nations. Silakan isi formulir pendaftaran untuk memulai perjalanan diplomasimu.</p>
     <a href="/register.html" class="btn solid">Daftarkan Negara Sekarang</a>
   </div>
 
-  <!-- STATE 2: SUDAH DAFTAR -->
-  <div id="profile-state" class="reveal">
+  <!-- STATE 3: SUDAH DAFTAR -->
+  <div id="profile-state" class="reveal" style="display:none;">
     <div class="card-grid">
       <!-- Kiri: Bendera -->
       <div class="card-visual">
@@ -62,22 +70,26 @@ title: Kartu Delegasi — Grand Nations
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
   
-  // Panggil auth yang sudah diinisialisasi di layout
   const auth = getAuth();
   const db = getFirestore();
 
   const loading = document.getElementById('loading');
+  const loginRequiredState = document.getElementById('login-required-state');
   const emptyState = document.getElementById('empty-state');
   const profileState = document.getElementById('profile-state');
 
   onAuthStateChanged(auth, async (user) => {
+    loading.style.display = 'none'; // Sembunyikan loading
+    
     if (user) {
+      // JIKA SUDAH LOGIN
+      loginRequiredState.style.display = 'none';
+      
       const docRef = doc(db, "registrations", user.uid);
       const docSnap = await getDoc(docRef);
 
-      loading.style.display = 'none';
-
       if (docSnap.exists()) {
+        // JIKA SUDAH DAFTAR NEGARA
         const data = docSnap.data();
         
         document.getElementById('nation-name-display').textContent = data.nation_name;
@@ -95,8 +107,15 @@ title: Kartu Delegasi — Grand Nations
 
         profileState.style.display = 'block';
       } else {
+        // JIKA BELUM DAFTAR NEGARA
         emptyState.style.display = 'block';
       }
+
+    } else {
+      // JIKA BELUM LOGIN
+      loginRequiredState.style.display = 'block';
+      emptyState.style.display = 'none';
+      profileState.style.display = 'none';
     }
   });
 </script>
