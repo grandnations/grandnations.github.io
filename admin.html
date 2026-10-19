@@ -194,34 +194,40 @@ title: Dashboard Admin — Grand Nations
       const docSnap = await getDoc(docRef);
       let data = docSnap.data();
 
+      // 1. Ubah status spesifik negara di array pendaftaran member
       data.nations[nationIndex].status = newStatus;
       const allProcessed = data.nations.every(n => n.status !== 'pending');
       
       let updateData = { nations: data.nations };
       
       if (allProcessed) {
-        // Jika semua sudah diproses, cek apakah ada yang di-approve
+        // Jika semua diproses, cek apakah ada yang disetujui
         const anyApproved = data.nations.some(n => n.status === 'approved');
         updateData.status = anyApproved ? 'approved' : 'rejected';
       }
 
       await updateDoc(docRef, updateData);
 
+      // 2. Ubah status di tabel countries (Agar tidak muncul lagi di dropdown)
       const targetNationName = data.nations[nationIndex].name;
       const q = query(collection(db, "countries"), where("name", "==", targetNationName));
       const countrySnap = await getDocs(q);
       
-      countrySnap.forEach(async (cDoc) => {
+      // PERBAIKAN: Gunakan for...of agar sistem menunggu proses update selesai
+      for (const cDoc of countrySnap.docs) {
         await updateDoc(doc(db, "countries", cDoc.id), { 
           status: newStatus === 'approved' ? 'claimed' : 'available' 
         });
-      });
+      }
 
       alert(`Negara ${targetNationName} berhasil di-${newStatus === 'approved' ? 'setujui' : 'tolak'}!`);
+      
+      // 3. Refresh tampilan
       loadRequests(); 
       loadCountries(); 
 
     } catch (e) {
+      console.error(e);
       alert("Gagal memproses: " + e.message);
     }
   };
