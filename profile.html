@@ -3,7 +3,7 @@ layout: default
 title: Profil — Grand Nations
 ---
 
-<!-- CSS KHUSUS MODAL EDIT (Diletakkan di sini agar rapi) -->
+<!-- CSS KHUSUS MODAL EDIT -->
 <style>
   .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -73,7 +73,7 @@ title: Profil — Grand Nations
         <button id="btn-edit-profile" class="btn solid" style="padding: 8px 20px; font-size: 0.8rem; width: 100%;">Edit Profil</button>
 
         <!-- TOMBOL DASHBOARD ADMIN (Tersembunyi, hanya muncul untuk Admin) -->
-        <a href="/admin.html" id="btn-admin-panel" class="btn line" style="display: none; padding: 8px 20px; font-size: 0.8rem; width: 100%; margin-top: 10px; border-color: #ffc800; color: #ffc800;">
+        <a href="/admin.html" id="btn-admin-panel" class="btn line" style="display: none; padding: 8px 20px; font-size: 0.8rem; width: 100%; margin-top: 10px; border-color: #ffc800; color: #ffc800; text-decoration: none;">
           ⚡ Dashboard Admin
         </a>
       </div>
@@ -92,11 +92,14 @@ title: Profil — Grand Nations
         <div>
           <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DELEGASI NEGARA</h3>
           
+          <!-- JIKA BELUM PUNYA NEGARA -->
           <div id="no-nation-state" style="display:none; border:1px dashed var(--line-strong); padding:20px; text-align:center;">
             <p style="color:var(--dim); font-size:0.9rem; margin-bottom:15px;">Kamu belum mendaftarkan negara untuk berpartisipasi dalam simulasi.</p>
-            <button class="btn solid" onclick="alert('Fitur pendaftaran negara akan segera hadir!')" style="padding:10px 20px; font-size:0.85rem;">Daftarkan Negara</button>
+            <!-- TOMBOL DIPERBAIKI: Mengarah ke register-nation.html -->
+            <a href="/register-nation.html" class="btn solid" style="padding:10px 20px; font-size:0.85rem; display:inline-block; text-decoration:none;">Daftarkan Negara</a>
           </div>
 
+          <!-- JIKA SUDAH PUNYA NEGARA -->
           <div id="has-nation-state" style="display:none;">
             <div class="data-list">
               <div class="data-row"><span class="data-label">NAMA NEGARA</span><span id="nation-name-display" class="data-value" style="color:#00ff64;">-</span></div>
@@ -191,7 +194,7 @@ title: Profil — Grand Nations
       if (userDocSnap.exists()) {
         currentUserData = userDocSnap.data();
         
-                // --- 2. LOGIKA CEK ADMIN (Dengan pengaman try-catch) ---
+        // --- 2. LOGIKA CEK ADMIN (Dengan pengaman try-catch) ---
         try {
           const adminDocRef = doc(db, "admins", user.email);
           const adminDocSnap = await getDoc(adminDocRef);
@@ -203,7 +206,7 @@ title: Profil — Grand Nations
           console.log("Bukan admin atau akses ditolak, lanjut memuat profil biasa.");
         }
         // ---------------------------------------------------------------------
-        
+
         // Tampilkan Data ke Layar
         document.getElementById('user-name-display').textContent = currentUserData.full_name;
         document.getElementById('user-email-display').textContent = currentUserData.email;
@@ -260,10 +263,9 @@ title: Profil — Grand Nations
   // --- LOGIKA MODAL EDIT ---
   btnEditProfile.addEventListener('click', () => {
     if (!currentUserData) return;
-    // Isi form dengan data saat ini
     document.getElementById('edit-name').value = currentUserData.full_name || '';
     document.getElementById('edit-dob').value = currentUserData.dob || '';
-    document.getElementById('edit-photo').value = ''; // Reset input file
+    document.getElementById('edit-photo').value = ''; 
     editError.style.display = 'none';
     editModal.classList.add('active');
   });
@@ -272,7 +274,6 @@ title: Profil — Grand Nations
     editModal.classList.remove('active');
   });
 
-  // Tutup modal jika klik di luar kotak
   editModal.addEventListener('click', (e) => {
     if (e.target === editModal) editModal.classList.remove('active');
   });
@@ -289,9 +290,8 @@ title: Profil — Grand Nations
       const newName = document.getElementById('edit-name').value;
       const newDob = document.getElementById('edit-dob').value;
       const file = document.getElementById('edit-photo').files[0];
-      let newPhotoURL = currentUserData.photo_url; // Gunakan foto lama secara default
+      let newPhotoURL = currentUserData.photo_url;
 
-      // Jika user upload foto baru
       if (file) {
         if (file.size > 2 * 1024 * 1024) throw new Error("Ukuran foto maksimal 2MB!");
         
@@ -309,7 +309,6 @@ title: Profil — Grand Nations
         newPhotoURL = data.secure_url;
       }
 
-      // Update data di Firestore
       const userDocRef = doc(db, "users", currentUser.uid);
       await updateDoc(userDocRef, {
         full_name: newName,
@@ -317,7 +316,6 @@ title: Profil — Grand Nations
         photo_url: newPhotoURL
       });
 
-      // Update tampilan secara instan tanpa reload
       document.getElementById('user-name-display').textContent = newName;
       document.getElementById('user-dob-display').textContent = new Date(newDob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
       
@@ -328,12 +326,10 @@ title: Profil — Grand Nations
         img.style.display = 'block';
       }
 
-      // Update data cache lokal
       currentUserData.full_name = newName;
       currentUserData.dob = newDob;
       currentUserData.photo_url = newPhotoURL;
 
-      // Tutup modal
       editModal.classList.remove('active');
       alert("Profil berhasil diperbarui!");
 
