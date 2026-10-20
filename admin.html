@@ -519,27 +519,22 @@ title: Dashboard Admin — Grand Nations
     btnConfirmTimeskip.disabled = true;
 
     try {
-      // 1. Hapus semua data pendaftaran anggota (klaim negara lama hilang)
-      const regSnap = await getDocs(collection(db, "registrations"));
-      for (const docSnap of regSnap.docs) {
-        await deleteDoc(doc(db, "registrations", docSnap.id));
-      }
-
-      // 2. Kembalikan semua negara berstatus 'claimed' menjadi 'available'
-      const countrySnap = await getDocs(collection(db, "countries"));
-      for (const cDoc of countrySnap.docs) {
-        if (cDoc.data().status === 'claimed') {
-          await updateDoc(doc(db, "countries", cDoc.id), { status: 'available' });
-        }
-      }
-
-      // 3. Set timeline baru sebagai aktif
+      // 1. Ubah config Timeline Aktif ke timeline baru
       await setDoc(doc(db, "config", "timeline"), { 
         active_id: newTimelineId, 
         active_name: newTimelineName 
       });
 
-      alert(`⏳ TIMESKIP BERHASIL! Dunia telah berubah ke era ${newTimelineName}. Semua anggota harus mendaftarkan negara mereka kembali.`);
+      // 2. Update timeline_id di semua pendaftaran anggota
+      const regSnap = await getDocs(collection(db, "registrations"));
+      let updatedCount = 0;
+      
+      for (const docSnap of regSnap.docs) {
+        await updateDoc(doc(db, "registrations", docSnap.id), { timeline_id: newTimelineId });
+        updatedCount++;
+      }
+
+      alert(`⏳ TIMESKIP BERHASIL! Dunia telah berubah ke era ${newTimelineName}. ${updatedCount} pendaftaran negara telah dipindahkan ke era baru.`);
       timeskipModal.classList.remove('active');
       
       loadRequests(); loadCountries(); loadTimelines();
