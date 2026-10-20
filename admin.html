@@ -583,4 +583,32 @@ title: Dashboard Admin — Grand Nations
       
       let movedCount = 0;
       for (const cDoc of oldCountriesSnap.docs) {
-        await update
+        await updateDoc(doc(db, "countries", cDoc.id), { 
+          timeline_id: newTimelineId,
+          timeline_name: newTimelineName
+        });
+        movedCount++;
+      }
+
+      alert(`⏳ TIMESKIP BERHASIL!\n\nDunia telah berubah ke era ${newTimelineName}. Sebanyak ${movedCount} negara telah dipindahkan ke era baru. Semua member tetap memegang negaranya masing-masing.`);
+      timeskipModal.classList.remove('active');
+      
+      loadRequests(); loadCountries(); loadTimelines();
+    } catch (error) {
+      console.error(error);
+      alert("Gagal melakukan timeskip: " + error.message);
+    } finally { 
+      btnConfirmTimeskip.textContent = 'Konfirmasi Timeskip'; 
+      btnConfirmTimeskip.disabled = false;
+    }
+  });
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.target).style.display = 'block';
+    });
+  });
+</script>
