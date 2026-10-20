@@ -519,27 +519,36 @@ title: Dashboard Admin — Grand Nations
     btnConfirmTimeskip.disabled = true;
 
     try {
+      // 1. Hapus semua data pendaftaran anggota (klaim negara lama hilang)
       const regSnap = await getDocs(collection(db, "registrations"));
       for (const docSnap of regSnap.docs) {
         await deleteDoc(doc(db, "registrations", docSnap.id));
       }
 
+      // 2. Kembalikan semua negara berstatus 'claimed' menjadi 'available'
       const countrySnap = await getDocs(collection(db, "countries"));
       for (const cDoc of countrySnap.docs) {
-        if(cDoc.data().status === 'claimed') {
-           await updateDoc(doc(db, "countries", cDoc.id), { status: 'available' });
+        if (cDoc.data().status === 'claimed') {
+          await updateDoc(doc(db, "countries", cDoc.id), { status: 'available' });
         }
       }
 
-      await setDoc(doc(db, "config", "timeline"), { active_id: newTimelineId, active_name: newTimelineName });
+      // 3. Set timeline baru sebagai aktif
+      await setDoc(doc(db, "config", "timeline"), { 
+        active_id: newTimelineId, 
+        active_name: newTimelineName 
+      });
 
       alert(`⏳ TIMESKIP BERHASIL! Dunia telah berubah ke era ${newTimelineName}. Semua anggota harus mendaftarkan negara mereka kembali.`);
       timeskipModal.classList.remove('active');
       
       loadRequests(); loadCountries(); loadTimelines();
     } catch (error) {
+      console.error(error);
       alert("Gagal melakukan timeskip: " + error.message);
-    } finally { btnConfirmTimeskip.textContent = 'Konfirmasi Timeskip'; }
+    } finally { 
+      btnConfirmTimeskip.textContent = 'Konfirmasi Timeskip'; 
+    }
   });
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
