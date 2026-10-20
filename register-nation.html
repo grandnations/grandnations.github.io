@@ -262,7 +262,6 @@ title: Pendaftaran Negara — Grand Nations
     try {
       const nationsData = selectedCountries.map(name => ({ name: name, status: 'pending' }));
 
-      // MENYIMPAN TIMELINE_ID SEKARANG
       await setDoc(doc(db, "registrations", currentUser.uid), {
         nations: nationsData, 
         leader_name: document.getElementById('leader_name').value,
@@ -270,7 +269,6 @@ title: Pendaftaran Negara — Grand Nations
         capital: document.getElementById('capital').value,
         description: document.getElementById('description').value,
         status: 'pending', 
-        timeline_id: activeTimelineId, // <--- INI YANG BARU
         created_at: serverTimestamp(),
         email: currentUser.email
       });
