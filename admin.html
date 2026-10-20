@@ -7,7 +7,8 @@ title: Dashboard Admin — Grand Nations
   .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
   .admin-table th, .admin-table td { padding: 12px 15px; border-bottom: 1px solid var(--line); font-size: 0.9rem; }
   .admin-table th { font-family: var(--mono); color: var(--dim); font-size: 0.75rem; background: var(--bg3); }
-  .tab-btn { background: none; border: none; color: var(--dim); font-family: var(--head); font-weight: 700; font-size: 1rem; cursor: pointer; padding-bottom: 10px; }
+  .tab-btn { background: none; border: none; color: var(--dim); font-family: var(--head); font-weight: 700; font-size: 1rem; cursor: pointer; padding-bottom: 10px; transition: color 0.2s; }
+  .tab-btn:hover { color: #fff; }
   .tab-btn.active { color: #fff; border-bottom: 2px solid #fff; }
   .admin-input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--line); color: #fff; margin-bottom: 10px; font-family: var(--head); }
   textarea.admin-input { resize: vertical; min-height: 120px; }
@@ -38,19 +39,21 @@ title: Dashboard Admin — Grand Nations
 
   <div id="admin-panel" style="display:none; background:var(--bg2); border:1px solid var(--line); padding:40px;">
     
+    <!-- Navigasi Tab -->
     <div style="display:flex; gap:20px; border-bottom:1px solid var(--line); margin-bottom:20px; flex-wrap:wrap;">
       <button class="tab-btn active" data-target="nations">Persetujuan Negara</button>
       <button class="tab-btn" data-target="members">Data Anggota</button>
       <button class="tab-btn" data-target="master-data">Kelola Data</button>
+      <button class="tab-btn" data-target="danger-zone" style="color: #ff4d4d;">Zona Bahaya</button>
     </div>
 
-    <!-- Tab Persetujuan -->
+    <!-- 1. Tab Persetujuan Negara -->
     <div id="tab-nations" class="tab-content">
       <h3 style="font-family:var(--mono); color:var(--dim); font-size: 0.9rem; margin-bottom: 20px;">DAFTAR PENGAJUAN NEGARA</h3>
       <div id="requests-container"></div>
     </div>
 
-    <!-- Tab Anggota -->
+    <!-- 2. Tab Data Anggota -->
     <div id="tab-members" class="tab-content" style="display:none;">
       <h3 style="font-family:var(--mono); color:var(--dim); font-size: 0.9rem;">TOTAL ANGGOTA: <span id="total-members" style="color: #fff;">0</span></h3>
       <div style="overflow-x:auto;">
@@ -61,7 +64,7 @@ title: Dashboard Admin — Grand Nations
       </div>
     </div>
 
-    <!-- Tab Master Data -->
+    <!-- 3. Tab Kelola Data -->
     <div id="tab-master-data" class="tab-content" style="display:none;">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
         
@@ -97,6 +100,20 @@ title: Dashboard Admin — Grand Nations
         <thead><tr><th>Timeline</th><th>Nama Negara</th><th>Status</th></tr></thead>
         <tbody id="table-countries-body"></tbody>
       </table>
+    </div>
+
+    <!-- 4. Tab Zona Bahaya -->
+    <div id="tab-danger-zone" class="tab-content" style="display:none;">
+      <div style="border: 1px solid #ff4d4d; background: rgba(255, 77, 77, 0.05); padding: 40px; border-radius: 4px; text-align: center;">
+        <h2 style="color: #ff4d4d; font-weight: 800; font-size: 2rem; margin-bottom: 10px;">ZONA BAHAYA</h2>
+        <p style="color: var(--dim); max-width: 600px; margin: 0 auto 30px; line-height: 1.6; font-size: 1.05rem;">
+          Tombol di bawah ini akan menghapus <strong>seluruh data pendaftaran negara</strong> dari semua anggota, dan mengembalikan semua negara menjadi "Tersedia". <br><br>
+          <em>Data profil anggota (Nama, Email, Foto) tidak akan terhapus.</em> Gunakan fitur ini saat akan memulai era/timeline baru.
+        </p>
+        <button id="btn-reset-timeline" class="btn solid" style="background: #ff4d4d; border-color: #ff4d4d; color: #fff; padding: 15px 40px; font-size: 1rem; width: auto; font-weight: bold;">
+          RESET SEMUA DATA NEGARA
+        </button>
+      </div>
     </div>
 
   </div>
@@ -147,7 +164,7 @@ title: Dashboard Admin — Grand Nations
     }
   });
 
-  // --- LOAD KOTAK PERSETUJUAN ---
+  // --- 1. LOAD KOTAK PERSETUJUAN ---
   async function loadRequests() {
     const container = document.getElementById('requests-container');
     container.innerHTML = '';
@@ -202,7 +219,7 @@ title: Dashboard Admin — Grand Nations
     }
   }
 
-  // --- HANDLE APPROVE / REJECT PER NEGARA ---
+  // --- 2. HANDLE APPROVE / REJECT PER NEGARA ---
   window.handleNation = async function(uid, nationIndex, newStatus) {
     try {
       const docRef = doc(db, "registrations", uid);
@@ -239,7 +256,7 @@ title: Dashboard Admin — Grand Nations
     }
   };
 
-  // --- LOAD DATA ANGGOTA ---
+  // --- 3. LOAD DATA ANGGOTA ---
   async function loadMembers() {
     const membersSnap = await getDocs(collection(db, "users"));
     const membersBody = document.getElementById('table-members-body');
@@ -262,7 +279,7 @@ title: Dashboard Admin — Grand Nations
     document.getElementById('total-members').textContent = count;
   }
 
-  // --- FUNGSI HAPUS ANGGOTA ---
+  // --- 4. FUNGSI HAPUS ANGGOTA ---
   window.deleteMember = async function(uid, name) {
     const confirmDelete = confirm(`Yakin ingin menghapus keanggotaan "${name}"?\n\nSistem akan menghapus profil, riwayat negara, dan mengembalikan negara yang sudah diklaim menjadi Tersedia.`);
     if (!confirmDelete) return;
@@ -294,7 +311,7 @@ title: Dashboard Admin — Grand Nations
     }
   };
 
-  // --- LOAD TIMELINES & COUNTRIES ---
+  // --- 5. LOAD TIMELINES ---
   async function loadTimelines() {
     try {
       const configSnap = await getDoc(doc(db, "config", "timeline"));
@@ -319,7 +336,6 @@ title: Dashboard Admin — Grand Nations
         const isActive = docSnap.id === activeTimelineId;
         const badge = isActive ? '<span class="badge-active">AKTIF</span>' : '<span class="badge-inactive">ARSIP</span>';
         
-        // LOGIKA TOMBOL: Jika aktif, tidak boleh dihapus. Jika arsip, bisa dihapus.
         const btnAction = isActive 
           ? '<span style="color:var(--dim); font-size:0.8rem;">Sedang Digunakan</span>' 
           : `<button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>
@@ -339,7 +355,7 @@ title: Dashboard Admin — Grand Nations
     }
   }
 
-  // --- FUNGSI SET TIMELINE AKTIF ---
+  // --- 6. SET TIMELINE AKTIF ---
   window.setActiveTimeline = async function(timelineId, timelineName) {
     const confirmSet = confirm(`Jadikan Timeline "${timelineName}" sebagai timeline aktif?\n\nSemua member baru hanya akan bisa memilih negara dari timeline ini.`);
     if (!confirmSet) return;
@@ -356,26 +372,21 @@ title: Dashboard Admin — Grand Nations
     }
   };
 
-  // --- FUNGSI HAPUS TIMELINE ---
+  // --- 7. HAPUS TIMELINE ---
   window.deleteTimeline = async function(timelineId, timelineName) {
     const confirmDelete = confirm(`HAPUS TIMELINE "${timelineName}"?\n\nAWAS: Semua negara di dalam timeline ini akan ikut terhapus permanen dari database!`);
     if (!confirmDelete) return;
 
     try {
-      // 1. Hapus semua negara di timeline ini
       const q = query(collection(db, "countries"), where("timeline_id", "==", timelineId));
       const countrySnap = await getDocs(q);
-      
       for (const cDoc of countrySnap.docs) {
         await deleteDoc(doc(db, "countries", cDoc.id));
       }
-
-      // 2. Hapus timeline-nya
       await deleteDoc(doc(db, "timelines", timelineId));
 
       alert(`Timeline ${timelineName} dan semua negaranya berhasil dihapus.`);
-      loadTimelines();
-      loadCountries();
+      loadTimelines(); loadCountries();
     } catch (e) {
       alert("Gagal menghapus timeline: " + e.message);
     }
@@ -433,6 +444,45 @@ title: Dashboard Admin — Grand Nations
     finally { btn.textContent = 'Tambah Massal Negara'; btn.disabled = false; }
   });
 
+  // --- 8. LOGIKA TOMBOL RESET ---
+  document.getElementById('btn-reset-timeline').addEventListener('click', async () => {
+    const confirm1 = confirm("⚠️ PERINGATAN KERAS ⚠️\n\nApakah kamu yakin ingin mereset SEMUA data negara?\nSemua member harus mendaftar ulang negaranya.");
+    if (!confirm1) return;
+
+    const confirm2 = prompt("Ketik kata 'RESET' (huruf besar) untuk melanjutkan:");
+    if (confirm2 !== 'RESET') {
+      return alert("Reset dibatalkan. Kata kunci salah.");
+    }
+
+    const btn = document.getElementById('btn-reset-timeline');
+    btn.textContent = 'Menghapus Data...';
+    btn.disabled = true;
+
+    try {
+      const regSnap = await getDocs(collection(db, "registrations"));
+      for (const docSnap of regSnap.docs) {
+        await deleteDoc(doc(db, "registrations", docSnap.id));
+      }
+
+      const countrySnap = await getDocs(collection(db, "countries"));
+      for (const cDoc of countrySnap.docs) {
+        await updateDoc(doc(db, "countries", cDoc.id), { status: 'available' });
+      }
+
+      alert("✅ RESET BERHASIL! Semua data negara telah dibersihkan.");
+      loadRequests();
+      loadCountries();
+
+    } catch (error) {
+      console.error(error);
+      alert("Gagal mereset data: " + error.message);
+    } finally {
+      btn.textContent = 'RESET SEMUA DATA NEGARA';
+      btn.disabled = false;
+    }
+  });
+
+  // --- 9. NAVIGASI TAB ---
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
