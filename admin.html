@@ -222,56 +222,85 @@ title: Dashboard Admin — Grand Nations
 
   async function loadRequests() {
     const container = document.getElementById('requests-container');
-    container.innerHTML = '';
-    const snap = await getDocs(collection(db, "registrations"));
+    
+    // 1. Kosongkan wadah terlebih dahulu
+    container.innerHTML = ''; 
+    
+    // 2. Tampilkan loading sementara
+    container.innerHTML = '<div style="font-family:var(--mono); color:var(--dim); padding:20px;">Memuat data pengajuan...</div>';
 
-    for (const docSnap of snap.docs) {
-      const data = docSnap.data();
-      const uid = docSnap.id;
+    try {
+      const snap = await getDocs(collection(db, "registrations"));
+      
+      // Jika tidak ada data sama sekali
+      if (snap.empty) {
+        container.innerHTML = '<div style="font-family:var(--mono); color:var(--dim); padding:20px;">Belum ada pengajuan negara.</div>';
+        return;
+      }
 
-      const hasPending = data.nations.some(n => n.status === 'pending');
-      if (!hasPending && data.status !== 'pending') continue; 
+      let htmlContent = ''; // Tampung HTML di variabel dulu
 
-      const userSnap = await getDoc(doc(db, "users", uid));
-      const userData = userSnap.exists() ? userSnap.data() : {};
-      const memberName = userData.full_name || "Tanpa Nama";
-      const waNumber = userData.whatsapp || '-';
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data();
+        const uid = docSnap.id;
 
-      let nationsHtml = '';
-      data.nations.forEach((nation, index) => {
-        let actionHtml = '';
-        if (nation.status === 'pending') {
-          actionHtml = `
-            <div>
-              <button class="btn-sm btn-approve" onclick="handleNation('${uid}', ${index}, 'approved')">✓ Setujui</button>
-              <button class="btn-sm btn-reject" onclick="handleNation('${uid}', ${index}, 'rejected')">✗ Tolak</button>
+        const hasPending = data.nations.some(n => n.status === 'pending');
+        if (!hasPending && data.status !== 'pending') continue; 
+
+        const userSnap = await getDoc(doc(db, "users", uid));
+        const userData = userSnap.exists() ? userSnap.data() : {};
+        const memberName = userData.full_name || "Tanpa Nama";
+        const waNumber = userData.whatsapp || '-';
+
+        let nationsHtml = '';
+        data.nations.forEach((nation, index) => {
+          let actionHtml = '';
+          if (nation.status === 'pending') {
+            actionHtml = `
+              <div>
+                <button class="btn-sm btn-approve" onclick="handleNation('${uid}', ${index}, 'approved')">✓ Setujui</button>
+                <button class="btn-sm btn-reject" onclick="handleNation('${uid}', ${index}, 'rejected')">✗ Tolak</button>
+              </div>
+            `;
+          } else {
+            const color = nation.status === 'approved' ? '#00ff64' : '#ff4d4d';
+            actionHtml = `<span style="color:${color}; font-family:var(--mono); font-size:0.8rem;">${nation.status.toUpperCase()}</span>`;
+          }
+          nationsHtml += `
+            <div class="nation-claim-box">
+              <span style="font-weight:600; color:${nation.status === 'rejected' ? '#ff4d4d' : '#fff'}; text-decoration:${nation.status === 'rejected' ? 'line-through' : 'none'};">${nation.name}</span>
+              ${actionHtml}
             </div>
           `;
-        } else {
-          const color = nation.status === 'approved' ? '#00ff64' : '#ff4d4d';
-          actionHtml = `<span style="color:${color}; font-family:var(--mono); font-size:0.8rem;">${nation.status.toUpperCase()}</span>`;
-        }
-        nationsHtml += `
-          <div class="nation-claim-box">
-            <span style="font-weight:600; color:${nation.status === 'rejected' ? '#ff4d4d' : '#fff'}; text-decoration:${nation.status === 'rejected' ? 'line-through' : 'none'};">${nation.name}</span>
-            ${actionHtml}
+        });
+
+        // Masukkan ke variabel penampung
+        htmlContent += `
+          <div class="request-card">
+            <div class="request-header">
+              <div>
+                <h4 style="font-size:1.4rem; margin-bottom:2px; color:#fff;">${memberName}</h4>
+                <p style="color:var(--dim); font-size:0.85rem; margin-bottom:8px;">${data.email}</p>
+                <p style="color:var(--dim); font-size:0.9rem;">Pemimpin: <strong>${data.leader_name}</strong> | WA: <strong>${waNumber}</strong></p>
+              </div>
+              <span style="font-family:var(--mono); font-size:0.7rem; border:1px solid var(--line); padding:4px 8px;">ID: ${uid.slice(0,6)}...</span>
+            </div>
+            <div>${nationsHtml}</div>
           </div>
         `;
-      });
+      }
 
-      container.innerHTML += `
-        <div class="request-card">
-          <div class="request-header">
-            <div>
-              <h4 style="font-size:1.4rem; margin-bottom:2px; color:#fff;">${memberName}</h4>
-              <p style="color:var(--dim); font-size:0.85rem; margin-bottom:8px;">${data.email}</p>
-              <p style="color:var(--dim); font-size:0.9rem;">Pemimpin: <strong>${data.leader_name}</strong> | WA: <strong>${waNumber}</strong></p>
-            </div>
-            <span style="font-family:var(--mono); font-size:0.7rem; border:1px solid var(--line); padding:4px 8px;">ID: ${uid.slice(0,6)}...</span>
-          </div>
-          <div>${nationsHtml}</div>
-        </div>
-      `;
+      // 3. Cetak ke layar HANYA SEKALI di akhir
+      container.innerHTML = htmlContent;
+
+      // Jika setelah di-filter ternyata tidak ada pending
+      if (htmlContent === '') {
+         container.innerHTML = '<div style="font-family:var(--mono); color:var(--dim); padding:20px;">Tidak ada pengajuan yang menunggu persetujuan.</div>';
+      }
+
+    } catch (error) {
+      console.error(error);
+      container.innerHTML = '<div style="color:#ff4d4d; padding:20px;">Gagal memuat pengajuan.</div>';
     }
   }
 
