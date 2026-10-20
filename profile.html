@@ -11,7 +11,6 @@ title: Profil — Grand Nations
   .form-group { margin-bottom: 20px; }
   .form-group label { display: block; font-family: var(--mono); font-size: 0.8rem; color: var(--dim); margin-bottom: 8px; }
   .form-group input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--line); color: #fff; font-family: var(--head); border-radius: 2px; }
-  .form-group input:focus { outline: none; border-color: #fff; }
   .nation-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed var(--line); }
   .nation-item:last-child { border-bottom: none; }
 </style>
@@ -26,8 +25,8 @@ title: Profil — Grand Nations
 
   <div id="error-state" class="auth-box" style="display:none; border-color: #ff4d4d;">
     <div class="icon" style="color: #ff4d4d; border-color: #ff4d4d;">!</div>
-    <h2>Akses Error</h2>
-    <p id="error-message" style="color:#ff4d4d; font-family: var(--mono);"></p>
+    <h2>Akses Error</h2><p id="error-message" style="color:#ff4d4d; font-family: var(--mono);"></p>
+    <p style="font-size: 0.9rem;">Coba <b>Logout</b> lalu <b>Login</b> kembali.</p>
   </div>
 
   <div id="login-required-state" class="auth-box" style="display:none;">
@@ -164,6 +163,10 @@ title: Profil — Grand Nations
           if (currentUserData.created_at) document.getElementById('user-joined-display').textContent = currentUserData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
 
           try {
+            // Cek Timeline ID Aktif dari Config
+            const configSnap = await getDoc(doc(db, "config", "timeline"));
+            const activeTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
+
             const nationDocSnap = await getDoc(doc(db, "registrations", user.uid));
             if (nationDocSnap.exists()) {
               const nationData = nationDocSnap.data();
@@ -174,8 +177,8 @@ title: Profil — Grand Nations
               listContainer.innerHTML = `<div class="data-row" style="border-bottom:2px solid var(--line); margin-bottom:10px;"><span class="data-label">NAMA NEGARA</span><span class="data-label">STATUS</span></div>`;
               
               let allRejected = true;
+              let isOldTimeline = (nationData.timeline_id !== activeTimelineId); // Cek apakah beda era
 
-              // PERBAIKAN: Tambahkan pengaman (nationData.nations &&) sebelum membaca .length
               if (nationData.nations && Array.isArray(nationData.nations)) {
                 nationData.nations.forEach(nation => {
                   let statusColor = '#ffc800'; 
@@ -190,13 +193,13 @@ title: Profil — Grand Nations
                     </div>
                   `;
                 });
-              } else {
-                // Jika data lama formatnya rusak/bukan array
-                allRejected = false;
-                listContainer.innerHTML += `<p style="color:#ff4d4d; font-size:0.85rem;">Data negara tidak valid (format lama). Hubungi Admin.</p>`;
               }
 
-              // PERBAIKAN: Cek apakah nationData.nations benar-benar ada dan panjangnya > 0
+              // Jika beda era, munculkan pemberitahuan
+              if (isOldTimeline) {
+                 listContainer.innerHTML += `<p style="color:#ffc800; font-size:0.85rem; margin-top:10px;">⚠️ Era telah berganti. Negara ini milik era lama. Silakan daftar ulang jika ingin bermain di era baru.</p>`;
+              }
+
               if (allRejected && nationData.nations && nationData.nations.length > 0) {
                 document.getElementById('re-apply-container').style.display = 'block';
               } else {
@@ -206,21 +209,16 @@ title: Profil — Grand Nations
               document.getElementById('no-nation-state').style.display = 'block';
               document.getElementById('has-nation-state').style.display = 'none';
             }
-          } catch (e) {
-             console.error("Gagal load negara:", e);
-          }
+          } catch (e) { console.error("Gagal load negara:", e); }
 
           profileState.style.display = 'block';
-
         } else {
           emptyUserState.style.display = 'block';
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
         errorMessage.textContent = error.message;
         errorState.style.display = 'block';
       }
-
     } else {
       loginRequiredState.style.display = 'block';
       emptyUserState.style.display = 'none';
