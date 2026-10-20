@@ -186,8 +186,6 @@ title: Dashboard Admin — Grand Nations
     }
   });
 
-  // ... (Fungsi loadRequests, handleNation, loadMembers, deleteMember, loadTimelines, setActiveTimeline, deleteTimeline, loadCountries, addTimeline, addCountry tetap SAMA seperti sebelumnya) ...
-
   async function loadRequests() {
     const container = document.getElementById('requests-container');
     container.innerHTML = '';
@@ -429,24 +427,37 @@ title: Dashboard Admin — Grand Nations
     btnConfirmReset.disabled = true;
 
     try {
-      // Hapus semua data di tabel registrations
+      // 1. Hapus semua data pendaftaran anggota
       const regSnap = await getDocs(collection(db, "registrations"));
       for (const docSnap of regSnap.docs) {
         await deleteDoc(doc(db, "registrations", docSnap.id));
       }
 
-      // Ubah semua status negara jadi 'available'
+      // 2. Hapus semua data negara
       const countrySnap = await getDocs(collection(db, "countries"));
       for (const cDoc of countrySnap.docs) {
-        await updateDoc(doc(db, "countries", cDoc.id), { status: 'available' });
+        await deleteDoc(doc(db, "countries", cDoc.id)); // Hapus negaranya sekalian
       }
 
-      alert("✅ RESET BERHASIL! Semua data negara telah dibersihkan.");
+      // 3. Hapus semua Timeline
+      const timelineSnap = await getDocs(collection(db, "timelines"));
+      for (const tDoc of timelineSnap.docs) {
+        await deleteDoc(doc(db, "timelines", tDoc.id));
+      }
+
+      // 4. Kosongkan Config Timeline Aktif (Reset total)
+      await setDoc(doc(db, "config", "timeline"), { 
+        active_id: null,
+        active_name: null 
+      });
+
+      alert("✅ RESET BERHASIL! Semua Timeline, Negara, dan Pendaftaran telah dihapus. Sistem kembali kosong.");
       resetModal.classList.remove('active');
       
       // Refresh tampilan
       loadRequests();
       loadCountries();
+      loadTimelines();
 
     } catch (error) {
       console.error(error);
