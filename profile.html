@@ -163,10 +163,6 @@ title: Profil — Grand Nations
           if (currentUserData.created_at) document.getElementById('user-joined-display').textContent = currentUserData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
 
           try {
-            // Cek Timeline ID Aktif dari Config
-            const configSnap = await getDoc(doc(db, "config", "timeline"));
-            const activeTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
-
             const nationDocSnap = await getDoc(doc(db, "registrations", user.uid));
             if (nationDocSnap.exists()) {
               const nationData = nationDocSnap.data();
@@ -177,7 +173,6 @@ title: Profil — Grand Nations
               listContainer.innerHTML = `<div class="data-row" style="border-bottom:2px solid var(--line); margin-bottom:10px;"><span class="data-label">NAMA NEGARA</span><span class="data-label">STATUS</span></div>`;
               
               let allRejected = true;
-              let isOldTimeline = (nationData.timeline_id !== activeTimelineId); // Cek apakah beda era
 
               if (nationData.nations && Array.isArray(nationData.nations)) {
                 nationData.nations.forEach(nation => {
@@ -193,11 +188,6 @@ title: Profil — Grand Nations
                     </div>
                   `;
                 });
-              }
-
-              // Jika beda era, munculkan pemberitahuan
-              if (isOldTimeline) {
-                 listContainer.innerHTML += `<p style="color:#ffc800; font-size:0.85rem; margin-top:10px;">⚠️ Era telah berganti. Negara ini milik era lama. Silakan daftar ulang jika ingin bermain di era baru.</p>`;
               }
 
               if (allRejected && nationData.nations && nationData.nations.length > 0) {
