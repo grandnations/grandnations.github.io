@@ -17,17 +17,31 @@ title: Grand Nations — Organisasi Roleplay
   </div>
 </section>
 
-<!-- PANEL TIMELINE AKTIF -->
+<!-- BAGIAN SLOGAN & LOGO (DIKEMBALIKAN & DIPERBESAR) -->
 <section class="slogan">
   <div class="wrap">
-    <div class="slogan-top" style="grid-template-columns: 1fr; text-align: center; margin-bottom: 40px;">
-      
+    <div class="slogan-top">
+      <h2 class="hashtag reveal">#LovEvery<br>FictionNations</h2>
+      <div class="emblem reveal">
+        <span class="logo-slot">
+          <img src="/assets/img/logogn.jpeg" alt="Emblem Grand Nations" onerror="this.parentElement.classList.add('missing')">
+          <svg viewBox="0 0 200 200" fill="none" stroke="#fff" aria-hidden="true"><circle cx="100" cy="100" r="92" stroke-opacity=".25" stroke-width="1"/><circle cx="100" cy="100" r="76" stroke-opacity=".45" stroke-width="1.2" stroke-dasharray="1 5"/><circle cx="100" cy="100" r="58" stroke-width="3"/><ellipse cx="100" cy="100" rx="24" ry="58" stroke-width="2"/><ellipse cx="100" cy="100" rx="58" ry="24" stroke-opacity=".7" stroke-width="2"/><path d="M100 42v116M42 100h116" stroke-width="2"/><circle cx="100" cy="100" r="5" fill="#fff"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL TIMELINE AKTIF & NEGARA (PENGGANTI PILAR-PILAR) -->
+<section class="alt" style="padding-top: 0;">
+  <div class="wrap">
+    <div style="background: var(--bg2); border: 1px solid var(--line); padding: 50px 30px; text-align: center; margin-top: -40px; position: relative; z-index: 2; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
       <div class="reveal">
         <div class="badge" style="border-color: #ffc800; color: #ffc800; margin-bottom: 20px;">
           <span class="dot" style="background:#ffc800; box-shadow:0 0 8px 1px rgba(255,200,0,0.6);"></span>
           LIVE SIMULATION
         </div>
-        <h2 class="hashtag" style="font-size: clamp(2rem, 5vw, 4rem); margin-bottom: 10px;">Era Aktif Saat Ini</h2>
+        <h2 class="hashtag" style="font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 10px;">Era Aktif Saat Ini</h2>
         
         <!-- Teks Tahun Mulai -->
         <div id="start-year-container" style="font-family: var(--mono); font-size: 0.9rem; color: var(--dim); margin-bottom: 5px;">
@@ -44,25 +58,21 @@ title: Grand Nations — Organisasi Roleplay
           (Hari ke-<span id="days-running-display">0</span> simulasi)
         </div>
 
-        <p style="color: var(--dim); max-width: 600px; margin: 0 auto;">Seluruh interaksi diplomasi, konflik, dan ekonomi saat ini sedang berlangsung di era ini. Daftarkan negaramu segera!</p>
+        <p style="color: var(--dim); max-width: 600px; margin: 0 auto 30px; font-size: 0.95rem;">Seluruh interaksi diplomasi, konflik, dan ekonomi saat ini sedang berlangsung di era ini.</p>
+        
+        <h3 style="font-family: var(--mono); font-size: 0.8rem; color: var(--dim); letter-spacing: 0.1em; border-top: 1px solid var(--line); padding-top: 30px; margin-bottom: 20px;">NEGARA YANG SEDANG DIKLAIM</h3>
+        
+        <!-- Container untuk list negara dinamis -->
+        <div id="active-nations-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; width: 100%;">
+          <p style="color: var(--dim); font-family: var(--mono); text-align: center; grid-column: 1/-1;">Memuat daftar negara...</p>
+        </div>
       </div>
-
-    </div>
-    
-    <div class="pillars" style="grid-template-columns: 1fr; background: var(--bg2); border: 1px solid var(--line); padding: 40px;">
-      <h3 class="reveal" style="text-align: center; margin-bottom: 30px;">Negara yang Sedang Diklaim</h3>
-      
-      <!-- Container untuk list negara dinamis -->
-      <div id="active-nations-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; width: 100%;">
-        <p style="color: var(--dim); font-family: var(--mono); text-align: center; grid-column: 1/-1;">Memuat daftar negara...</p>
-      </div>
-
     </div>
   </div>
 </section>
 
 <section class="alt">
-  <div class="wrap numbers">
+  <div class="wrap numbers" style="margin-top: 50px;">
     <div class="num-grid reveal">
       <div class="num-cell"><div class="n" data-count="325">0</div><div class="t">ANGGOTA</div></div>
       <div class="num-cell"><div class="n" data-count="2025">0</div><div class="t">TAHUN BERDIRI</div></div>
