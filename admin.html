@@ -232,8 +232,10 @@ title: Dashboard Admin — Grand Nations
       const hasPending = data.nations.some(n => n.status === 'pending');
       if (!hasPending && data.status !== 'pending') continue; 
 
+      // AMBIL DATA ANGGOTA (Nama & WA)
       const userSnap = await getDoc(doc(db, "users", uid));
       const userData = userSnap.exists() ? userSnap.data() : {};
+      const memberName = userData.full_name || "Tanpa Nama";
       const waNumber = userData.whatsapp || '-';
 
       let nationsHtml = '';
@@ -250,6 +252,7 @@ title: Dashboard Admin — Grand Nations
           const color = nation.status === 'approved' ? '#00ff64' : '#ff4d4d';
           actionHtml = `<span style="color:${color}; font-family:var(--mono); font-size:0.8rem;">${nation.status.toUpperCase()}</span>`;
         }
+
         nationsHtml += `
           <div class="nation-claim-box">
             <span style="font-weight:600; color:${nation.status === 'rejected' ? '#ff4d4d' : '#fff'}; text-decoration:${nation.status === 'rejected' ? 'line-through' : 'none'};">${nation.name}</span>
@@ -258,16 +261,20 @@ title: Dashboard Admin — Grand Nations
         `;
       });
 
+      // TAMPILAN BARU: Nama Besar, Email Kecil di Bawahnya
       container.innerHTML += `
         <div class="request-card">
           <div class="request-header">
             <div>
-              <h4 style="font-size:1.2rem; margin-bottom:4px;">${data.email}</h4>
+              <h4 style="font-size:1.4rem; margin-bottom:2px; color:#fff;">${memberName}</h4>
+              <p style="color:var(--dim); font-size:0.85rem; margin-bottom:8px;">${data.email}</p>
               <p style="color:var(--dim); font-size:0.9rem;">Pemimpin: <strong>${data.leader_name}</strong> | WA: <strong>${waNumber}</strong></p>
             </div>
             <span style="font-family:var(--mono); font-size:0.7rem; border:1px solid var(--line); padding:4px 8px;">ID: ${uid.slice(0,6)}...</span>
           </div>
-          <div>${nationsHtml}</div>
+          <div>
+            ${nationsHtml}
+          </div>
         </div>
       `;
     }
