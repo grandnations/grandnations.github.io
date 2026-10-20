@@ -17,7 +17,7 @@ title: Grand Nations — Organisasi Roleplay
   </div>
 </section>
 
-<!-- BAGIAN SLOGAN DIGANTI JADI INFO TIMELINE AKTIF -->
+<!-- PANEL TIMELINE AKTIF -->
 <section class="slogan">
   <div class="wrap">
     <div class="slogan-top" style="grid-template-columns: 1fr; text-align: center; margin-bottom: 40px;">
@@ -28,9 +28,22 @@ title: Grand Nations — Organisasi Roleplay
           LIVE SIMULATION
         </div>
         <h2 class="hashtag" style="font-size: clamp(2rem, 5vw, 4rem); margin-bottom: 10px;">Era Aktif Saat Ini</h2>
-        <h3 id="active-timeline-name" style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 20px; text-shadow: 0 0 40px rgba(255,255,255,0.2);">
+        
+        <!-- Teks Tahun Mulai -->
+        <div id="start-year-container" style="font-family: var(--mono); font-size: 0.9rem; color: var(--dim); margin-bottom: 5px;">
+          Dimulai pada tahun <span id="start-year-display" style="color: #fff; font-weight: bold;">...</span>
+        </div>
+
+        <!-- Tahun Berjalan (Besar) -->
+        <h3 id="active-timeline-name" style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 10px; text-shadow: 0 0 40px rgba(255,255,255,0.2);">
           Memuat...
         </h3>
+
+        <!-- Hari Berjalan -->
+        <div id="days-container" style="font-family: var(--mono); font-size: 0.8rem; color: #ffc800; margin-bottom: 20px;">
+          (Hari ke-<span id="days-running-display">0</span> simulasi)
+        </div>
+
         <p style="color: var(--dim); max-width: 600px; margin: 0 auto;">Seluruh interaksi diplomasi, konflik, dan ekonomi saat ini sedang berlangsung di era ini. Daftarkan negaramu segera!</p>
       </div>
 
@@ -168,7 +181,7 @@ title: Grand Nations — Organisasi Roleplay
   </div>
 </section>
 
-<!-- SCRIPT UNTUK INTERAKSI UI (REVEAL, COUNT, TIMELINE TAB) -->
+<!-- SCRIPT INTERAKSI UI -->
 <script>
   (function () {
     var els = document.querySelectorAll('.reveal');
@@ -224,7 +237,7 @@ title: Grand Nations — Organisasi Roleplay
   })();
 </script>
 
-<!-- SCRIPT FIREBASE UNTUK MENAMPILKAN TIMELINE AKTIF DI LANDING PAGE -->
+<!-- SCRIPT FIREBASE TIMELINE DINAMIS -->
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
   import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
@@ -243,24 +256,62 @@ title: Grand Nations — Organisasi Roleplay
 
   async function loadLiveTimeline() {
     const timelineNameEl = document.getElementById('active-timeline-name');
+    const startYearEl = document.getElementById('start-year-display');
+    const startYearContainer = document.getElementById('start-year-container');
+    const daysRunningEl = document.getElementById('days-running-display');
+    const daysContainer = document.getElementById('days-container');
     const nationsContainer = document.getElementById('active-nations-container');
 
     try {
-      // 1. Ambil Timeline Aktif dari Config
       const configSnap = await getDoc(doc(db, "config", "timeline"));
       
+      // LOGIKA MASA VOTING / RESET
       if (!configSnap.exists() || !configSnap.data().active_id) {
-        timelineNameEl.textContent = "Belum Ada Timeline";
-        nationsContainer.innerHTML = '<p style="color: var(--dim); font-family: var(--mono); text-align: center; grid-column: 1/-1;">Admin belum memulai simulasi.</p>';
+        startYearContainer.style.display = 'none'; 
+        daysContainer.style.display = 'none'; 
+        
+        timelineNameEl.innerHTML = '<span style="color: #ffc800;">MASA VOTING</span>';
+        
+        nationsContainer.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 20px;">
+            <p style="color: var(--dim); font-family: var(--mono); margin-bottom: 20px;">Pemilihan Timeline Era Baru sedang berlangsung.</p>
+            <p style="color: var(--dim); font-size: 0.9rem;">Silakan cek grup WhatsApp untuk memberikan suaramu. Era dengan suara terbanyak akan segera diaktifkan oleh Admin.</p>
+          </div>
+        `;
         return;
       }
 
-      const activeTimelineId = configSnap.data().active_id;
-      const activeTimelineName = configSnap.data().active_name;
-      
-      timelineNameEl.textContent = activeTimelineName;
+      // LOGIKA JIKA ADA TIMELINE AKTIF
+      startYearContainer.style.display = 'block';
+      daysContainer.style.display = 'block';
 
-      // 2. Ambil Negara yang Sedang Diklaim di Era Ini
+      const configData = configSnap.data();
+      const activeTimelineId = configData.active_id;
+      const startYear = parseInt(configData.active_name); 
+      const startDate = configData.start_date; 
+
+      if (isNaN(startYear)) {
+         timelineNameEl.textContent = configData.active_name;
+         startYearEl.textContent = "-";
+         daysRunningEl.textContent = "-";
+         return;
+      }
+
+      let currentYear = startYear;
+      let daysPassed = 0;
+
+      if (startDate) {
+        const now = new Date().getTime();
+        const diffTime = Math.abs(now - startDate);
+        daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+        currentYear = startYear + daysPassed;
+      }
+
+      startYearEl.textContent = startYear;
+      timelineNameEl.textContent = currentYear;
+      daysRunningEl.textContent = daysPassed;
+
+      // AMBIL NEGARA DIKLAIM
       const q = query(
         collection(db, "countries"), 
         where("timeline_id", "==", activeTimelineId),
@@ -268,7 +319,7 @@ title: Grand Nations — Organisasi Roleplay
       );
       const querySnapshot = await getDocs(q);
 
-      nationsContainer.innerHTML = ''; // Bersihkan loading
+      nationsContainer.innerHTML = ''; 
 
       if (querySnapshot.empty) {
         nationsContainer.innerHTML = '<p style="color: var(--dim); font-family: var(--mono); text-align: center; grid-column: 1/-1;">Belum ada negara yang diklaim di era ini.</p>';
@@ -292,6 +343,5 @@ title: Grand Nations — Organisasi Roleplay
     }
   }
 
-  // Jalankan fungsi saat halaman dimuat
   loadLiveTimeline();
 </script>
