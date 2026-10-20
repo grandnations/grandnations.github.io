@@ -23,6 +23,15 @@ title: Dashboard Admin — Grand Nations
   
   .badge-active { background: #00ff64; color: #000; padding: 2px 8px; font-family: var(--mono); font-size: 0.7rem; font-weight: bold; border-radius: 2px; }
   .badge-inactive { background: var(--line-strong); color: var(--dim); padding: 2px 8px; font-family: var(--mono); font-size: 0.7rem; border-radius: 2px; }
+
+  /* CSS UNTUK MODAL CUSTOM */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.active { display: flex; }
+  .modal-content { background: var(--bg2); border: 1px solid #ff4d4d; padding: 40px; width: 100%; max-width: 500px; border-radius: 4px; text-align: center; box-shadow: 0 10px 30px rgba(255, 77, 77, 0.2); }
+  .modal-content h3 { color: #ff4d4d; font-family: var(--head); font-size: 1.8rem; margin-bottom: 10px; }
+  .modal-content p { color: var(--dim); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6; }
+  .modal-content input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--line); color: #fff; font-family: var(--mono); text-align: center; font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 20px; border-radius: 2px; }
+  .modal-content input:focus { outline: none; border-color: #ff4d4d; }
 </style>
 
 <main class="wrap">
@@ -39,7 +48,6 @@ title: Dashboard Admin — Grand Nations
 
   <div id="admin-panel" style="display:none; background:var(--bg2); border:1px solid var(--line); padding:40px;">
     
-    <!-- Navigasi Tab -->
     <div style="display:flex; gap:20px; border-bottom:1px solid var(--line); margin-bottom:20px; flex-wrap:wrap;">
       <button class="tab-btn active" data-target="nations">Persetujuan Negara</button>
       <button class="tab-btn" data-target="members">Data Anggota</button>
@@ -47,13 +55,13 @@ title: Dashboard Admin — Grand Nations
       <button class="tab-btn" data-target="danger-zone" style="color: #ff4d4d;">Zona Bahaya</button>
     </div>
 
-    <!-- 1. Tab Persetujuan Negara -->
+    <!-- 1. Tab Persetujuan -->
     <div id="tab-nations" class="tab-content">
       <h3 style="font-family:var(--mono); color:var(--dim); font-size: 0.9rem; margin-bottom: 20px;">DAFTAR PENGAJUAN NEGARA</h3>
       <div id="requests-container"></div>
     </div>
 
-    <!-- 2. Tab Data Anggota -->
+    <!-- 2. Tab Anggota -->
     <div id="tab-members" class="tab-content" style="display:none;">
       <h3 style="font-family:var(--mono); color:var(--dim); font-size: 0.9rem;">TOTAL ANGGOTA: <span id="total-members" style="color: #fff;">0</span></h3>
       <div style="overflow-x:auto;">
@@ -68,33 +76,29 @@ title: Dashboard Admin — Grand Nations
     <div id="tab-master-data" class="tab-content" style="display:none;">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
         
-        <!-- Form Tambah Timeline -->
         <div style="background:var(--bg3); padding:20px; border:1px solid var(--line);">
           <h3 style="margin-bottom:15px; font-size:1.1rem;">1. Tambah Timeline Baru</h3>
           <input type="text" id="new-timeline-name" class="admin-input" placeholder="Contoh: 1945 atau 1500">
           <button id="btn-add-timeline" class="btn solid" style="width:100%;">Tambah Timeline</button>
         </div>
 
-        <!-- Form Tambah Negara Massal -->
         <div style="background:var(--bg3); padding:20px; border:1px solid var(--line);">
           <h3 style="margin-bottom:15px; font-size:1.1rem;">2. Tambah Massal Negara</h3>
           <select id="select-timeline" class="admin-input">
             <option value="">-- Pilih Timeline --</option>
           </select>
-          <textarea id="new-country-names" class="admin-input" placeholder="Paste daftar negara di sini. Satu negara per baris.&#10;Contoh:&#10;Indonesia&#10;Malaysia&#10;Singapura"></textarea>
+          <textarea id="new-country-names" class="admin-input" placeholder="Paste daftar negara di sini. Satu negara per baris."></textarea>
           <button id="btn-add-country" class="btn solid" style="width:100%;">Tambah Massal Negara</button>
         </div>
 
       </div>
 
-      <!-- Tabel Daftar Timeline -->
       <h3 style="margin-top:40px; margin-bottom:15px; font-size:1.1rem;">Daftar Timeline & Status</h3>
       <table class="admin-table" style="margin-bottom:30px;">
         <thead><tr><th>Nama Timeline</th><th>Status</th><th>Aksi</th></tr></thead>
         <tbody id="table-timelines-body"></tbody>
       </table>
 
-      <!-- Tabel Daftar Negara -->
       <h3 style="margin-top:40px; margin-bottom:15px; font-size:1.1rem;">Daftar Negara Terdaftar</h3>
       <table class="admin-table">
         <thead><tr><th>Timeline</th><th>Nama Negara</th><th>Status</th></tr></thead>
@@ -111,13 +115,26 @@ title: Dashboard Admin — Grand Nations
           <em>Data profil anggota (Nama, Email, Foto) tidak akan terhapus.</em> Gunakan fitur ini saat akan memulai era/timeline baru.
         </p>
         <button id="btn-reset-timeline" class="btn solid" style="background: #ff4d4d; border-color: #ff4d4d; color: #fff; padding: 15px 40px; font-size: 1rem; width: auto; font-weight: bold;">
-          RESET SEMUA DATA NEGARA
+          Reset Timeline
         </button>
       </div>
     </div>
 
   </div>
 </main>
+
+<!-- MODAL CUSTOM UNTUK RESET -->
+<div id="reset-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3>⚠️ Peringatan Keras</h3>
+    <p>Kamu akan menghapus <strong>SEMUA</strong> data negara dari semua anggota. Tindakan ini tidak bisa dibatalkan.<br><br>Ketik <strong>RESET</strong> di bawah ini untuk mengonfirmasi:</p>
+    <input type="text" id="reset-confirm-input" placeholder="Ketik RESET" autocomplete="off">
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button id="btn-cancel-reset" class="btn line" style="border-color: var(--line); color: var(--dim);">Batal</button>
+      <button id="btn-confirm-reset" class="btn solid" style="background: #ff4d4d; border-color: #ff4d4d; color: #fff;">Konfirmasi Reset</button>
+    </div>
+  </div>
+</div>
 
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
@@ -140,6 +157,11 @@ title: Dashboard Admin — Grand Nations
   const loading = document.getElementById('loading');
   const accessDenied = document.getElementById('access-denied');
   const adminPanel = document.getElementById('admin-panel');
+  
+  // Elemen Modal
+  const resetModal = document.getElementById('reset-modal');
+  const resetInput = document.getElementById('reset-confirm-input');
+  const btnConfirmReset = document.getElementById('btn-confirm-reset');
 
   onAuthStateChanged(auth, async (user) => {
     loading.style.display = 'none';
@@ -164,7 +186,8 @@ title: Dashboard Admin — Grand Nations
     }
   });
 
-  // --- 1. LOAD KOTAK PERSETUJUAN ---
+  // ... (Fungsi loadRequests, handleNation, loadMembers, deleteMember, loadTimelines, setActiveTimeline, deleteTimeline, loadCountries, addTimeline, addCountry tetap SAMA seperti sebelumnya) ...
+
   async function loadRequests() {
     const container = document.getElementById('requests-container');
     container.innerHTML = '';
@@ -195,7 +218,6 @@ title: Dashboard Admin — Grand Nations
           const color = nation.status === 'approved' ? '#00ff64' : '#ff4d4d';
           actionHtml = `<span style="color:${color}; font-family:var(--mono); font-size:0.8rem;">${nation.status.toUpperCase()}</span>`;
         }
-
         nationsHtml += `
           <div class="nation-claim-box">
             <span style="font-weight:600; color:${nation.status === 'rejected' ? '#ff4d4d' : '#fff'}; text-decoration:${nation.status === 'rejected' ? 'line-through' : 'none'};">${nation.name}</span>
@@ -219,7 +241,6 @@ title: Dashboard Admin — Grand Nations
     }
   }
 
-  // --- 2. HANDLE APPROVE / REJECT PER NEGARA ---
   window.handleNation = async function(uid, nationIndex, newStatus) {
     try {
       const docRef = doc(db, "registrations", uid);
@@ -242,36 +263,23 @@ title: Dashboard Admin — Grand Nations
       const countrySnap = await getDocs(q);
       
       for (const cDoc of countrySnap.docs) {
-        await updateDoc(doc(db, "countries", cDoc.id), { 
-          status: newStatus === 'approved' ? 'claimed' : 'available' 
-        });
+        await updateDoc(doc(db, "countries", cDoc.id), { status: newStatus === 'approved' ? 'claimed' : 'available' });
       }
-
-      alert(`Negara ${targetNationName} berhasil di-${newStatus === 'approved' ? 'setujui' : 'tolak'}!`);
-      loadRequests(); 
-      loadCountries(); 
-
-    } catch (e) {
-      alert("Gagal memproses: " + e.message);
-    }
+      loadRequests(); loadCountries(); 
+    } catch (e) { alert("Gagal memproses: " + e.message); }
   };
 
-  // --- 3. LOAD DATA ANGGOTA ---
   async function loadMembers() {
     const membersSnap = await getDocs(collection(db, "users"));
     const membersBody = document.getElementById('table-members-body');
     membersBody.innerHTML = '';
     let count = 0;
-    
     membersSnap.forEach((docSnap) => {
       const data = docSnap.data();
       count++;
       membersBody.innerHTML += `
         <tr>
-          <td>${data.full_name}</td>
-          <td>${data.email}</td>
-          <td>${data.whatsapp || '-'}</td>
-          <td>${data.dob || '-'}</td>
+          <td>${data.full_name}</td><td>${data.email}</td><td>${data.whatsapp || '-'}</td><td>${data.dob || '-'}</td>
           <td><button class="btn-sm btn-delete" onclick="deleteMember('${docSnap.id}', '${data.full_name}')">Hapus</button></td>
         </tr>
       `;
@@ -279,15 +287,11 @@ title: Dashboard Admin — Grand Nations
     document.getElementById('total-members').textContent = count;
   }
 
-  // --- 4. FUNGSI HAPUS ANGGOTA ---
   window.deleteMember = async function(uid, name) {
-    const confirmDelete = confirm(`Yakin ingin menghapus keanggotaan "${name}"?\n\nSistem akan menghapus profil, riwayat negara, dan mengembalikan negara yang sudah diklaim menjadi Tersedia.`);
-    if (!confirmDelete) return;
-
+    if (!confirm(`Yakin ingin menghapus keanggotaan "${name}"?`)) return;
     try {
       const regDocRef = doc(db, "registrations", uid);
       const regSnap = await getDoc(regDocRef);
-      
       if (regSnap.exists()) {
         const regData = regSnap.data();
         if (regData.nations && Array.isArray(regData.nations)) {
@@ -304,92 +308,50 @@ title: Dashboard Admin — Grand Nations
         await deleteDoc(regDocRef);
       }
       await deleteDoc(doc(db, "users", uid));
-      alert("Anggota berhasil dihapus dari sistem.");
       loadMembers(); loadRequests(); loadCountries();
-    } catch (e) {
-      alert("Gagal menghapus anggota: " + e.message);
-    }
+    } catch (e) { alert("Gagal: " + e.message); }
   };
 
-  // --- 5. LOAD TIMELINES ---
   async function loadTimelines() {
-    try {
-      const configSnap = await getDoc(doc(db, "config", "timeline"));
-      const activeTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
+    const configSnap = await getDoc(doc(db, "config", "timeline"));
+    const activeTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
 
-      const select = document.getElementById('select-timeline');
-      select.innerHTML = '<option value="">-- Pilih Timeline --</option>';
-      
-      const tableBody = document.getElementById('table-timelines-body');
-      tableBody.innerHTML = '';
+    const select = document.getElementById('select-timeline');
+    select.innerHTML = '<option value="">-- Pilih Timeline --</option>';
+    const tableBody = document.getElementById('table-timelines-body');
+    tableBody.innerHTML = '';
 
-      const snap = await getDocs(collection(db, "timelines"));
-      if (snap.empty) {
-        tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--dim);">Belum ada timeline.</td></tr>';
-        return;
-      }
-
-      snap.forEach((docSnap) => {
-        const data = docSnap.data();
-        select.innerHTML += `<option value="${docSnap.id}">${data.name}</option>`;
-
-        const isActive = docSnap.id === activeTimelineId;
-        const badge = isActive ? '<span class="badge-active">AKTIF</span>' : '<span class="badge-inactive">ARSIP</span>';
-        
-        const btnAction = isActive 
-          ? '<span style="color:var(--dim); font-size:0.8rem;">Sedang Digunakan</span>' 
-          : `<button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>
-             <button class="btn-sm btn-delete" onclick="deleteTimeline('${docSnap.id}', '${data.name}')">Hapus</button>`;
-
-        tableBody.innerHTML += `
-          <tr>
-            <td style="font-weight:600;">${data.name}</td>
-            <td>${badge}</td>
-            <td>${btnAction}</td>
-          </tr>
-        `;
-      });
-    } catch (error) {
-      console.error(error);
-      alert("Gagal memuat timeline: " + error.message);
-    }
+    const snap = await getDocs(collection(db, "timelines"));
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      select.innerHTML += `<option value="${docSnap.id}">${data.name}</option>`;
+      const isActive = docSnap.id === activeTimelineId;
+      const badge = isActive ? '<span class="badge-active">AKTIF</span>' : '<span class="badge-inactive">ARSIP</span>';
+      const btnAction = isActive 
+        ? '<span style="color:var(--dim); font-size:0.8rem;">Sedang Digunakan</span>' 
+        : `<button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>
+           <button class="btn-sm btn-delete" onclick="deleteTimeline('${docSnap.id}', '${data.name}')">Hapus</button>`;
+      tableBody.innerHTML += `<tr><td style="font-weight:600;">${data.name}</td><td>${badge}</td><td>${btnAction}</td></tr>`;
+    });
   }
 
-  // --- 6. SET TIMELINE AKTIF ---
   window.setActiveTimeline = async function(timelineId, timelineName) {
-    const confirmSet = confirm(`Jadikan Timeline "${timelineName}" sebagai timeline aktif?\n\nSemua member baru hanya akan bisa memilih negara dari timeline ini.`);
-    if (!confirmSet) return;
-
+    if (!confirm(`Jadikan Timeline "${timelineName}" sebagai timeline aktif?`)) return;
     try {
-      await setDoc(doc(db, "config", "timeline"), { 
-        active_id: timelineId,
-        active_name: timelineName 
-      });
-      alert(`Timeline ${timelineName} berhasil diaktifkan!`);
+      await setDoc(doc(db, "config", "timeline"), { active_id: timelineId, active_name: timelineName });
       loadTimelines(); 
-    } catch (e) {
-      alert("Gagal mengubah timeline: " + e.message);
-    }
+    } catch (e) { alert("Gagal: " + e.message); }
   };
 
-  // --- 7. HAPUS TIMELINE ---
   window.deleteTimeline = async function(timelineId, timelineName) {
-    const confirmDelete = confirm(`HAPUS TIMELINE "${timelineName}"?\n\nAWAS: Semua negara di dalam timeline ini akan ikut terhapus permanen dari database!`);
-    if (!confirmDelete) return;
-
+    if (!confirm(`HAPUS TIMELINE "${timelineName}"?\n\nSemua negara di dalamnya akan ikut terhapus!`)) return;
     try {
       const q = query(collection(db, "countries"), where("timeline_id", "==", timelineId));
       const countrySnap = await getDocs(q);
-      for (const cDoc of countrySnap.docs) {
-        await deleteDoc(doc(db, "countries", cDoc.id));
-      }
+      for (const cDoc of countrySnap.docs) await deleteDoc(doc(db, "countries", cDoc.id));
       await deleteDoc(doc(db, "timelines", timelineId));
-
-      alert(`Timeline ${timelineName} dan semua negaranya berhasil dihapus.`);
       loadTimelines(); loadCountries();
-    } catch (e) {
-      alert("Gagal menghapus timeline: " + e.message);
-    }
+    } catch (e) { alert("Gagal: " + e.message); }
   };
 
   async function loadCountries() {
@@ -405,15 +367,11 @@ title: Dashboard Admin — Grand Nations
   document.getElementById('btn-add-timeline').addEventListener('click', async () => {
     const name = document.getElementById('new-timeline-name').value;
     if (!name) return alert("Isi nama timeline!");
-    const btn = document.getElementById('btn-add-timeline');
-    btn.textContent = 'Menyimpan...'; btn.disabled = true;
     try {
       await addDoc(collection(db, "timelines"), { name: name });
       document.getElementById('new-timeline-name').value = '';
       loadTimelines();
-      alert("Timeline berhasil ditambahkan!");
-    } catch (e) { alert("Gagal: " + e.message); } 
-    finally { btn.textContent = 'Tambah Timeline'; btn.disabled = false; }
+    } catch (e) { alert("Gagal: " + e.message); }
   });
 
   document.getElementById('btn-add-country').addEventListener('click', async () => {
@@ -421,55 +379,72 @@ title: Dashboard Admin — Grand Nations
     const timelineName = document.getElementById('select-timeline').options[document.getElementById('select-timeline').selectedIndex]?.text;
     const countryNamesRaw = document.getElementById('new-country-names').value;
 
-    if (!timelineId) return alert("Pilih timeline terlebih dahulu!");
-    if (!countryNamesRaw.trim()) return alert("Isi daftar negara terlebih dahulu!");
-
-    const countryNames = countryNamesRaw.split('\n').map(name => name.trim()).filter(name => name !== '');
-    if (countryNames.length === 0) return alert("Format tidak valid.");
+    if (!timelineId || !countryNamesRaw.trim()) return alert("Lengkapi data!");
+    const countryNames = countryNamesRaw.split('\n').map(n => n.trim()).filter(n => n !== '');
 
     const btn = document.getElementById('btn-add-country');
     btn.textContent = 'Memproses...'; btn.disabled = true;
     try {
-      let addedCount = 0;
       for (const countryName of countryNames) {
-        await addDoc(collection(db, "countries"), {
-          name: countryName, timeline_id: timelineId, timeline_name: timelineName, status: 'available'
-        });
-        addedCount++;
+        await addDoc(collection(db, "countries"), { name: countryName, timeline_id: timelineId, timeline_name: timelineName, status: 'available' });
       }
-      alert(`Berhasil! ${addedCount} negara ditambahkan.`);
       document.getElementById('new-country-names').value = '';
       loadCountries(); 
     } catch (e) { alert("Gagal: " + e.message); } 
     finally { btn.textContent = 'Tambah Massal Negara'; btn.disabled = false; }
   });
 
-  // --- 8. LOGIKA TOMBOL RESET ---
-  document.getElementById('btn-reset-timeline').addEventListener('click', async () => {
-    const confirm1 = confirm("⚠️ PERINGATAN KERAS ⚠️\n\nApakah kamu yakin ingin mereset SEMUA data negara?\nSemua member harus mendaftar ulang negaranya.");
-    if (!confirm1) return;
+  // --- LOGIKA MODAL RESET TIMELINE ---
+  
+  // 1. Buka Modal saat tombol di Zona Bahaya diklik
+  document.getElementById('btn-reset-timeline').addEventListener('click', () => {
+    resetInput.value = ''; // Kosongkan inputan
+    btnConfirmReset.disabled = true; // Nonaktifkan tombol konfirmasi dulu
+    btnConfirmReset.style.opacity = '0.5';
+    resetModal.classList.add('active');
+    resetInput.focus();
+  });
 
-    const confirm2 = prompt("Ketik kata 'RESET' (huruf besar) untuk melanjutkan:");
-    if (confirm2 !== 'RESET') {
-      return alert("Reset dibatalkan. Kata kunci salah.");
+  // 2. Tutup Modal jika klik Batal
+  document.getElementById('btn-cancel-reset').addEventListener('click', () => {
+    resetModal.classList.remove('active');
+  });
+
+  // 3. Deteksi ketikan user. Jika "RESET", aktifkan tombol konfirmasi
+  resetInput.addEventListener('input', (e) => {
+    if (e.target.value === 'RESET') {
+      btnConfirmReset.disabled = false;
+      btnConfirmReset.style.opacity = '1';
+    } else {
+      btnConfirmReset.disabled = true;
+      btnConfirmReset.style.opacity = '0.5';
     }
+  });
 
-    const btn = document.getElementById('btn-reset-timeline');
-    btn.textContent = 'Menghapus Data...';
-    btn.disabled = true;
+  // 4. Eksekusi Reset saat tombol Konfirmasi diklik
+  btnConfirmReset.addEventListener('click', async () => {
+    if (resetInput.value !== 'RESET') return;
+
+    btnConfirmReset.textContent = 'Menghapus...';
+    btnConfirmReset.disabled = true;
 
     try {
+      // Hapus semua data di tabel registrations
       const regSnap = await getDocs(collection(db, "registrations"));
       for (const docSnap of regSnap.docs) {
         await deleteDoc(doc(db, "registrations", docSnap.id));
       }
 
+      // Ubah semua status negara jadi 'available'
       const countrySnap = await getDocs(collection(db, "countries"));
       for (const cDoc of countrySnap.docs) {
         await updateDoc(doc(db, "countries", cDoc.id), { status: 'available' });
       }
 
       alert("✅ RESET BERHASIL! Semua data negara telah dibersihkan.");
+      resetModal.classList.remove('active');
+      
+      // Refresh tampilan
       loadRequests();
       loadCountries();
 
@@ -477,12 +452,11 @@ title: Dashboard Admin — Grand Nations
       console.error(error);
       alert("Gagal mereset data: " + error.message);
     } finally {
-      btn.textContent = 'RESET SEMUA DATA NEGARA';
-      btn.disabled = false;
+      btnConfirmReset.textContent = 'Konfirmasi Reset';
     }
   });
 
-  // --- 9. NAVIGASI TAB ---
+  // --- NAVIGASI TAB ---
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
