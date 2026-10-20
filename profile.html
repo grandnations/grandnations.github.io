@@ -210,4 +210,168 @@ title: Profil — Grand Nations
               // Tampilkan Nama Kustom (jika ada, jika tidak pakai nama lama)
               const customNameDisplay = document.getElementById('custom-nation-display');
               if (currentNationData.custom_name) {
-                customNameDisplay
+                customNameDisplay.textContent = currentNationData.custom_name;
+              } else {
+                // Fallback jika data lama tidak punya custom_name
+                const names = currentNationData.nations.map(n => n.name).join(' & ');
+                customNameDisplay.textContent = names || 'Negara Tanpa Nama';
+              }
+
+              const listContainer = document.getElementById('nations-list-container');
+              listContainer.innerHTML = '';
+              
+              let allRejected = true;
+              if (currentNationData.nations && Array.isArray(currentNationData.nations)) {
+                currentNationData.nations.forEach(nation => {
+                  let statusColor = '#ffc800'; 
+                  if (nation.status === 'approved') statusColor = '#00ff64';
+                  if (nation.status === 'rejected') statusColor = '#ff4d4d';
+                  else allRejected = false;
+
+                  listContainer.innerHTML += `
+                    <div class="nation-item">
+                      <span class="data-value" style="color:#fff;">${nation.name}</span>
+                      <span class="data-value" style="color:${statusColor}; font-size:0.85rem;">${nation.status.toUpperCase()}</span>
+                    </div>
+                  `;
+                });
+              }
+
+              if (allRejected && currentNationData.nations && currentNationData.nations.length > 0) {
+                document.getElementById('re-apply-container').style.display = 'block';
+              } else {
+                document.getElementById('re-apply-container').style.display = 'none';
+              }
+            } else {
+              document.getElementById('no-nation-state').style.display = 'block';
+              document.getElementById('has-nation-state').style.display = 'none';
+              document.getElementById('btn-edit-nation').style.display = 'none';
+            }
+          } catch (e) { console.error("Gagal load negara:", e); }
+
+          profileState.style.display = 'block';
+        } else {
+          emptyUserState.style.display = 'block';
+        }
+      } catch (error) {
+        console.error(error);
+        loginRequiredState.style.display = 'block';
+      }
+    } else {
+      loginRequiredState.style.display = 'block';
+      emptyUserState.style.display = 'none';
+      profileState.style.display = 'none';
+    }
+  });
+
+  // --- LOGIKA EDIT PROFIL (SAMA SEPERTI SEBELUMNYA) ---
+  btnEditProfile.addEventListener('click', () => {
+    if (!currentUserData) return;
+    document.getElementById('edit-name').value = currentUserData.full_name || '';
+    document.getElementById('edit-wa').value = currentUserData.whatsapp || '';
+    document.getElementById('edit-dob').value = currentUserData.dob || '';
+    document.getElementById('edit-photo').value = ''; 
+    editError.style.display = 'none';
+    editModal.classList.add('active');
+  });
+
+  btnCloseModal.addEventListener('click', () => editModal.classList.remove('active'));
+  editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.remove('active'); });
+
+  editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    btnSaveEdit.textContent = 'Menyimpan...';
+    btnSaveEdit.disabled = true;
+    editError.style.display = 'none';
+
+    try {
+      const newName = document.getElementById('edit-name').value;
+      const newWa = document.getElementById('edit-wa').value;
+      const newDob = document.getElementById('edit-dob').value;
+      const file = document.getElementById('edit-photo').files[0];
+      let newPhotoURL = currentUserData.photo_url;
+
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) throw new Error("Ukuran foto maksimal 2MB!");
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+        const data = await response.json();
+        if (!data.secure_url) throw new Error(data.error?.message || "Gagal upload foto");
+        newPhotoURL = data.secure_url;
+      }
+
+      await updateDoc(doc(db, "users", currentUser.uid), { full_name: newName, whatsapp: newWa, dob: newDob, photo_url: newPhotoURL });
+
+      document.getElementById('user-name-display').textContent = newName;
+      document.getElementById('user-wa-display').textContent = newWa;
+      document.getElementById('user-dob-display').textContent = new Date(newDob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+      
+      if (newPhotoURL) {
+        document.getElementById('photo-placeholder').style.display = 'none';
+        document.getElementById('profile-pic-display').src = newPhotoURL;
+        document.getElementById('profile-pic-display').style.display = 'block';
+      }
+
+      currentUserData.full_name = newName;
+      currentUserData.whatsapp = newWa;
+      currentUserData.dob = newDob;
+      currentUserData.photo_url = newPhotoURL;
+
+      editModal.classList.remove('active');
+      alert("Profil berhasil diperbarui!");
+    } catch (error) {
+      editError.textContent = "Gagal menyimpan: " + error.message;
+      editError.style.display = 'block';
+    } finally {
+      btnSaveEdit.textContent = 'Simpan Perubahan';
+      btnSaveEdit.disabled = false;
+    }
+  });
+
+  // --- LOGIKA EDIT NAMA NEGARA (BARU) ---
+  btnEditNation.addEventListener('click', () => {
+    if (!currentNationData) return;
+    // Isi input dengan nama saat ini
+    document.getElementById('edit-nation-name').value = currentNationData.custom_name || '';
+    editNationError.style.display = 'none';
+    editNationModal.classList.add('active');
+  });
+
+  btnCloseNationModal.addEventListener('click', () => editNationModal.classList.remove('active'));
+  editNationModal.addEventListener('click', (e) => { if (e.target === editNationModal) editNationModal.classList.remove('active'); });
+
+  editNationForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    btnSaveNation.textContent = 'Menyimpan...';
+    btnSaveNation.disabled = true;
+    editNationError.style.display = 'none';
+
+    try {
+      const newNationName = document.getElementById('edit-nation-name').value;
+
+      // Update data pendaftaran di tabel 'registrations'
+      await updateDoc(doc(db, "registrations", currentUser.uid), {
+        custom_name: newNationName
+      });
+
+      // Update tampilan secara instan
+      document.getElementById('custom-nation-display').textContent = newNationName;
+      currentNationData.custom_name = newNationName;
+
+      editNationModal.classList.remove('active');
+      alert("Nama negara berhasil diperbarui!");
+    } catch (error) {
+      editNationError.textContent = "Gagal menyimpan: " + error.message;
+      editNationError.style.display = 'block';
+    } finally {
+      btnSaveNation.textContent = 'Simpan Nama Negara';
+      btnSaveNation.disabled = false;
+    }
+  });
+</script>
