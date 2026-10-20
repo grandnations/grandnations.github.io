@@ -196,9 +196,7 @@ title: Dashboard Admin — Grand Nations
             </div>
             <span style="font-family:var(--mono); font-size:0.7rem; border:1px solid var(--line); padding:4px 8px;">ID: ${uid.slice(0,6)}...</span>
           </div>
-          <div>
-            ${nationsHtml}
-          </div>
+          <div>${nationsHtml}</div>
         </div>
       `;
     }
@@ -257,9 +255,7 @@ title: Dashboard Admin — Grand Nations
           <td>${data.email}</td>
           <td>${data.whatsapp || '-'}</td>
           <td>${data.dob || '-'}</td>
-          <td>
-            <button class="btn-sm btn-delete" onclick="deleteMember('${docSnap.id}', '${data.full_name}')">Hapus</button>
-          </td>
+          <td><button class="btn-sm btn-delete" onclick="deleteMember('${docSnap.id}', '${data.full_name}')">Hapus</button></td>
         </tr>
       `;
     });
@@ -290,14 +286,9 @@ title: Dashboard Admin — Grand Nations
         }
         await deleteDoc(regDocRef);
       }
-
       await deleteDoc(doc(db, "users", uid));
-
       alert("Anggota berhasil dihapus dari sistem.");
-      loadMembers();
-      loadRequests();
-      loadCountries();
-
+      loadMembers(); loadRequests(); loadCountries();
     } catch (e) {
       alert("Gagal menghapus anggota: " + e.message);
     }
@@ -305,37 +296,47 @@ title: Dashboard Admin — Grand Nations
 
   // --- LOAD TIMELINES & COUNTRIES ---
   async function loadTimelines() {
-    // 1. Cek ID Timeline Aktif saat ini
-    const configSnap = await getDoc(doc(db, "config", "timeline"));
-    const activeTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
+    try {
+      // 1. Cek ID Timeline Aktif
+      const configSnap = await getDoc(doc(db, "config", "timeline"));
+      const activeTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
 
-    // 2. Isi Dropdown Form Tambah Negara
-    const select = document.getElementById('select-timeline');
-    select.innerHTML = '<option value="">-- Pilih Timeline --</option>';
-    const snap = await getDocs(collection(db, "timelines"));
-    
-    // 3. Isi Tabel Daftar Timeline
-    const tableBody = document.getElementById('table-timelines-body');
-    tableBody.innerHTML = '';
+      // 2. Isi Dropdown
+      const select = document.getElementById('select-timeline');
+      select.innerHTML = '<option value="">-- Pilih Timeline --</option>';
+      
+      // 3. Isi Tabel Daftar Timeline
+      const tableBody = document.getElementById('table-timelines-body');
+      tableBody.innerHTML = '';
 
-    snap.forEach((docSnap) => {
-      const data = docSnap.data();
-      select.innerHTML += `<option value="${docSnap.id}">${data.name}</option>`;
+      const snap = await getDocs(collection(db, "timelines"));
+      if (snap.empty) {
+        tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--dim);">Belum ada timeline.</td></tr>';
+        return;
+      }
 
-      const isActive = docSnap.id === activeTimelineId;
-      const badge = isActive ? '<span class="badge-active">AKTIF</span>' : '<span class="badge-inactive">ARSIP</span>';
-      const btnAction = isActive 
-        ? '<span style="color:var(--dim); font-size:0.8rem;">Sedang Digunakan</span>' 
-        : `<button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>`;
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        select.innerHTML += `<option value="${docSnap.id}">${data.name}</option>`;
 
-      tableBody.innerHTML += `
-        <tr>
-          <td style="font-weight:600;">${data.name}</td>
-          <td>${badge}</td>
-          <td>${btnAction}</td>
-        </tr>
-      `;
-    });
+        const isActive = docSnap.id === activeTimelineId;
+        const badge = isActive ? '<span class="badge-active">AKTIF</span>' : '<span class="badge-inactive">ARSIP</span>';
+        const btnAction = isActive 
+          ? '<span style="color:var(--dim); font-size:0.8rem;">Sedang Digunakan</span>' 
+          : `<button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>`;
+
+        tableBody.innerHTML += `
+          <tr>
+            <td style="font-weight:600;">${data.name}</td>
+            <td>${badge}</td>
+            <td>${btnAction}</td>
+          </tr>
+        `;
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Gagal memuat timeline: " + error.message);
+    }
   }
 
   // --- FUNGSI SET TIMELINE AKTIF ---
@@ -344,14 +345,12 @@ title: Dashboard Admin — Grand Nations
     if (!confirmSet) return;
 
     try {
-      // Simpan ID timeline aktif ke koleksi config
       await setDoc(doc(db, "config", "timeline"), { 
         active_id: timelineId,
         active_name: timelineName 
       });
-      
       alert(`Timeline ${timelineName} berhasil diaktifkan!`);
-      loadTimelines(); // Refresh tabel
+      loadTimelines(); 
     } catch (e) {
       alert("Gagal mengubah timeline: " + e.message);
     }
@@ -367,12 +366,26 @@ title: Dashboard Admin — Grand Nations
     });
   }
 
+  // --- LOGIKA TAMBAH TIMELINE ---
   document.getElementById('btn-add-timeline').addEventListener('click', async () => {
     const name = document.getElementById('new-timeline-name').value;
-    if (!name) return;
-    await addDoc(collection(db, "timelines"), { name: name });
-    document.getElementById('new-timeline-name').value = '';
-    loadTimelines();
+    if (!name) return alert("Isi nama timeline!");
+
+    const btn = document.getElementById('btn-add-timeline');
+    btn.textContent = 'Menyimpan...';
+    btn.disabled = true;
+
+    try {
+      await addDoc(collection(db, "timelines"), { name: name });
+      document.getElementById('new-timeline-name').value = '';
+      loadTimelines(); // Langsung refresh tabel dan dropdown
+      alert("Timeline berhasil ditambahkan!");
+    } catch (e) {
+      alert("Gagal menambah timeline: " + e.message);
+    } finally {
+      btn.textContent = 'Tambah Timeline';
+      btn.disabled = false;
+    }
   });
 
   // --- LOGIKA TAMBAH MASSAL NEGARA ---
@@ -402,7 +415,6 @@ title: Dashboard Admin — Grand Nations
         });
         addedCount++;
       }
-      
       alert(`Berhasil! ${addedCount} negara telah ditambahkan ke timeline ${timelineName}.`);
       document.getElementById('new-country-names').value = '';
       loadCountries(); 
