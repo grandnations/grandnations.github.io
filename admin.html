@@ -147,7 +147,7 @@ title: Dashboard Admin — Grand Nations
   <div class="modal-content" style="border-color: #ffc800; box-shadow: 0 10px 30px rgba(255, 200, 0, 0.2);">
     <h3 style="color: #ffc800;">⏳ Timeskip Era</h3>
     <p style="text-align: left; color: var(--dim); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
-      Pilih timeline baru. Pemain akan <strong>kehilangan klaim negara lamanya</strong>, tetapi data profil anggota tetap aman. Mereka harus mendaftarkan negara baru di era ini.
+      Pilih timeline baru. Seluruh negara dari era lama akan <strong>dipindahkan ke era baru</strong>, sehingga semua anggota tetap memegang negaranya masing-masing tanpa perlu mendaftar ulang.
     </p>
     
     <select id="timeskip-target" class="admin-input" style="margin-bottom: 20px; padding: 12px;">
@@ -519,25 +519,41 @@ title: Dashboard Admin — Grand Nations
     btnConfirmTimeskip.disabled = true;
 
     try {
-      // 1. Ubah config Timeline Aktif ke timeline baru
+      // 1. Dapatkan Timeline Aktif Saat Ini (Era Lama)
+      const configSnap = await getDoc(doc(db, "config", "timeline"));
+      const oldTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
+
+      if (!oldTimelineId) {
+        throw new Error("Tidak ada timeline aktif sebelumnya. Tidak bisa timeskip.");
+      }
+
+      // 2. UBAH CONFIG KE TIMELINE BARU
       await setDoc(doc(db, "config", "timeline"), { 
         active_id: newTimelineId, 
         active_name: newTimelineName 
       });
 
-      // 2. Update timeline_id di semua pendaftaran anggota
-      const regSnap = await getDocs(collection(db, "registrations"));
-      let updatedCount = 0;
+      // 3. PINDAHKAN SEMUA NEGARA DARI ERA LAMA KE ERA BARU
+      // (Ini agar data klaim Jokowi (Jerman) tetap sah di era baru)
+      const q = query(collection(db, "countries"), where("timeline_id", "==", oldTimelineId));
+      const oldCountriesSnap = await getDocs(q);
       
-      for (const docSnap of regSnap.docs) {
-        await updateDoc(doc(db, "registrations", docSnap.id), { timeline_id: newTimelineId });
-        updatedCount++;
+      let movedCount = 0;
+      for (const cDoc of oldCountriesSnap.docs) {
+        await updateDoc(doc(db, "countries", cDoc.id), { 
+          timeline_id: newTimelineId,
+          timeline_name: newTimelineName
+        });
+        movedCount++;
       }
 
-      alert(`⏳ TIMESKIP BERHASIL! Dunia telah berubah ke era ${newTimelineName}. ${updatedCount} pendaftaran negara telah dipindahkan ke era baru.`);
+      alert(`⏳ TIMESKIP BERHASIL!\n\nDunia telah berubah ke era ${newTimelineName}. Sebanyak ${movedCount} negara telah dipindahkan ke era baru. Semua member tetap memegang negaranya masing-masing.`);
       timeskipModal.classList.remove('active');
       
-      loadRequests(); loadCountries(); loadTimelines();
+      loadRequests(); 
+      loadCountries(); 
+      loadTimelines();
+      
     } catch (error) {
       console.error(error);
       alert("Gagal melakukan timeskip: " + error.message);
