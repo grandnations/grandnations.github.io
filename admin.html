@@ -297,15 +297,12 @@ title: Dashboard Admin — Grand Nations
   // --- LOAD TIMELINES & COUNTRIES ---
   async function loadTimelines() {
     try {
-      // 1. Cek ID Timeline Aktif
       const configSnap = await getDoc(doc(db, "config", "timeline"));
       const activeTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
 
-      // 2. Isi Dropdown
       const select = document.getElementById('select-timeline');
       select.innerHTML = '<option value="">-- Pilih Timeline --</option>';
       
-      // 3. Isi Tabel Daftar Timeline
       const tableBody = document.getElementById('table-timelines-body');
       tableBody.innerHTML = '';
 
@@ -321,9 +318,12 @@ title: Dashboard Admin — Grand Nations
 
         const isActive = docSnap.id === activeTimelineId;
         const badge = isActive ? '<span class="badge-active">AKTIF</span>' : '<span class="badge-inactive">ARSIP</span>';
+        
+        // LOGIKA TOMBOL: Jika aktif, tidak boleh dihapus. Jika arsip, bisa dihapus.
         const btnAction = isActive 
           ? '<span style="color:var(--dim); font-size:0.8rem;">Sedang Digunakan</span>' 
-          : `<button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>`;
+          : `<button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>
+             <button class="btn-sm btn-delete" onclick="deleteTimeline('${docSnap.id}', '${data.name}')">Hapus</button>`;
 
         tableBody.innerHTML += `
           <tr>
@@ -356,6 +356,31 @@ title: Dashboard Admin — Grand Nations
     }
   };
 
+  // --- FUNGSI HAPUS TIMELINE ---
+  window.deleteTimeline = async function(timelineId, timelineName) {
+    const confirmDelete = confirm(`HAPUS TIMELINE "${timelineName}"?\n\nAWAS: Semua negara di dalam timeline ini akan ikut terhapus permanen dari database!`);
+    if (!confirmDelete) return;
+
+    try {
+      // 1. Hapus semua negara di timeline ini
+      const q = query(collection(db, "countries"), where("timeline_id", "==", timelineId));
+      const countrySnap = await getDocs(q);
+      
+      for (const cDoc of countrySnap.docs) {
+        await deleteDoc(doc(db, "countries", cDoc.id));
+      }
+
+      // 2. Hapus timeline-nya
+      await deleteDoc(doc(db, "timelines", timelineId));
+
+      alert(`Timeline ${timelineName} dan semua negaranya berhasil dihapus.`);
+      loadTimelines();
+      loadCountries();
+    } catch (e) {
+      alert("Gagal menghapus timeline: " + e.message);
+    }
+  };
+
   async function loadCountries() {
     const countriesBody = document.getElementById('table-countries-body');
     countriesBody.innerHTML = '';
@@ -366,29 +391,20 @@ title: Dashboard Admin — Grand Nations
     });
   }
 
-  // --- LOGIKA TAMBAH TIMELINE ---
   document.getElementById('btn-add-timeline').addEventListener('click', async () => {
     const name = document.getElementById('new-timeline-name').value;
     if (!name) return alert("Isi nama timeline!");
-
     const btn = document.getElementById('btn-add-timeline');
-    btn.textContent = 'Menyimpan...';
-    btn.disabled = true;
-
+    btn.textContent = 'Menyimpan...'; btn.disabled = true;
     try {
       await addDoc(collection(db, "timelines"), { name: name });
       document.getElementById('new-timeline-name').value = '';
-      loadTimelines(); // Langsung refresh tabel dan dropdown
+      loadTimelines();
       alert("Timeline berhasil ditambahkan!");
-    } catch (e) {
-      alert("Gagal menambah timeline: " + e.message);
-    } finally {
-      btn.textContent = 'Tambah Timeline';
-      btn.disabled = false;
-    }
+    } catch (e) { alert("Gagal: " + e.message); } 
+    finally { btn.textContent = 'Tambah Timeline'; btn.disabled = false; }
   });
 
-  // --- LOGIKA TAMBAH MASSAL NEGARA ---
   document.getElementById('btn-add-country').addEventListener('click', async () => {
     const timelineId = document.getElementById('select-timeline').value;
     const timelineName = document.getElementById('select-timeline').options[document.getElementById('select-timeline').selectedIndex]?.text;
@@ -398,32 +414,23 @@ title: Dashboard Admin — Grand Nations
     if (!countryNamesRaw.trim()) return alert("Isi daftar negara terlebih dahulu!");
 
     const countryNames = countryNamesRaw.split('\n').map(name => name.trim()).filter(name => name !== '');
-    if (countryNames.length === 0) return alert("Format tidak valid atau tidak ada negara yang terbaca.");
+    if (countryNames.length === 0) return alert("Format tidak valid.");
 
     const btn = document.getElementById('btn-add-country');
-    btn.textContent = 'Memproses...';
-    btn.disabled = true;
-
+    btn.textContent = 'Memproses...'; btn.disabled = true;
     try {
       let addedCount = 0;
       for (const countryName of countryNames) {
         await addDoc(collection(db, "countries"), {
-          name: countryName,
-          timeline_id: timelineId,
-          timeline_name: timelineName,
-          status: 'available'
+          name: countryName, timeline_id: timelineId, timeline_name: timelineName, status: 'available'
         });
         addedCount++;
       }
-      alert(`Berhasil! ${addedCount} negara telah ditambahkan ke timeline ${timelineName}.`);
+      alert(`Berhasil! ${addedCount} negara ditambahkan.`);
       document.getElementById('new-country-names').value = '';
       loadCountries(); 
-    } catch (e) {
-      alert("Terjadi kesalahan: " + e.message);
-    } finally {
-      btn.textContent = 'Tambah Massal Negara';
-      btn.disabled = false;
-    }
+    } catch (e) { alert("Gagal: " + e.message); } 
+    finally { btn.textContent = 'Tambah Massal Negara'; btn.disabled = false; }
   });
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
