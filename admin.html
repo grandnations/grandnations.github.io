@@ -19,6 +19,9 @@ title: Dashboard Admin — Grand Nations
   .btn-approve { background: #00ff64; color: #000; }
   .btn-reject { background: #ff4d4d; color: #fff; }
   .btn-delete { background: #ff4d4d; color: #fff; }
+  
+  .badge-active { background: #00ff64; color: #000; padding: 2px 8px; font-family: var(--mono); font-size: 0.7rem; font-weight: bold; border-radius: 2px; }
+  .badge-inactive { background: var(--line-strong); color: var(--dim); padding: 2px 8px; font-family: var(--mono); font-size: 0.7rem; border-radius: 2px; }
 </style>
 
 <main class="wrap">
@@ -81,6 +84,13 @@ title: Dashboard Admin — Grand Nations
 
       </div>
 
+      <!-- Tabel Daftar Timeline -->
+      <h3 style="margin-top:40px; margin-bottom:15px; font-size:1.1rem;">Daftar Timeline & Status</h3>
+      <table class="admin-table" style="margin-bottom:30px;">
+        <thead><tr><th>Nama Timeline</th><th>Status</th><th>Aksi</th></tr></thead>
+        <tbody id="table-timelines-body"></tbody>
+      </table>
+
       <!-- Tabel Daftar Negara -->
       <h3 style="margin-top:40px; margin-bottom:15px; font-size:1.1rem;">Daftar Negara Terdaftar</h3>
       <table class="admin-table">
@@ -94,7 +104,7 @@ title: Dashboard Admin — Grand Nations
 
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, addDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, addDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -295,11 +305,57 @@ title: Dashboard Admin — Grand Nations
 
   // --- LOAD TIMELINES & COUNTRIES ---
   async function loadTimelines() {
+    // 1. Cek ID Timeline Aktif saat ini
+    const configSnap = await getDoc(doc(db, "config", "timeline"));
+    const activeTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
+
+    // 2. Isi Dropdown Form Tambah Negara
     const select = document.getElementById('select-timeline');
     select.innerHTML = '<option value="">-- Pilih Timeline --</option>';
     const snap = await getDocs(collection(db, "timelines"));
-    snap.forEach((doc) => { select.innerHTML += `<option value="${doc.id}">${doc.data().name}</option>`; });
+    
+    // 3. Isi Tabel Daftar Timeline
+    const tableBody = document.getElementById('table-timelines-body');
+    tableBody.innerHTML = '';
+
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      select.innerHTML += `<option value="${docSnap.id}">${data.name}</option>`;
+
+      const isActive = docSnap.id === activeTimelineId;
+      const badge = isActive ? '<span class="badge-active">AKTIF</span>' : '<span class="badge-inactive">ARSIP</span>';
+      const btnAction = isActive 
+        ? '<span style="color:var(--dim); font-size:0.8rem;">Sedang Digunakan</span>' 
+        : `<button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>`;
+
+      tableBody.innerHTML += `
+        <tr>
+          <td style="font-weight:600;">${data.name}</td>
+          <td>${badge}</td>
+          <td>${btnAction}</td>
+        </tr>
+      `;
+    });
   }
+
+  // --- FUNGSI SET TIMELINE AKTIF ---
+  window.setActiveTimeline = async function(timelineId, timelineName) {
+    const confirmSet = confirm(`Jadikan Timeline "${timelineName}" sebagai timeline aktif?\n\nSemua member baru hanya akan bisa memilih negara dari timeline ini.`);
+    if (!confirmSet) return;
+
+    try {
+      // Simpan ID timeline aktif ke koleksi config
+      await setDoc(doc(db, "config", "timeline"), { 
+        active_id: timelineId,
+        active_name: timelineName 
+      });
+      
+      alert(`Timeline ${timelineName} berhasil diaktifkan!`);
+      loadTimelines(); // Refresh tabel
+    } catch (e) {
+      alert("Gagal mengubah timeline: " + e.message);
+    }
+  };
 
   async function loadCountries() {
     const countriesBody = document.getElementById('table-countries-body');
@@ -328,11 +384,7 @@ title: Dashboard Admin — Grand Nations
     if (!timelineId) return alert("Pilih timeline terlebih dahulu!");
     if (!countryNamesRaw.trim()) return alert("Isi daftar negara terlebih dahulu!");
 
-    // Pecah teks berdasarkan baris baru (enter), bersihkan spasi di awal/akhir, dan buang baris kosong
-    const countryNames = countryNamesRaw.split('\n')
-                        .map(name => name.trim())
-                        .filter(name => name !== '');
-
+    const countryNames = countryNamesRaw.split('\n').map(name => name.trim()).filter(name => name !== '');
     if (countryNames.length === 0) return alert("Format tidak valid atau tidak ada negara yang terbaca.");
 
     const btn = document.getElementById('btn-add-country');
@@ -341,7 +393,6 @@ title: Dashboard Admin — Grand Nations
 
     try {
       let addedCount = 0;
-      // Looping untuk memasukkan setiap negara ke database
       for (const countryName of countryNames) {
         await addDoc(collection(db, "countries"), {
           name: countryName,
@@ -353,10 +404,10 @@ title: Dashboard Admin — Grand Nations
       }
       
       alert(`Berhasil! ${addedCount} negara telah ditambahkan ke timeline ${timelineName}.`);
-      document.getElementById('new-country-names').value = ''; // Bersihkan textarea
-      loadCountries(); // Refresh tabel
+      document.getElementById('new-country-names').value = '';
+      loadCountries(); 
     } catch (e) {
-      alert("Terjadi kesalahan saat menambahkan: " + e.message);
+      alert("Terjadi kesalahan: " + e.message);
     } finally {
       btn.textContent = 'Tambah Massal Negara';
       btn.disabled = false;
