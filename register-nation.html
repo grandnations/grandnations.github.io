@@ -172,4 +172,118 @@ title: Pendaftaran Negara — Grand Nations
       const querySnapshot = await getDocs(q);
       
       allCountries = [];
-      querySnapshot.forEach((doc) => { allCountries.push({ id: doc.id
+      querySnapshot.forEach((doc) => { allCountries.push({ id: doc.id, name: doc.data().name }); });
+      renderOptions('');
+      
+      formContainer.style.display = 'block'; // Tampilkan form setelah negara siap
+
+    } catch (error) { 
+      console.error(error);
+      optionsList.innerHTML = '<div style="color:#ff4d4d; padding:10px;">Gagal memuat negara</div>'; 
+    }
+  }
+
+  function renderOptions(searchTerm) {
+    optionsList.innerHTML = '';
+    const filtered = allCountries.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (filtered.length === 0) { optionsList.innerHTML = '<div style="color:var(--dim); padding:10px;">Negara tidak ditemukan</div>'; return; }
+
+    filtered.forEach(country => {
+      const div = document.createElement('div');
+      const isSelected = selectedCountries.includes(country.name);
+      div.className = 'custom-option' + (isSelected ? ' selected' : '');
+      div.textContent = country.name;
+      div.addEventListener('click', (e) => { e.stopPropagation(); toggleCountry(country.name); });
+      optionsList.appendChild(div);
+    });
+  }
+
+  function toggleCountry(name) {
+    const index = selectedCountries.indexOf(name);
+    if (index > -1) selectedCountries.splice(index, 1);
+    else selectedCountries.push(name);
+    updateTagsUI();
+    renderOptions(searchInput.value); 
+  }
+
+  function updateTagsUI() {
+    tagsContainer.innerHTML = '';
+    if (selectedCountries.length === 0) { tagsContainer.innerHTML = '<span style="color:var(--dim);">Pilih Negara...</span>'; return; }
+    selectedCountries.forEach(name => {
+      const tag = document.createElement('div');
+      tag.className = 'selected-tag';
+      tag.innerHTML = `${name} <span title="Hapus">&times;</span>`;
+      tag.querySelector('span').addEventListener('click', (e) => { e.stopPropagation(); toggleCountry(name); });
+      tagsContainer.appendChild(tag);
+    });
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    loading.style.display = 'none';
+    if (user) {
+      currentUser = user;
+      loginRequiredState.style.display = 'none';
+      
+      const memberDocSnap = await getDoc(doc(db, "users", user.uid));
+      if (memberDocSnap.exists()) {
+        notAMemberState.style.display = 'none';
+        
+        const nationDocSnap = await getDoc(doc(db, "registrations", user.uid));
+        
+        // Cek apakah semua negara ditolak
+        if (nationDocSnap.exists()) {
+          const data = nationDocSnap.data();
+          const hasActive = data.nations && data.nations.some(n => n.status === 'pending' || n.status === 'approved');
+          
+          if (hasActive) {
+            window.location.href = '/profile.html';
+          } else {
+            formContainer.style.display = 'block'; 
+            loadCountries();
+          }
+        } else {
+          formContainer.style.display = 'block'; 
+          loadCountries();
+        }
+      } else { 
+        formContainer.style.display = 'none'; 
+        notAMemberState.style.display = 'block'; 
+      }
+    } else { 
+      formContainer.style.display = 'none'; 
+      loginRequiredState.style.display = 'block'; 
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    if (selectedCountries.length === 0) { formError.textContent = "Pilih minimal satu negara!"; formError.style.display = 'block'; return; }
+
+    submitBtn.textContent = 'Mengirim Data...';
+    submitBtn.disabled = true;
+    formError.style.display = 'none';
+
+    try {
+      const nationsData = selectedCountries.map(name => ({ name: name, status: 'pending' }));
+
+      await setDoc(doc(db, "registrations", currentUser.uid), {
+        nations: nationsData, 
+        leader_name: document.getElementById('leader_name').value,
+        ideology: document.getElementById('ideology').value,
+        capital: document.getElementById('capital').value,
+        description: document.getElementById('description').value,
+        status: 'pending', 
+        created_at: serverTimestamp(),
+        email: currentUser.email
+      });
+
+      window.location.href = '/profile.html';
+    } catch (error) {
+      formError.textContent = "Gagal mendaftar: " + error.message;
+      formError.style.display = 'block';
+      submitBtn.textContent = 'Kirim Pendaftaran';
+      submitBtn.disabled = false;
+    }
+  });
+</script>
