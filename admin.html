@@ -101,7 +101,7 @@ title: Dashboard Admin — Grand Nations
 
       <h3 style="margin-top:40px; margin-bottom:15px; font-size:1.1rem;">Daftar Negara Terdaftar</h3>
       <table class="admin-table">
-        <thead><tr><th>Timeline</th><th>Nama Negara</th><th>Status</th></tr></thead>
+        <thead><tr><th>Timeline</th><th>Nama Negara</th><th>Status</th><th>Aksi</th></tr></thead>
         <tbody id="table-countries-body"></tbody>
       </table>
     </div>
@@ -147,7 +147,7 @@ title: Dashboard Admin — Grand Nations
   <div class="modal-content" style="border-color: #ffc800; box-shadow: 0 10px 30px rgba(255, 200, 0, 0.2);">
     <h3 style="color: #ffc800;">⏳ Timeskip Era</h3>
     <p style="text-align: left; color: var(--dim); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
-      Pilih timeline baru. Seluruh negara dari era lama akan <strong>dipindahkan ke era baru</strong>, sehingga semua anggota tetap memegang negaranya masing-masing tanpa perlu mendaftar ulang.
+      Pilih timeline baru. Pemain akan <strong>kehilangan klaim negara lamanya</strong>, tetapi data profil anggota tetap aman. Mereka harus mendaftarkan negara baru di era ini.
     </p>
     
     <select id="timeskip-target" class="admin-input" style="margin-bottom: 20px; padding: 12px;">
@@ -232,7 +232,6 @@ title: Dashboard Admin — Grand Nations
       const hasPending = data.nations.some(n => n.status === 'pending');
       if (!hasPending && data.status !== 'pending') continue; 
 
-      // AMBIL DATA ANGGOTA (Nama & WA)
       const userSnap = await getDoc(doc(db, "users", uid));
       const userData = userSnap.exists() ? userSnap.data() : {};
       const memberName = userData.full_name || "Tanpa Nama";
@@ -252,7 +251,6 @@ title: Dashboard Admin — Grand Nations
           const color = nation.status === 'approved' ? '#00ff64' : '#ff4d4d';
           actionHtml = `<span style="color:${color}; font-family:var(--mono); font-size:0.8rem;">${nation.status.toUpperCase()}</span>`;
         }
-
         nationsHtml += `
           <div class="nation-claim-box">
             <span style="font-weight:600; color:${nation.status === 'rejected' ? '#ff4d4d' : '#fff'}; text-decoration:${nation.status === 'rejected' ? 'line-through' : 'none'};">${nation.name}</span>
@@ -261,7 +259,6 @@ title: Dashboard Admin — Grand Nations
         `;
       });
 
-      // TAMPILAN BARU: Nama Besar, Email Kecil di Bawahnya
       container.innerHTML += `
         <div class="request-card">
           <div class="request-header">
@@ -272,9 +269,7 @@ title: Dashboard Admin — Grand Nations
             </div>
             <span style="font-family:var(--mono); font-size:0.7rem; border:1px solid var(--line); padding:4px 8px;">ID: ${uid.slice(0,6)}...</span>
           </div>
-          <div>
-            ${nationsHtml}
-          </div>
+          <div>${nationsHtml}</div>
         </div>
       `;
     }
@@ -393,15 +388,57 @@ title: Dashboard Admin — Grand Nations
     } catch (e) { alert("Gagal: " + e.message); }
   };
 
+  // --- FUNGSI EDIT & HAPUS NEGARA ---
   async function loadCountries() {
     const countriesBody = document.getElementById('table-countries-body');
     countriesBody.innerHTML = '';
     const snap = await getDocs(collection(db, "countries"));
     snap.forEach((doc) => {
       const data = doc.data();
-      countriesBody.innerHTML += `<tr><td>${data.timeline_name}</td><td>${data.name}</td><td>${data.status === 'available' ? 'Tersedia' : 'Diklaim'}</td></tr>`;
+      
+      const actionButtons = `
+        <button class="btn-sm" style="background: #ffc800; color: #000;" onclick="editCountry('${doc.id}', '${data.name}')">Edit</button>
+        <button class="btn-sm btn-delete" onclick="deleteCountry('${doc.id}', '${data.name}', '${data.status}')">Hapus</button>
+      `;
+
+      countriesBody.innerHTML += `
+        <tr>
+          <td>${data.timeline_name}</td>
+          <td>${data.name}</td>
+          <td>${data.status === 'available' ? 'Tersedia' : 'Diklaim'}</td>
+          <td>${actionButtons}</td>
+        </tr>
+      `;
     });
   }
+
+  window.editCountry = async function(countryId, oldName) {
+    const newName = prompt(`Ubah nama negara:\n\nNama lama: "${oldName}"\n\nMasukkan nama baru:`, oldName);
+    if (newName === null || newName.trim() === '' || newName === oldName) return;
+
+    try {
+      await updateDoc(doc(db, "countries", countryId), { name: newName.trim() });
+      alert("Nama negara berhasil diperbarui!");
+      loadCountries();
+    } catch (e) { alert("Gagal mengubah negara: " + e.message); }
+  };
+
+  window.deleteCountry = async function(countryId, countryName, status) {
+    let confirmMessage = `Yakin ingin menghapus negara "${countryName}" dari daftar?`;
+    
+    // PERINGATAN EKSTRA JIKA SEDANG DIKLAIM
+    if (status === 'claimed') {
+      confirmMessage = `⚠️ PERINGATAN KERAS ⚠️\n\nNegara "${countryName}" sedang DIKLAIM oleh member.\n\nJika kamu menghapusnya, data klaim di profil member akan menjadi tidak valid (negara hantu).\n\nSebaiknya TOLAK dulu pendaftaran member tersebut di tab Persetujuan Negara sebelum menghapus.\n\nApakah kamu tetap ingin menghapusnya?`;
+    }
+
+    if (!confirm(confirmMessage)) return;
+
+    try {
+      await deleteDoc(doc(db, "countries", countryId));
+      alert(`Negara ${countryName} berhasil dihapus.`);
+      loadCountries();
+    } catch (e) { alert("Gagal menghapus negara: " + e.message); }
+  };
 
   document.getElementById('btn-add-timeline').addEventListener('click', async () => {
     const name = document.getElementById('new-timeline-name').value;
@@ -541,40 +578,9 @@ title: Dashboard Admin — Grand Nations
       });
 
       // 3. PINDAHKAN SEMUA NEGARA DARI ERA LAMA KE ERA BARU
-      // (Ini agar data klaim Jokowi (Jerman) tetap sah di era baru)
       const q = query(collection(db, "countries"), where("timeline_id", "==", oldTimelineId));
       const oldCountriesSnap = await getDocs(q);
       
       let movedCount = 0;
       for (const cDoc of oldCountriesSnap.docs) {
-        await updateDoc(doc(db, "countries", cDoc.id), { 
-          timeline_id: newTimelineId,
-          timeline_name: newTimelineName
-        });
-        movedCount++;
-      }
-
-      alert(`⏳ TIMESKIP BERHASIL!\n\nDunia telah berubah ke era ${newTimelineName}. Sebanyak ${movedCount} negara telah dipindahkan ke era baru. Semua member tetap memegang negaranya masing-masing.`);
-      timeskipModal.classList.remove('active');
-      
-      loadRequests(); 
-      loadCountries(); 
-      loadTimelines();
-      
-    } catch (error) {
-      console.error(error);
-      alert("Gagal melakukan timeskip: " + error.message);
-    } finally { 
-      btnConfirmTimeskip.textContent = 'Konfirmasi Timeskip'; 
-    }
-  });
-
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-      btn.classList.add('active');
-      document.getElementById('tab-' + btn.dataset.target).style.display = 'block';
-    });
-  });
-</script>
+        await update
