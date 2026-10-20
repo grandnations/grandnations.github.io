@@ -69,6 +69,13 @@ title: Pendaftaran Negara — Grand Nations
         </div>
       </div>
 
+      <!-- INPUT NAMA KUSTOM (BARU) -->
+      <div style="margin-bottom:20px; padding: 15px; background: rgba(255,255,255,0.03); border: 1px dashed var(--line-strong);">
+        <label style="font-family:var(--mono); font-size:0.8rem; color:var(--ink);">NAMA GABUNGAN / NAMA FIKSI NEGARA</label>
+        <p style="font-size: 0.8rem; color: var(--dim); margin-bottom: 8px;">Jika kamu memilih lebih dari satu negara, beri nama gabungannya (misal: "United States of German"). Nama ini bisa diubah nanti di Profil.</p>
+        <input type="text" id="custom_nation_name" required placeholder="Contoh: United States of German" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; font-family:var(--head); font-weight: bold;">
+      </div>
+
       <div style="margin-bottom:20px;">
         <label style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">NAMA PEMIMPIN</label>
         <input type="text" id="leader_name" required placeholder="Contoh: Jenderal Soedirman" style="width:100%; padding:12px; background:var(--bg); border:1px solid var(--line); color:#fff; margin-top:8px; font-family:var(--head);">
@@ -134,7 +141,6 @@ title: Pendaftaran Negara — Grand Nations
   let currentUser = null;
   let allCountries = []; 
   let selectedCountries = []; 
-  let activeTimelineId = null; // Simpan ID Timeline Aktif
 
   selectTrigger.addEventListener('click', (e) => {
     if(e.target.tagName === 'SPAN') return; 
@@ -158,7 +164,7 @@ title: Pendaftaran Negara — Grand Nations
         return;
       }
 
-      activeTimelineId = configSnap.data().active_id;
+      const activeTimelineId = configSnap.data().active_id;
 
       const q = query(
         collection(db, "countries"), 
@@ -255,6 +261,8 @@ title: Pendaftaran Negara — Grand Nations
     if (!currentUser) return;
     if (selectedCountries.length === 0) { formError.textContent = "Pilih minimal satu negara!"; formError.style.display = 'block'; return; }
 
+    const customName = document.getElementById('custom_nation_name').value;
+
     submitBtn.textContent = 'Mengirim Data...';
     submitBtn.disabled = true;
     formError.style.display = 'none';
@@ -264,6 +272,7 @@ title: Pendaftaran Negara — Grand Nations
 
       await setDoc(doc(db, "registrations", currentUser.uid), {
         nations: nationsData, 
+        custom_name: customName, // <--- Simpan Nama Kustom
         leader_name: document.getElementById('leader_name').value,
         ideology: document.getElementById('ideology').value,
         capital: document.getElementById('capital').value,
