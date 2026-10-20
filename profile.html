@@ -23,18 +23,12 @@ title: Profil — Grand Nations
 
   <div id="loading" style="font-family:var(--mono); font-size:0.85rem; color:var(--dim); padding:40px 0; text-align:center;">Memuat data...</div>
 
-  <div id="error-state" class="auth-box" style="display:none; border-color: #ff4d4d;">
-    <div class="icon" style="color: #ff4d4d; border-color: #ff4d4d;">!</div>
-    <h2>Akses Error</h2><p id="error-message" style="color:#ff4d4d; font-family: var(--mono);"></p>
-    <p style="font-size: 0.9rem;">Coba <b>Logout</b> lalu <b>Login</b> kembali.</p>
-  </div>
-
   <div id="login-required-state" class="auth-box" style="display:none;">
     <div class="icon">🔒</div><h2>Akses Dibatasi</h2><p>Kamu harus login menggunakan akun Google terlebih dahulu.</p>
   </div>
 
   <div id="empty-user-state" class="auth-box" style="display:none;">
-    <div class="icon">?</div><h2>Belum Terdaftar</h2><p>Data keanggotaanmu tidak ditemukan di database.</p><a href="/register.html" class="btn solid">Daftar Anggota</a>
+    <div class="icon">?</div><h2>Belum Terdaftar</h2><p>Kamu belum mendaftarkan diri sebagai anggota.</p><a href="/register.html" class="btn solid">Daftar Anggota</a>
   </div>
 
   <div id="profile-state" style="display:none;">
@@ -60,14 +54,30 @@ title: Profil — Grand Nations
             <div class="data-row"><span class="data-label">BERGABUNG SEJAK</span><span id="user-joined-display" class="data-value">-</span></div>
           </div>
         </div>
+
         <div>
-          <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim); margin-bottom:10px;">DELEGASI NEGARA</h3>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">DELEGASI NEGARA</h3>
+            <!-- TOMBOL EDIT NAMA NEGARA -->
+            <button id="btn-edit-nation" class="btn line" style="display:none; padding: 4px 10px; font-size: 0.7rem; border-color: #00ff64; color: #00ff64;">Edit Nama Negara</button>
+          </div>
+          
           <div id="no-nation-state" style="display:none; border:1px dashed var(--line-strong); padding:20px; text-align:center;">
             <p style="color:var(--dim); font-size:0.9rem; margin-bottom:15px;">Kamu belum mendaftarkan negara.</p>
             <a href="/register-nation.html" class="btn solid" style="padding:10px 20px; font-size:0.85rem; display:inline-block; text-decoration:none;">Daftarkan Negara</a>
           </div>
+
           <div id="has-nation-state" style="display:none;">
+            
+            <!-- KOTAK NAMA KUSTOM -->
+            <div style="background: var(--glass); border-left: 3px solid #00ff64; padding: 15px; margin-bottom: 15px;">
+              <div style="font-family:var(--mono); font-size:0.7rem; color:var(--dim); margin-bottom:5px;">NAMA NEGARA (FIKSI)</div>
+              <div id="custom-nation-display" style="font-size:1.4rem; font-weight:800; color:#00ff64;">Nama Negara</div>
+            </div>
+
+            <div style="font-family:var(--mono); font-size:0.75rem; color:var(--dim); margin-bottom:5px;">WILAYAH DIKLAIM:</div>
             <div id="nations-list-container"></div>
+
             <div id="re-apply-container" style="display:none; margin-top:20px; text-align:center; border-top:1px solid var(--line); padding-top:20px;">
               <p style="color:#ff4d4d; font-size:0.9rem; margin-bottom:15px;">Semua pengajuan negaramu ditolak.</p>
               <a href="/register-nation.html" class="btn solid" style="padding:10px 20px; font-size:0.85rem; display:inline-block; text-decoration:none; border-color:#ff4d4d; background:#ff4d4d; color:#fff;">Ajukan Ulang Pendaftaran</a>
@@ -79,6 +89,7 @@ title: Profil — Grand Nations
   </div>
 </main>
 
+<!-- MODAL EDIT PROFIL -->
 <div id="edit-modal" class="modal-overlay">
   <div class="modal-content">
     <span class="modal-close" id="btn-close-modal">&times;</span>
@@ -90,6 +101,24 @@ title: Profil — Grand Nations
       <div class="form-group"><label>GANTI FOTO (Kosongkan jika tidak diubah)</label><input type="file" id="edit-photo" accept="image/*"></div>
       <button type="submit" id="btn-save-edit" class="btn solid" style="width:100%; margin-top:10px;">Simpan Perubahan</button>
       <p id="edit-error" style="color:#ff4d4d; text-align:center; margin-top:10px; font-family:var(--mono); font-size:0.8rem; display:none;"></p>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL EDIT NAMA NEGARA -->
+<div id="edit-nation-modal" class="modal-overlay">
+  <div class="modal-content" style="border-color: #00ff64;">
+    <span class="modal-close" id="btn-close-nation-modal">&times;</span>
+    <h2 style="font-family:var(--head); font-weight:800; font-size:1.5rem; margin-bottom:10px; color: #00ff64;">Ubah Nama Negara</h2>
+    <p style="font-size: 0.9rem; color: var(--dim); margin-bottom: 20px;">Gunakan fitur ini saat era berubah (Timeskip). Misalnya, ubah dari "Kekaisaran Jerman" menjadi "Jerman Nazi".</p>
+    
+    <form id="edit-nation-form">
+      <div class="form-group">
+        <label>NAMA NEGARA BARU</label>
+        <input type="text" id="edit-nation-name" required placeholder="Contoh: Third Reich" style="font-weight: bold; color: #00ff64;">
+      </div>
+      <button type="submit" id="btn-save-nation" class="btn solid" style="width:100%; margin-top:10px; background: #00ff64; border-color: #00ff64; color: #000;">Simpan Nama Negara</button>
+      <p id="edit-nation-error" style="color:#ff4d4d; text-align:center; margin-top:10px; font-family:var(--mono); font-size:0.8rem; display:none;"></p>
     </form>
   </div>
 </div>
@@ -116,12 +145,11 @@ title: Profil — Grand Nations
   const db = getFirestore(app);
 
   const loading = document.getElementById('loading');
-  const errorState = document.getElementById('error-state');
-  const errorMessage = document.getElementById('error-message');
   const loginRequiredState = document.getElementById('login-required-state');
   const emptyUserState = document.getElementById('empty-user-state');
   const profileState = document.getElementById('profile-state');
 
+  // Elemen Modal Edit Profil
   const editModal = document.getElementById('edit-modal');
   const btnEditProfile = document.getElementById('btn-edit-profile');
   const btnCloseModal = document.getElementById('btn-close-modal');
@@ -129,8 +157,17 @@ title: Profil — Grand Nations
   const editError = document.getElementById('edit-error');
   const btnSaveEdit = document.getElementById('btn-save-edit');
 
+  // Elemen Modal Edit Negara
+  const editNationModal = document.getElementById('edit-nation-modal');
+  const btnEditNation = document.getElementById('btn-edit-nation');
+  const btnCloseNationModal = document.getElementById('btn-close-nation-modal');
+  const editNationForm = document.getElementById('edit-nation-form');
+  const editNationError = document.getElementById('edit-nation-error');
+  const btnSaveNation = document.getElementById('btn-save-nation');
+
   let currentUser = null;
   let currentUserData = null;
+  let currentNationData = null; // Simpan data negara untuk diedit
 
   onAuthStateChanged(auth, async (user) => {
     loading.style.display = 'none';
@@ -165,121 +202,12 @@ title: Profil — Grand Nations
           try {
             const nationDocSnap = await getDoc(doc(db, "registrations", user.uid));
             if (nationDocSnap.exists()) {
-              const nationData = nationDocSnap.data();
+              currentNationData = nationDocSnap.data();
               document.getElementById('no-nation-state').style.display = 'none';
               document.getElementById('has-nation-state').style.display = 'block';
+              document.getElementById('btn-edit-nation').style.display = 'block'; // Munculkan tombol edit nama negara
 
-              const listContainer = document.getElementById('nations-list-container');
-              listContainer.innerHTML = `<div class="data-row" style="border-bottom:2px solid var(--line); margin-bottom:10px;"><span class="data-label">NAMA NEGARA</span><span class="data-label">STATUS</span></div>`;
-              
-              let allRejected = true;
-
-              if (nationData.nations && Array.isArray(nationData.nations)) {
-                nationData.nations.forEach(nation => {
-                  let statusColor = '#ffc800'; 
-                  if (nation.status === 'approved') statusColor = '#00ff64';
-                  if (nation.status === 'rejected') statusColor = '#ff4d4d';
-                  else allRejected = false;
-
-                  listContainer.innerHTML += `
-                    <div class="nation-item">
-                      <span class="data-value" style="color:#fff;">${nation.name}</span>
-                      <span class="data-value" style="color:${statusColor}; font-size:0.9rem;">${nation.status.toUpperCase()}</span>
-                    </div>
-                  `;
-                });
-              }
-
-              if (allRejected && nationData.nations && nationData.nations.length > 0) {
-                document.getElementById('re-apply-container').style.display = 'block';
-              } else {
-                document.getElementById('re-apply-container').style.display = 'none';
-              }
-            } else {
-              document.getElementById('no-nation-state').style.display = 'block';
-              document.getElementById('has-nation-state').style.display = 'none';
-            }
-          } catch (e) { console.error("Gagal load negara:", e); }
-
-          profileState.style.display = 'block';
-        } else {
-          emptyUserState.style.display = 'block';
-        }
-      } catch (error) {
-        errorMessage.textContent = error.message;
-        errorState.style.display = 'block';
-      }
-    } else {
-      loginRequiredState.style.display = 'block';
-      emptyUserState.style.display = 'none';
-      profileState.style.display = 'none';
-    }
-  });
-
-  btnEditProfile.addEventListener('click', () => {
-    if (!currentUserData) return;
-    document.getElementById('edit-name').value = currentUserData.full_name || '';
-    document.getElementById('edit-wa').value = currentUserData.whatsapp || '';
-    document.getElementById('edit-dob').value = currentUserData.dob || '';
-    document.getElementById('edit-photo').value = ''; 
-    editError.style.display = 'none';
-    editModal.classList.add('active');
-  });
-
-  btnCloseModal.addEventListener('click', () => editModal.classList.remove('active'));
-  editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.remove('active'); });
-
-  editForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!currentUser) return;
-
-    btnSaveEdit.textContent = 'Menyimpan...';
-    btnSaveEdit.disabled = true;
-    editError.style.display = 'none';
-
-    try {
-      const newName = document.getElementById('edit-name').value;
-      const newWa = document.getElementById('edit-wa').value;
-      const newDob = document.getElementById('edit-dob').value;
-      const file = document.getElementById('edit-photo').files[0];
-      let newPhotoURL = currentUserData.photo_url;
-
-      if (file) {
-        if (file.size > 2 * 1024 * 1024) throw new Error("Ukuran foto maksimal 2MB!");
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', UPLOAD_PRESET);
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
-        const data = await response.json();
-        if (!data.secure_url) throw new Error(data.error?.message || "Gagal upload foto");
-        newPhotoURL = data.secure_url;
-      }
-
-      await updateDoc(doc(db, "users", currentUser.uid), { full_name: newName, whatsapp: newWa, dob: newDob, photo_url: newPhotoURL });
-
-      document.getElementById('user-name-display').textContent = newName;
-      document.getElementById('user-wa-display').textContent = newWa;
-      document.getElementById('user-dob-display').textContent = new Date(newDob).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-      
-      if (newPhotoURL) {
-        document.getElementById('photo-placeholder').style.display = 'none';
-        document.getElementById('profile-pic-display').src = newPhotoURL;
-        document.getElementById('profile-pic-display').style.display = 'block';
-      }
-
-      currentUserData.full_name = newName;
-      currentUserData.whatsapp = newWa;
-      currentUserData.dob = newDob;
-      currentUserData.photo_url = newPhotoURL;
-
-      editModal.classList.remove('active');
-      alert("Profil berhasil diperbarui!");
-    } catch (error) {
-      editError.textContent = "Gagal menyimpan: " + error.message;
-      editError.style.display = 'block';
-    } finally {
-      btnSaveEdit.textContent = 'Simpan Perubahan';
-      btnSaveEdit.disabled = false;
-    }
-  });
-</script>
+              // Tampilkan Nama Kustom (jika ada, jika tidak pakai nama lama)
+              const customNameDisplay = document.getElementById('custom-nation-display');
+              if (currentNationData.custom_name) {
+                customNameDisplay
