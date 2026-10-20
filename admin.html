@@ -111,9 +111,9 @@ title: Dashboard Admin — Grand Nations
       <div style="border: 1px solid #ff4d4d; background: rgba(255, 77, 77, 0.05); padding: 40px; border-radius: 4px; text-align: center;">
         <h2 style="color: #ff4d4d; font-weight: 800; font-size: 2rem; margin-bottom: 10px;">ZONA BAHAYA</h2>
         <p style="color: var(--dim); max-width: 600px; margin: 0 auto 30px; line-height: 1.6; font-size: 1.05rem;">
-          Tombol di bawah ini akan menghapus <strong>seluruh data pendaftaran negara</strong> dari semua anggota, dan mengembalikan semua negara menjadi "Tersedia". <br><br>
-          <em>Data profil anggota (Nama, Email, Foto) tidak akan terhapus.</em> Gunakan fitur ini saat akan memulai era/timeline baru.
+          Gunakan fitur di bawah ini dengan sangat hati-hati. Tindakan ini akan mempengaruhi seluruh anggota.
         </p>
+        
         <div style="display:flex; flex-direction:column; gap:15px; align-items:center;">
           <button id="btn-timeskip" class="btn solid" style="background: #ffc800; border-color: #ffc800; color: #000; padding: 15px 40px; font-size: 1rem; width: 300px; font-weight: bold;">
             ⏳ Timeskip Era Baru
@@ -133,11 +133,33 @@ title: Dashboard Admin — Grand Nations
 <div id="reset-modal" class="modal-overlay">
   <div class="modal-content">
     <h3>⚠️ Peringatan Keras</h3>
-    <p>Kamu akan menghapus <strong>SEMUA</strong> data negara dari semua anggota. Tindakan ini tidak bisa dibatalkan.<br><br>Ketik <strong>RESET</strong> di bawah ini untuk mengonfirmasi:</p>
+    <p>Kamu akan menghapus <strong>SEMUA</strong> data negara, timeline, dan pendaftaran dari semua anggota. Tindakan ini tidak bisa dibatalkan.<br><br>Ketik <strong>RESET</strong> di bawah ini untuk mengonfirmasi:</p>
     <input type="text" id="reset-confirm-input" placeholder="Ketik RESET" autocomplete="off">
     <div style="display:flex; gap:10px; justify-content:center;">
       <button id="btn-cancel-reset" class="btn line" style="border-color: var(--line); color: var(--dim);">Batal</button>
-      <button id="btn-confirm-reset" class="btn solid" style="background: #ff4d4d; border-color: #ff4d4d; color: #fff;">Konfirmasi Reset</button>
+      <button id="btn-confirm-reset" class="btn solid" style="background: #ff4d4d; border-color: #ff4d4d; color: #fff;" disabled>Konfirmasi Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CUSTOM UNTUK TIMESKIP -->
+<div id="timeskip-modal" class="modal-overlay">
+  <div class="modal-content" style="border-color: #ffc800; box-shadow: 0 10px 30px rgba(255, 200, 0, 0.2);">
+    <h3 style="color: #ffc800;">⏳ Timeskip Era</h3>
+    <p style="text-align: left; color: var(--dim); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
+      Pilih timeline baru. Pemain akan <strong>kehilangan klaim negara lamanya</strong>, tetapi data profil anggota tetap aman. Mereka harus mendaftarkan negara baru di era ini.
+    </p>
+    
+    <select id="timeskip-target" class="admin-input" style="margin-bottom: 20px; padding: 12px;">
+      <option value="">-- Pilih Timeline Baru --</option>
+    </select>
+
+    <p style="text-align: left; color: #ff4d4d; font-size: 0.85rem; margin-bottom: 10px;">Ketik <strong>TIMESKIP</strong> untuk mengonfirmasi:</p>
+    <input type="text" id="timeskip-confirm-input" placeholder="Ketik TIMESKIP" autocomplete="off" style="border-color: #ffc800;">
+    
+    <div style="display:flex; gap:10px; justify-content:center; margin-top: 20px;">
+      <button id="btn-cancel-timeskip" class="btn line" style="border-color: var(--line); color: var(--dim);">Batal</button>
+      <button id="btn-confirm-timeskip" class="btn solid" style="background: #ffc800; border-color: #ffc800; color: #000;" disabled>Konfirmasi Timeskip</button>
     </div>
   </div>
 </div>
@@ -164,10 +186,16 @@ title: Dashboard Admin — Grand Nations
   const accessDenied = document.getElementById('access-denied');
   const adminPanel = document.getElementById('admin-panel');
   
-  // Elemen Modal
+  // Elemen Modal Reset
   const resetModal = document.getElementById('reset-modal');
   const resetInput = document.getElementById('reset-confirm-input');
   const btnConfirmReset = document.getElementById('btn-confirm-reset');
+
+  // Elemen Modal Timeskip
+  const timeskipModal = document.getElementById('timeskip-modal');
+  const timeskipTarget = document.getElementById('timeskip-target');
+  const timeskipInput = document.getElementById('timeskip-confirm-input');
+  const btnConfirmTimeskip = document.getElementById('btn-confirm-timeskip');
 
   onAuthStateChanged(auth, async (user) => {
     loading.style.display = 'none';
@@ -398,23 +426,19 @@ title: Dashboard Admin — Grand Nations
     finally { btn.textContent = 'Tambah Massal Negara'; btn.disabled = false; }
   });
 
-  // --- LOGIKA MODAL RESET TIMELINE ---
-  
-  // 1. Buka Modal saat tombol di Zona Bahaya diklik
+  // --- LOGIKA MODAL RESET TOTAL ---
   document.getElementById('btn-reset-timeline').addEventListener('click', () => {
-    resetInput.value = ''; // Kosongkan inputan
-    btnConfirmReset.disabled = true; // Nonaktifkan tombol konfirmasi dulu
+    resetInput.value = ''; 
+    btnConfirmReset.disabled = true; 
     btnConfirmReset.style.opacity = '0.5';
     resetModal.classList.add('active');
     resetInput.focus();
   });
 
-  // 2. Tutup Modal jika klik Batal
   document.getElementById('btn-cancel-reset').addEventListener('click', () => {
     resetModal.classList.remove('active');
   });
 
-  // 3. Deteksi ketikan user. Jika "RESET", aktifkan tombol konfirmasi
   resetInput.addEventListener('input', (e) => {
     if (e.target.value === 'RESET') {
       btnConfirmReset.disabled = false;
@@ -425,55 +449,99 @@ title: Dashboard Admin — Grand Nations
     }
   });
 
-  // 4. Eksekusi Reset saat tombol Konfirmasi diklik
   btnConfirmReset.addEventListener('click', async () => {
     if (resetInput.value !== 'RESET') return;
-
-    btnConfirmReset.textContent = 'Menghapus...';
-    btnConfirmReset.disabled = true;
+    btnConfirmReset.textContent = 'Menghapus...'; btnConfirmReset.disabled = true;
 
     try {
-      // 1. Hapus semua data pendaftaran anggota
+      const regSnap = await getDocs(collection(db, "registrations"));
+      for (const docSnap of regSnap.docs) await deleteDoc(doc(db, "registrations", docSnap.id));
+
+      const countrySnap = await getDocs(collection(db, "countries"));
+      for (const cDoc of countrySnap.docs) await deleteDoc(doc(db, "countries", cDoc.id));
+
+      const timelineSnap = await getDocs(collection(db, "timelines"));
+      for (const tDoc of timelineSnap.docs) await deleteDoc(doc(db, "timelines", tDoc.id));
+
+      await setDoc(doc(db, "config", "timeline"), { active_id: null, active_name: null });
+
+      alert("✅ RESET BERHASIL! Semua Timeline, Negara, dan Pendaftaran telah dihapus. Sistem kembali kosong.");
+      resetModal.classList.remove('active');
+      
+      loadRequests(); loadCountries(); loadTimelines();
+    } catch (error) {
+      alert("Gagal mereset data: " + error.message);
+    } finally { btnConfirmReset.textContent = 'Konfirmasi Reset'; }
+  });
+
+  // --- LOGIKA MODAL TIMESKIP ---
+  document.getElementById('btn-timeskip').addEventListener('click', async () => {
+    timeskipTarget.innerHTML = '<option value="">-- Pilih Timeline Baru --</option>';
+    const snap = await getDocs(collection(db, "timelines"));
+    
+    const configSnap = await getDoc(doc(db, "config", "timeline"));
+    const currentActiveId = configSnap.exists() ? configSnap.data().active_id : null;
+
+    snap.forEach(docSnap => {
+      if (docSnap.id !== currentActiveId) {
+        timeskipTarget.innerHTML += `<option value="${docSnap.id}" data-name="${docSnap.data().name}">${docSnap.data().name}</option>`;
+      }
+    });
+
+    timeskipInput.value = '';
+    btnConfirmTimeskip.disabled = true;
+    btnConfirmTimeskip.style.opacity = '0.5';
+    timeskipModal.classList.add('active');
+  });
+
+  document.getElementById('btn-cancel-timeskip').addEventListener('click', () => {
+    timeskipModal.classList.remove('active');
+  });
+
+  timeskipInput.addEventListener('input', (e) => {
+    if (e.target.value === 'TIMESKIP') {
+      btnConfirmTimeskip.disabled = false;
+      btnConfirmTimeskip.style.opacity = '1';
+    } else {
+      btnConfirmTimeskip.disabled = true;
+      btnConfirmTimeskip.style.opacity = '0.5';
+    }
+  });
+
+  btnConfirmTimeskip.addEventListener('click', async () => {
+    const newTimelineId = timeskipTarget.value;
+    const newTimelineName = timeskipTarget.options[timeskipTarget.selectedIndex]?.dataset.name;
+
+    if (!newTimelineId) return alert("Pilih timeline tujuan!");
+    if (timeskipInput.value !== 'TIMESKIP') return;
+
+    btnConfirmTimeskip.textContent = 'Memproses...';
+    btnConfirmTimeskip.disabled = true;
+
+    try {
       const regSnap = await getDocs(collection(db, "registrations"));
       for (const docSnap of regSnap.docs) {
         await deleteDoc(doc(db, "registrations", docSnap.id));
       }
 
-      // 2. Hapus semua data negara
       const countrySnap = await getDocs(collection(db, "countries"));
       for (const cDoc of countrySnap.docs) {
-        await deleteDoc(doc(db, "countries", cDoc.id)); // Hapus negaranya sekalian
+        if(cDoc.data().status === 'claimed') {
+           await updateDoc(doc(db, "countries", cDoc.id), { status: 'available' });
+        }
       }
 
-      // 3. Hapus semua Timeline
-      const timelineSnap = await getDocs(collection(db, "timelines"));
-      for (const tDoc of timelineSnap.docs) {
-        await deleteDoc(doc(db, "timelines", tDoc.id));
-      }
+      await setDoc(doc(db, "config", "timeline"), { active_id: newTimelineId, active_name: newTimelineName });
 
-      // 4. Kosongkan Config Timeline Aktif (Reset total)
-      await setDoc(doc(db, "config", "timeline"), { 
-        active_id: null,
-        active_name: null 
-      });
-
-      alert("✅ RESET BERHASIL! Semua Timeline, Negara, dan Pendaftaran telah dihapus. Sistem kembali kosong.");
-      resetModal.classList.remove('active');
+      alert(`⏳ TIMESKIP BERHASIL! Dunia telah berubah ke era ${newTimelineName}. Semua anggota harus mendaftarkan negara mereka kembali.`);
+      timeskipModal.classList.remove('active');
       
-      // Refresh tampilan
-      loadRequests();
-      loadCountries();
-      loadTimelines();
-
+      loadRequests(); loadCountries(); loadTimelines();
     } catch (error) {
-      console.error(error);
-      alert("Gagal mereset data: " + error.message);
-    } finally {
-      btnConfirmReset.textContent = 'Konfirmasi Reset';
-    }
+      alert("Gagal melakukan timeskip: " + error.message);
+    } finally { btnConfirmTimeskip.textContent = 'Konfirmasi Timeskip'; }
   });
 
-  // --- NAVIGASI TAB ---
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
