@@ -318,25 +318,23 @@ title: Grand Nations — Organisasi Roleplay
       let daysPassed = 0;
       let effectiveStartDate = startDate;
 
+      // Jika start_date kosong, paksa isi dengan hari ini
       if (!effectiveStartDate) {
         effectiveStartDate = new Date().getTime();
       }
 
-      // --- PERBAIKAN: KUNCI KE JAM 00:00:00 ---
-      let today = new Date();
-      today.setHours(0, 0, 0, 0); // Set jam, menit, detik ke 0
+      // --- RUMUS HITUNG HARI (BEBAS TIMEZONE) ---
+      const startDateObj = new Date(effectiveStartDate);
+      const todayObj = new Date();
       
-      let start = new Date(effectiveStartDate);
-      start.setHours(0, 0, 0, 0); // Set jam, menit, detik ke 0
-
-      const now = today.getTime();
-      const startTime = start.getTime();
-
-      // Hitung selisih hari (sekarang pasti bulat)
-      const diffTime = Math.abs(now - startTime);
-      daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+      // Ambil tanggal murni (Tahun, Bulan, Tanggal) dalam UTC
+      const startUTC = Date.UTC(startDateObj.getFullYear(), startDateObj.getMonth(), startDateObj.getDate());
+      const todayUTC = Date.UTC(todayObj.getFullYear(), todayObj.getMonth(), todayObj.getDate());
       
-      // LOGIKA PERCEPAT/PERLAMBAT
+      // Selisih hari
+      daysPassed = Math.floor((todayUTC - startUTC) / (1000 * 60 * 60 * 24));
+
+      // Hitung Tahun (Dibagi daysPerYear)
       currentYear = startYear + Math.floor(daysPassed / daysPerYear);
 
       startYearEl.textContent = startYear;
