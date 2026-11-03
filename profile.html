@@ -58,8 +58,10 @@ title: Profil — Grand Nations
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <h3 style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">DELEGASI NEGARA</h3>
-            <!-- TOMBOL EDIT NAMA NEGARA -->
-            <button id="btn-edit-nation" class="btn line" style="display:none; padding: 4px 10px; font-size: 0.7rem; border-color: #00ff64; color: #00ff64;">Edit Nama Negara</button>
+            <div>
+              <button id="btn-edit-nation" class="btn line" style="display:none; padding: 4px 10px; font-size: 0.7rem; border-color: #00ff64; color: #00ff64;">Edit Nama</button>
+              <button id="btn-release-nation" class="btn line" style="display:none; padding: 4px 10px; font-size: 0.7rem; border-color: #ff4d4d; color: #ff4d4d;">Lepas Negara</button>
+            </div>
           </div>
           
           <div id="no-nation-state" style="display:none; border:1px dashed var(--line-strong); padding:20px; text-align:center;">
@@ -68,11 +70,13 @@ title: Profil — Grand Nations
           </div>
 
           <div id="has-nation-state" style="display:none;">
-            
-            <!-- KOTAK NAMA KUSTOM -->
             <div style="background: var(--glass); border-left: 3px solid #00ff64; padding: 15px; margin-bottom: 15px;">
               <div style="font-family:var(--mono); font-size:0.7rem; color:var(--dim); margin-bottom:5px;">NAMA NEGARA (FIKSI)</div>
               <div id="custom-nation-display" style="font-size:1.4rem; font-weight:800; color:#00ff64;">Nama Negara</div>
+            </div>
+            
+            <div id="profile-flag-preview" style="text-align:center; margin-bottom:15px; display:none;">
+              <img id="nation-flag-img" src="" style="max-height: 80px; border: 1px solid var(--line);">
             </div>
 
             <div style="font-family:var(--mono); font-size:0.75rem; color:var(--dim); margin-bottom:5px;">WILAYAH DIKLAIM:</div>
@@ -110,12 +114,10 @@ title: Profil — Grand Nations
   <div class="modal-content" style="border-color: #00ff64;">
     <span class="modal-close" id="btn-close-nation-modal">&times;</span>
     <h2 style="font-family:var(--head); font-weight:800; font-size:1.5rem; margin-bottom:10px; color: #00ff64;">Ubah Nama Negara</h2>
-    <p style="font-size: 0.9rem; color: var(--dim); margin-bottom: 20px;">Gunakan fitur ini saat era berubah (Timeskip). Misalnya, ubah dari "Kekaisaran Jerman" menjadi "Jerman Nazi".</p>
-    
     <form id="edit-nation-form">
       <div class="form-group">
         <label>NAMA NEGARA BARU</label>
-        <input type="text" id="edit-nation-name" required placeholder="Contoh: Third Reich" style="font-weight: bold; color: #00ff64;">
+        <input type="text" id="edit-nation-name" required style="font-weight: bold; color: #00ff64;">
       </div>
       <button type="submit" id="btn-save-nation" class="btn solid" style="width:100%; margin-top:10px; background: #00ff64; border-color: #00ff64; color: #000;">Simpan Nama Negara</button>
       <p id="edit-nation-error" style="color:#ff4d4d; text-align:center; margin-top:10px; font-family:var(--mono); font-size:0.8rem; display:none;"></p>
@@ -125,7 +127,7 @@ title: Profil — Grand Nations
 
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
   
   const firebaseConfig = {
@@ -149,7 +151,6 @@ title: Profil — Grand Nations
   const emptyUserState = document.getElementById('empty-user-state');
   const profileState = document.getElementById('profile-state');
 
-  // Elemen Modal Edit Profil
   const editModal = document.getElementById('edit-modal');
   const btnEditProfile = document.getElementById('btn-edit-profile');
   const btnCloseModal = document.getElementById('btn-close-modal');
@@ -157,7 +158,6 @@ title: Profil — Grand Nations
   const editError = document.getElementById('edit-error');
   const btnSaveEdit = document.getElementById('btn-save-edit');
 
-  // Elemen Modal Edit Negara
   const editNationModal = document.getElementById('edit-nation-modal');
   const btnEditNation = document.getElementById('btn-edit-nation');
   const btnCloseNationModal = document.getElementById('btn-close-nation-modal');
@@ -167,7 +167,8 @@ title: Profil — Grand Nations
 
   let currentUser = null;
   let currentUserData = null;
-  let currentNationData = null; // Simpan data negara untuk diedit
+  let currentNationData = null;
+  let activeTimelineId = null;
 
   onAuthStateChanged(auth, async (user) => {
     loading.style.display = 'none';
@@ -177,7 +178,6 @@ title: Profil — Grand Nations
       
       try {
         const userDocSnap = await getDoc(doc(db, "users", user.uid));
-
         if (userDocSnap.exists()) {
           currentUserData = userDocSnap.data();
           
@@ -200,21 +200,23 @@ title: Profil — Grand Nations
           if (currentUserData.created_at) document.getElementById('user-joined-display').textContent = currentUserData.created_at.toDate().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
 
           try {
+            const configSnap = await getDoc(doc(db, "config", "timeline"));
+            activeTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
+
             const nationDocSnap = await getDoc(doc(db, "registrations", user.uid));
             if (nationDocSnap.exists()) {
               currentNationData = nationDocSnap.data();
               document.getElementById('no-nation-state').style.display = 'none';
               document.getElementById('has-nation-state').style.display = 'block';
-              document.getElementById('btn-edit-nation').style.display = 'block'; // Munculkan tombol edit nama negara
+              document.getElementById('btn-edit-nation').style.display = 'block';
+              document.getElementById('btn-release-nation').style.display = 'block';
 
-              // Tampilkan Nama Kustom (jika ada, jika tidak pakai nama lama)
               const customNameDisplay = document.getElementById('custom-nation-display');
-              if (currentNationData.custom_name) {
-                customNameDisplay.textContent = currentNationData.custom_name;
-              } else {
-                // Fallback jika data lama tidak punya custom_name
-                const names = currentNationData.nations.map(n => n.name).join(' & ');
-                customNameDisplay.textContent = names || 'Negara Tanpa Nama';
+              customNameDisplay.textContent = currentNationData.custom_name || 'Negara Tanpa Nama';
+
+              if (currentNationData.flag_url) {
+                document.getElementById('profile-flag-preview').style.display = 'block';
+                document.getElementById('nation-flag-img').src = currentNationData.flag_url;
               }
 
               const listContainer = document.getElementById('nations-list-container');
@@ -246,6 +248,7 @@ title: Profil — Grand Nations
               document.getElementById('no-nation-state').style.display = 'block';
               document.getElementById('has-nation-state').style.display = 'none';
               document.getElementById('btn-edit-nation').style.display = 'none';
+              document.getElementById('btn-release-nation').style.display = 'none';
             }
           } catch (e) { console.error("Gagal load negara:", e); }
 
@@ -254,7 +257,6 @@ title: Profil — Grand Nations
           emptyUserState.style.display = 'block';
         }
       } catch (error) {
-        console.error(error);
         loginRequiredState.style.display = 'block';
       }
     } else {
@@ -264,7 +266,7 @@ title: Profil — Grand Nations
     }
   });
 
-  // --- LOGIKA EDIT PROFIL (SAMA SEPERTI SEBELUMNYA) ---
+  // --- LOGIKA EDIT PROFIL ---
   btnEditProfile.addEventListener('click', () => {
     if (!currentUserData) return;
     document.getElementById('edit-name').value = currentUserData.full_name || '';
@@ -281,10 +283,7 @@ title: Profil — Grand Nations
   editForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!currentUser) return;
-
-    btnSaveEdit.textContent = 'Menyimpan...';
-    btnSaveEdit.disabled = true;
-    editError.style.display = 'none';
+    btnSaveEdit.textContent = 'Menyimpan...'; btnSaveEdit.disabled = true; editError.style.display = 'none';
 
     try {
       const newName = document.getElementById('edit-name').value;
@@ -332,10 +331,9 @@ title: Profil — Grand Nations
     }
   });
 
-  // --- LOGIKA EDIT NAMA NEGARA (BARU) ---
+  // --- LOGIKA EDIT NAMA NEGARA ---
   btnEditNation.addEventListener('click', () => {
     if (!currentNationData) return;
-    // Isi input dengan nama saat ini
     document.getElementById('edit-nation-name').value = currentNationData.custom_name || '';
     editNationError.style.display = 'none';
     editNationModal.classList.add('active');
@@ -347,31 +345,50 @@ title: Profil — Grand Nations
   editNationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!currentUser) return;
-
-    btnSaveNation.textContent = 'Menyimpan...';
-    btnSaveNation.disabled = true;
-    editNationError.style.display = 'none';
+    btnSaveNation.textContent = 'Menyimpan...'; btnSaveNation.disabled = true; editNationError.style.display = 'none';
 
     try {
       const newNationName = document.getElementById('edit-nation-name').value;
-
-      // Update data pendaftaran di tabel 'registrations'
-      await updateDoc(doc(db, "registrations", currentUser.uid), {
-        custom_name: newNationName
-      });
-
-      // Update tampilan secara instan
+      await updateDoc(doc(db, "registrations", currentUser.uid), { custom_name: newNationName });
       document.getElementById('custom-nation-display').textContent = newNationName;
       currentNationData.custom_name = newNationName;
-
       editNationModal.classList.remove('active');
       alert("Nama negara berhasil diperbarui!");
     } catch (error) {
       editNationError.textContent = "Gagal menyimpan: " + error.message;
       editNationError.style.display = 'block';
     } finally {
-      btnSaveNation.textContent = 'Simpan Nama Negara';
-      btnSaveNation.disabled = false;
+      btnSaveNation.textContent = 'Simpan Nama Negara'; btnSaveNation.disabled = false;
     }
+  });
+
+  // --- LOGIKA LEPAS NEGARA ---
+  document.getElementById('btn-release-nation').addEventListener('click', async () => {
+    if (!confirm("⚠️ PERINGATAN ⚠️\n\nApakah kamu yakin ingin melepas SEMUA negara yang kamu klaim?\nNegara akan dikembalikan ke daftar tersedia dan kamu harus mendaftar ulang.")) return;
+
+    try {
+      const regDocRef = doc(db, "registrations", currentUser.uid);
+      const regSnap = await getDoc(regDocRef);
+      
+      if (regSnap.exists()) {
+        const regData = regSnap.data();
+        // Kembalikan semua negara ke status available
+        if (regData.nations && Array.isArray(regData.nations)) {
+          for (const nation of regData.nations) {
+            if (nation.status === 'approved') {
+              const q = query(collection(db, "countries"), where("name", "==", nation.name), where("timeline_id", "==", activeTimelineId));
+              const countrySnap = await getDocs(q);
+              for (const cDoc of countrySnap.docs) {
+                await updateDoc(doc(db, "countries", cDoc.id), { status: 'available', flag_url: null });
+              }
+            }
+          }
+        }
+        // Hapus data pendaftaran
+        await deleteDoc(regDocRef);
+        alert("Negara berhasil dilepas. Kamu akan diarahkan ke form pendaftaran ulang.");
+        window.location.href = '/register-nation.html';
+      }
+    } catch (e) { alert("Gagal melepas negara: " + e.message); }
   });
 </script>
