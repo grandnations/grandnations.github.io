@@ -407,18 +407,39 @@ title: Dashboard Admin — Grand Nations
       const isActive = docSnap.id === activeTimelineId;
       const badge = isActive ? '<span class="badge-active">AKTIF</span>' : '<span class="badge-inactive">ARSIP</span>';
       const btnAction = isActive 
-        ? '<span style="color:var(--dim); font-size:0.8rem;">Sedang Digunakan</span>' 
-        : `<button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>
-           <button class="btn-sm btn-delete" onclick="deleteTimeline('${docSnap.id}', '${data.name}')">Hapus</button>`;
+        ? `<div style="display:flex; flex-direction:column; gap:5px;">
+             <span style="color:var(--dim); font-size:0.8rem;">Sedang Digunakan</span>
+             <button class="btn-sm" style="background:#00bfff; color:#fff;" onclick="syncTimelineClock('${docSnap.id}')">Sync Waktu</button>
+           </div>` 
+        : `<div style="display:flex; gap:5px; flex-wrap:wrap;">
+             <button class="btn-sm btn-approve" onclick="setActiveTimeline('${docSnap.id}', '${data.name}')">Jadikan Aktif</button>
+             <button class="btn-sm btn-delete" onclick="deleteTimeline('${docSnap.id}', '${data.name}')">Hapus</button>
+           </div>`;
       tableBody.innerHTML += `<tr><td style="font-weight:600;">${data.name}</td><td>${badge}</td><td>${btnAction}</td></tr>`;
     });
   }
 
   window.setActiveTimeline = async function(timelineId, timelineName) {
-    if (!confirm(`Jadikan Timeline "${timelineName}" sebagai timeline aktif?`)) return;
+    if (!confirm(`Jadikan Timeline "${timelineName}" sebagai timeline aktif?\n\nWaktu akan mulai berjalan dari hari ini.`)) return;
     try {
-      await setDoc(doc(db, "config", "timeline"), { active_id: timelineId, active_name: timelineName });
+      const today = new Date().getTime(); // Simpan waktu hari ini
+      await setDoc(doc(db, "config", "timeline"), { 
+        active_id: timelineId, 
+        active_name: timelineName,
+        start_date: today // <--- INI YANG KURANG TADI
+      });
       loadTimelines(); 
+    } catch (e) { alert("Gagal: " + e.message); }
+  };
+
+  // Fungsi Baru untuk Sinkronisasi Waktu
+  window.syncTimelineClock = async function(timelineId) {
+    if (!confirm("Mulai ulang hitungan hari dari HARI INI? (Tahun akan kembali ke tahun awal timeline)")) return;
+    try {
+      const today = new Date().getTime();
+      await updateDoc(doc(db, "config", "timeline"), { start_date: today });
+      alert("Waktu berhasil disinkronkan! Silakan cek beranda.");
+      loadTimelines();
     } catch (e) { alert("Gagal: " + e.message); }
   };
 
