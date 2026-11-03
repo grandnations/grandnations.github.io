@@ -690,7 +690,7 @@ title: Dashboard Admin — Grand Nations
     } catch (e) { alert("Gagal: " + e.message); }
   });
 
-  // --- FUNGSI MULAI VOTING ---
+   // --- FUNGSI MULAI VOTING ---
   document.getElementById('btn-start-voting').addEventListener('click', async () => {
     if (!confirm("Mulai masa voting? Ini akan menghentikan timeline aktif saat ini.")) return;
     try {
@@ -698,7 +698,7 @@ title: Dashboard Admin — Grand Nations
         active_id: null, 
         active_name: null,
         is_voting: true 
-      });
+      }, { merge: true }); // <--- merge:true agar days_per_year/start_date tidak hilang
       alert("Masa voting dibuka! Beranda sekarang menampilkan layar voting.");
       loadTimelines();
     } catch (e) { alert("Gagal: " + e.message); }
