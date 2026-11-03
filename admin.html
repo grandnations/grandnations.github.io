@@ -52,6 +52,7 @@ title: Dashboard Admin — Grand Nations
       <button class="tab-btn active" data-target="nations">Persetujuan Negara</button>
       <button class="tab-btn" data-target="members">Data Anggota</button>
       <button class="tab-btn" data-target="master-data">Kelola Data</button>
+      <button class="tab-btn" data-target="voting">Kotak Suara</button>
       <button class="tab-btn" data-target="danger-zone" style="color: #ff4d4d;">Zona Bahaya</button>
     </div>
 
@@ -139,6 +140,22 @@ title: Dashboard Admin — Grand Nations
             💥 Reset Total (Kiamat)
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- 5. Tab Voting -->
+    <div id="tab-voting" class="tab-content" style="display:none;">
+      <div style="border: 1px solid #00bfff; background: rgba(0, 191, 255, 0.05); padding: 40px; border-radius: 4px; text-align: center;">
+        <h2 style="color: #00bfff; font-weight: 800; font-size: 2rem; margin-bottom: 10px;">KOTAK SUARA VOTING</h2>
+        <p style="color: var(--dim); margin-bottom: 20px;">Hasil perolehan suara untuk pemilihan Era selanjutnya.</p>
+        
+        <div id="voting-results" style="text-align: left; max-width: 600px; margin: 0 auto 30px; background: var(--bg); padding: 20px; border: 1px solid var(--line);">
+          <p style="color: var(--dim); font-family: var(--mono);">Memuat data suara...</p>
+        </div>
+
+        <button id="btn-finish-voting" class="btn solid" style="background: #00bfff; border-color: #00bfff; color: #fff; padding: 15px 40px; font-size: 1rem; width: 300px; font-weight: bold; display: none;">
+          Selesaikan Voting & Aktifkan
+        </button>
       </div>
     </div>
 
@@ -238,23 +255,18 @@ title: Dashboard Admin — Grand Nations
 
   async function loadRequests() {
     const container = document.getElementById('requests-container');
-    
-    // 1. Kosongkan wadah terlebih dahulu
     container.innerHTML = ''; 
-    
-    // 2. Tampilkan loading sementara
     container.innerHTML = '<div style="font-family:var(--mono); color:var(--dim); padding:20px;">Memuat data pengajuan...</div>';
 
     try {
       const snap = await getDocs(collection(db, "registrations"));
       
-      // Jika tidak ada data sama sekali
       if (snap.empty) {
         container.innerHTML = '<div style="font-family:var(--mono); color:var(--dim); padding:20px;">Belum ada pengajuan negara.</div>';
         return;
       }
 
-      let htmlContent = ''; // Tampung HTML di variabel dulu
+      let htmlContent = ''; 
 
       for (const docSnap of snap.docs) {
         const data = docSnap.data();
@@ -290,7 +302,6 @@ title: Dashboard Admin — Grand Nations
           `;
         });
 
-        // Masukkan ke variabel penampung
         htmlContent += `
           <div class="request-card">
             <div class="request-header">
@@ -306,10 +317,8 @@ title: Dashboard Admin — Grand Nations
         `;
       }
 
-      // 3. Cetak ke layar HANYA SEKALI di akhir
       container.innerHTML = htmlContent;
 
-      // Jika setelah di-filter ternyata tidak ada pending
       if (htmlContent === '') {
          container.innerHTML = '<div style="font-family:var(--mono); color:var(--dim); padding:20px;">Tidak ada pengajuan yang menunggu persetujuan.</div>';
       }
@@ -422,17 +431,16 @@ title: Dashboard Admin — Grand Nations
   window.setActiveTimeline = async function(timelineId, timelineName) {
     if (!confirm(`Jadikan Timeline "${timelineName}" sebagai timeline aktif?\n\nWaktu akan mulai berjalan dari hari ini.`)) return;
     try {
-      const today = new Date().getTime(); // Simpan waktu hari ini
+      const today = new Date().getTime();
       await setDoc(doc(db, "config", "timeline"), { 
         active_id: timelineId, 
         active_name: timelineName,
-        start_date: today // <--- INI YANG KURANG TADI
+        start_date: today
       });
       loadTimelines(); 
     } catch (e) { alert("Gagal: " + e.message); }
   };
 
-  // Fungsi Baru untuk Sinkronisasi Waktu
   window.syncTimelineClock = async function(timelineId) {
     if (!confirm("Mulai ulang hitungan hari dari HARI INI? (Tahun akan kembali ke tahun awal timeline)")) return;
     try {
@@ -454,7 +462,6 @@ title: Dashboard Admin — Grand Nations
     } catch (e) { alert("Gagal: " + e.message); }
   };
 
-  // --- FUNGSI EDIT & HAPUS NEGARA ---
   async function loadCountries() {
     const countriesBody = document.getElementById('table-countries-body');
     countriesBody.innerHTML = '';
@@ -492,7 +499,6 @@ title: Dashboard Admin — Grand Nations
   window.deleteCountry = async function(countryId, countryName, status) {
     let confirmMessage = `Yakin ingin menghapus negara "${countryName}" dari daftar?`;
     
-    // PERINGATAN EKSTRA JIKA SEDANG DIKLAIM
     if (status === 'claimed') {
       confirmMessage = `⚠️ PERINGATAN KERAS ⚠️\n\nNegara "${countryName}" sedang DIKLAIM oleh member.\n\nJika kamu menghapusnya, data klaim di profil member akan menjadi tidak valid (negara hantu).\n\nSebaiknya TOLAK dulu pendaftaran member tersebut di tab Persetujuan Negara sebelum menghapus.\n\nApakah kamu tetap ingin menghapusnya?`;
     }
@@ -629,7 +635,6 @@ title: Dashboard Admin — Grand Nations
     btnConfirmTimeskip.disabled = true;
 
     try {
-      // 1. Dapatkan Timeline Aktif Saat Ini (Era Lama)
       const configSnap = await getDoc(doc(db, "config", "timeline"));
       const oldTimelineId = configSnap.exists() ? configSnap.data().active_id : null;
 
@@ -637,13 +642,11 @@ title: Dashboard Admin — Grand Nations
         throw new Error("Tidak ada timeline aktif sebelumnya. Tidak bisa timeskip.");
       }
 
-      // 2. UBAH CONFIG KE TIMELINE BARU
       await setDoc(doc(db, "config", "timeline"), { 
         active_id: newTimelineId, 
         active_name: newTimelineName 
       });
 
-      // 3. PINDAHKAN SEMUA NEGARA DARI ERA LAMA KE ERA BARU
       const q = query(collection(db, "countries"), where("timeline_id", "==", oldTimelineId));
       const oldCountriesSnap = await getDocs(q);
       
@@ -691,23 +694,106 @@ title: Dashboard Admin — Grand Nations
   document.getElementById('btn-start-voting').addEventListener('click', async () => {
     if (!confirm("Mulai masa voting? Ini akan menghentikan timeline aktif saat ini.")) return;
     try {
-      // Ubah config jadi kosong (memunculkan layar voting di beranda)
       await setDoc(doc(db, "config", "timeline"), { 
         active_id: null, 
         active_name: null,
         is_voting: true 
       });
       alert("Masa voting dibuka! Beranda sekarang menampilkan layar voting.");
-      loadTimelines(); // Refresh tampilan
+      loadTimelines();
     } catch (e) { alert("Gagal: " + e.message); }
   });
 
+  // --- LOGIKA VOTING ---
+  async function loadVotingResults() {
+    const container = document.getElementById('voting-results');
+    const finishBtn = document.getElementById('btn-finish-voting');
+    
+    try {
+      const configSnap = await getDoc(doc(db, "config", "timeline"));
+      if (configSnap.exists() && configSnap.data().is_voting !== true) {
+        container.innerHTML = '<p style="color: #ff4d4d; text-align: center;">Voting belum dimulai.</p>';
+        finishBtn.style.display = 'none';
+        return;
+      }
+
+      const votesSnap = await getDocs(collection(db, "votes"));
+      if (votesSnap.empty) {
+        container.innerHTML = '<p style="color: var(--dim); text-align: center;">Belum ada suara yang masuk.</p>';
+        finishBtn.style.display = 'none';
+        return;
+      }
+
+      let counts = {};
+      votesSnap.forEach(doc => {
+        const data = doc.data();
+        counts[data.timelineName] = (counts[data.timelineName] || 0) + 1;
+      });
+
+      let html = '';
+      let maxVotes = 0;
+      let winnerName = '';
+
+      for (const [name, count] of Object.entries(counts)) {
+        html += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line);">
+          <span style="font-weight:bold; color:#fff;">${name}</span>
+          <span style="color:#00bfff;">${count} Suara</span>
+        </div>`;
+        if (count > maxVotes) { maxVotes = count; winnerName = name; }
+      }
+      
+      container.innerHTML = html;
+      finishBtn.style.display = 'block';
+      finishBtn.dataset.winner = winnerName;
+
+    } catch (e) { container.innerHTML = `<p style="color: red;">Error: ${e.message}</p>`; }
+  }
+
+  document.getElementById('btn-finish-voting').addEventListener('click', async (e) => {
+    const winner = e.target.dataset.winner;
+    if (!winner) return alert("Belum ada pemenang.");
+    if (!confirm(`Aktifkan era ${winner} sebagai timeline baru?`)) return;
+
+    try {
+      // Simpan days_per_year lama agar tidak hilang
+      const configSnap = await getDoc(doc(db, "config", "timeline"));
+      const existingDaysPerYear = configSnap.exists() && configSnap.data().days_per_year 
+        ? configSnap.data().days_per_year 
+        : 1;
+
+      const timelinesSnap = await getDocs(collection(db, "timelines"));
+      let timelineId = '';
+      timelinesSnap.forEach(doc => { if (doc.data().name === winner) timelineId = doc.id; });
+
+      if (!timelineId) throw new Error("Timeline tidak ditemukan.");
+
+      const today = new Date().getTime();
+      await setDoc(doc(db, "config", "timeline"), { 
+        active_id: timelineId, 
+        active_name: winner,
+        start_date: today,
+        is_voting: false,
+        days_per_year: existingDaysPerYear
+      });
+
+      // Hapus semua vote
+      const votesSnap = await getDocs(collection(db, "votes"));
+      for (const vDoc of votesSnap.docs) await deleteDoc(doc(db, "votes", vDoc.id));
+
+      alert(`Era ${winner} berhasil diaktifkan!`);
+      loadTimelines(); loadVotingResults();
+    } catch (err) { alert(err.message); }
+  });
+
+  // --- NAVIGASI TAB (termasuk trigger loadVotingResults) ---
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
       btn.classList.add('active');
       document.getElementById('tab-' + btn.dataset.target).style.display = 'block';
+      
+      if (btn.dataset.target === 'voting') loadVotingResults();
     });
   });
 </script>
