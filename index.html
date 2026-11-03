@@ -316,15 +316,19 @@ title: Grand Nations — Organisasi Roleplay
 
       let currentYear = startYear;
       let daysPassed = 0;
+      let effectiveStartDate = startDate;
 
-      if (startDate) {
-        const now = new Date().getTime();
-        const diffTime = Math.abs(now - startDate);
-        daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
-        
-        // LOGIKA PERCEPAT/PERLAMBAT: Dibagi dengan daysPerYear
-        currentYear = startYear + Math.floor(daysPassed / daysPerYear);
+      // Jika start_date kosong, anggap mulai hari ini
+      if (!effectiveStartDate) {
+        effectiveStartDate = new Date().getTime();
       }
+
+      const now = new Date().getTime();
+      const diffTime = Math.abs(now - effectiveStartDate);
+      daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+      
+      // LOGIKA: Dibagi daysPerYear
+      currentYear = startYear + Math.floor(daysPassed / daysPerYear);
 
       startYearEl.textContent = startYear;
       timelineNameEl.textContent = currentYear;
