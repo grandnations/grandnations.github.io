@@ -250,7 +250,8 @@ title: Grand Nations — Organisasi Roleplay
 <!-- SCRIPT FIREBASE TIMELINE DINAMIS -->
 <script type="module">
   import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCYben87_XUeQdJxZ3DNeSO7pv3upsGXYc",
@@ -263,6 +264,7 @@ title: Grand Nations — Organisasi Roleplay
 
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   const db = getFirestore(app);
+  const auth = getAuth(app);
 
   async function loadLiveTimeline() {
     const timelineNameEl = document.getElementById('active-timeline-name');
@@ -341,7 +343,7 @@ title: Grand Nations — Organisasi Roleplay
       timelineNameEl.textContent = currentYear;
       daysRunningEl.textContent = `${daysPassed} (1 Tahun = ${daysPerYear} Hari)`;
 
-      // ... (Kode pengambilan daftar negara yang diklaim tetap sama) ...
+      // AMBIL NEGARA DIKLAIM
       const q = query(
         collection(db, "countries"), 
         where("timeline_id", "==", activeTimelineId),
@@ -373,9 +375,23 @@ title: Grand Nations — Organisasi Roleplay
     }
   }
 
-  // Fungsi untuk Voting (Sementara simpan di LocalStorage)
-  window.voteEra = function(id, name) {
-    alert(`Kamu memilih Era ${name}! (Catatan: Sistem hitung suara sedang dibangun)`);
+  // Fungsi untuk Voting (Simpan ke Firestore)
+  window.voteEra = async function(id, name) {
+    const user = auth.currentUser;
+    if (!user) return alert("Login dulu untuk vote!");
+    
+    try {
+      // Simpan suara user ke database
+      await setDoc(doc(db, "votes", user.uid), {
+        timelineId: id,
+        timelineName: name, // <-- Harus persis "timelineName"
+        email: user.email,
+        votedAt: new Date().getTime()
+      });
+      alert(`Vote untuk era ${name} berhasil disimpan!`);
+    } catch (e) { 
+      alert("Gagal vote: " + e.message); 
+    }
   };
 
   loadLiveTimeline();
