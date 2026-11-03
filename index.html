@@ -43,17 +43,14 @@ title: Grand Nations — Organisasi Roleplay
         </div>
         <h2 class="hashtag" style="font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 10px;">Era Aktif Saat Ini</h2>
         
-        <!-- Teks Tahun Mulai -->
         <div id="start-year-container" style="font-family: var(--mono); font-size: 0.9rem; color: var(--dim); margin-bottom: 5px;">
           Dimulai pada tahun <span id="start-year-display" style="color: #fff; font-weight: bold;">...</span>
         </div>
 
-        <!-- Tahun Berjalan (Besar) -->
         <h3 id="active-timeline-name" style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 10px; text-shadow: 0 0 40px rgba(255,255,255,0.2);">
           Memuat...
         </h3>
 
-        <!-- Hari Berjalan -->
         <div id="days-container" style="font-family: var(--mono); font-size: 0.8rem; color: #ffc800; margin-bottom: 20px;">
           (Hari ke-<span id="days-running-display">0</span> simulasi)
         </div>
@@ -62,7 +59,6 @@ title: Grand Nations — Organisasi Roleplay
         
         <h3 style="font-family: var(--mono); font-size: 0.8rem; color: var(--dim); letter-spacing: 0.1em; border-top: 1px solid var(--line); padding-top: 30px; margin-bottom: 20px;">NEGARA YANG SEDANG DIKLAIM</h3>
         
-        <!-- Container untuk list negara dinamis -->
         <div id="active-nations-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; width: 100%;">
           <p style="color: var(--dim); font-family: var(--mono); text-align: center; grid-column: 1/-1;">Memuat daftar negara...</p>
         </div>
@@ -266,6 +262,8 @@ title: Grand Nations — Organisasi Roleplay
   const db = getFirestore(app);
   const auth = getAuth(app);
 
+  let currentUserVote = null; // { timelineId, timelineName, ... }
+
   async function loadLiveTimeline() {
     const timelineNameEl = document.getElementById('active-timeline-name');
     const startYearEl = document.getElementById('start-year-display');
@@ -284,17 +282,52 @@ title: Grand Nations — Organisasi Roleplay
         
         timelineNameEl.innerHTML = '<span style="color: #00bfff;">MASA VOTING</span>';
         
-        // Tampilkan List Timeline untuk di-vote (Sederhana)
+        // Cek apakah user sudah vote sebelumnya
+        const user = auth.currentUser;
+        if (user) {
+          try {
+            const voteSnap = await getDoc(doc(db, "votes", user.uid));
+            currentUserVote = voteSnap.exists() ? voteSnap.data() : null;
+          } catch(e) { currentUserVote = null; }
+        } else {
+          currentUserVote = null;
+        }
+
+        // Render tombol vote berdasarkan state
         const timelinesSnap = await getDocs(collection(db, "timelines"));
         let voteHtml = '<div style="grid-column: 1/-1; text-align: center; padding: 20px;">';
         voteHtml += '<p style="color: var(--dim); margin-bottom: 20px;">Pilih Era yang kamu inginkan untuk RP selanjutnya:</p>';
         voteHtml += '<div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">';
         
         timelinesSnap.forEach((doc) => {
-          voteHtml += `<button onclick="voteEra('${doc.id}', '${doc.data().name}')" class="btn solid" style="background: #ffc800; color: #000;">Vote ${doc.data().name}</button>`;
+          const id = doc.id;
+          const name = doc.data().name;
+          const isMyVote = currentUserVote && currentUserVote.timelineId === id;
+          const hasVoted = !!currentUserVote;
+
+          if (isMyVote) {
+            // ✅ Pilihan user — hijau + glow
+            voteHtml += `<button disabled style="padding: 10px 20px; border: none; font-family: var(--head); font-weight: bold; font-size: 0.95rem; border-radius: 2px; background: #00ff64; color: #000; box-shadow: 0 0 25px rgba(0,255,100,0.6); cursor: default; opacity: 1;">✓ ${name} (Pilihanmu)</button>`;
+          } else if (hasVoted) {
+            // ❌ Sudah vote, ini bukan pilihan — abu-abu & tidak bisa diklik
+            voteHtml += `<button disabled style="padding: 10px 20px; border: 1px solid #333; font-family: var(--head); font-weight: bold; font-size: 0.95rem; border-radius: 2px; background: rgba(255,255,255,0.03); color: #555; cursor: not-allowed; opacity: 1;">${name}</button>`;
+          } else {
+            // ⚪ Belum vote — kuning, bisa diklik
+            voteHtml += `<button onclick="voteEra('${id}', '${name}')" style="padding: 10px 20px; border: none; font-family: var(--head); font-weight: bold; font-size: 0.95rem; border-radius: 2px; background: #ffc800; color: #000; cursor: pointer;">Vote ${name}</button>`;
+          }
         });
         
-        voteHtml += '</div></div>';
+        voteHtml += '</div>';
+
+        // Pesan status di bawah tombol
+        if (currentUserVote) {
+          voteHtml += `<p style="color: #00ff64; margin-top: 25px; font-weight: bold; font-size: 1rem;">✓ Kamu sudah memilih: <strong>${currentUserVote.timelineName}</strong></p>`;
+          voteHtml += `<p style="color: var(--dim); font-size: 0.8rem; margin-top: 8px;">Pilihan tidak bisa diubah.</p>`;
+        } else {
+          voteHtml += `<p style="color: #ff4d4d; margin-top: 25px; font-size: 0.85rem;">⚠️ Pilih dengan hati-hati — setelah memilih, pilihanmu tidak bisa diubah.</p>`;
+        }
+
+        voteHtml += '</div>';
         nationsContainer.innerHTML = voteHtml;
         return;
       }
@@ -307,7 +340,7 @@ title: Grand Nations — Organisasi Roleplay
       const activeTimelineId = configData.active_id;
       const startYear = parseInt(configData.active_name); 
       const startDate = configData.start_date; 
-      const daysPerYear = configData.days_per_year || 1; // Ambil kecepatan waktu (default 1)
+      const daysPerYear = configData.days_per_year || 1;
 
       if (isNaN(startYear)) {
          timelineNameEl.textContent = configData.active_name;
@@ -320,7 +353,6 @@ title: Grand Nations — Organisasi Roleplay
       let daysPassed = 0;
       let effectiveStartDate = startDate;
 
-      // Jika start_date kosong, paksa isi dengan hari ini
       if (!effectiveStartDate) {
         effectiveStartDate = new Date().getTime();
       }
@@ -329,21 +361,16 @@ title: Grand Nations — Organisasi Roleplay
       const startDateObj = new Date(effectiveStartDate);
       const todayObj = new Date();
       
-      // Ambil tanggal murni (Tahun, Bulan, Tanggal) dalam UTC
       const startUTC = Date.UTC(startDateObj.getFullYear(), startDateObj.getMonth(), startDateObj.getDate());
       const todayUTC = Date.UTC(todayObj.getFullYear(), todayObj.getMonth(), todayObj.getDate());
       
-      // Selisih hari
       daysPassed = Math.floor((todayUTC - startUTC) / (1000 * 60 * 60 * 24));
-
-      // Hitung Tahun (Dibagi daysPerYear)
       currentYear = startYear + Math.floor(daysPassed / daysPerYear);
 
       startYearEl.textContent = startYear;
       timelineNameEl.textContent = currentYear;
       daysRunningEl.textContent = `${daysPassed} (1 Tahun = ${daysPerYear} Hari)`;
 
-      // AMBIL NEGARA DIKLAIM
       const q = query(
         collection(db, "countries"), 
         where("timeline_id", "==", activeTimelineId),
@@ -375,24 +402,48 @@ title: Grand Nations — Organisasi Roleplay
     }
   }
 
-  // Fungsi untuk Voting (Simpan ke Firestore)
+  // Fungsi untuk Voting (Simpan ke Firestore, 1 suara per user, TIDAK bisa diubah)
   window.voteEra = async function(id, name) {
     const user = auth.currentUser;
     if (!user) return alert("Login dulu untuk vote!");
     
+    // Cek state lokal dulu
+    if (currentUserVote) {
+      alert("Kamu sudah memilih! Pilihan tidak bisa diubah.");
+      loadLiveTimeline();
+      return;
+    }
+    
+    // Cek ulang ke database (mencegah race condition / multi-tab)
     try {
-      // Simpan suara user ke database
+      const checkSnap = await getDoc(doc(db, "votes", user.uid));
+      if (checkSnap.exists()) {
+        currentUserVote = checkSnap.data();
+        alert(`Kamu sudah memilih Era ${currentUserVote.timelineName}. Pilihan tidak bisa diubah.`);
+        loadLiveTimeline();
+        return;
+      }
+    } catch(e) { /* ignore, lanjut */ }
+    
+    // Konfirmasi terakhir
+    if (!confirm(`Yakin pilih era "${name}"?\n\nPilihanmu TIDAK BISA diubah setelah ini.`)) return;
+    
+    try {
       await setDoc(doc(db, "votes", user.uid), {
         timelineId: id,
-        timelineName: name, // <-- Harus persis "timelineName"
+        timelineName: name,
         email: user.email,
         votedAt: new Date().getTime()
       });
-      alert(`Vote untuk era ${name} berhasil disimpan!`);
+      alert(`✓ Vote untuk era "${name}" berhasil disimpan!`);
+      loadLiveTimeline(); // Re-render: tombol jadi hijau & yang lain disable
     } catch (e) { 
       alert("Gagal vote: " + e.message); 
     }
   };
 
-  loadLiveTimeline();
+  // Initial load + auto re-render saat login/logout
+  onAuthStateChanged(auth, () => {
+    loadLiveTimeline();
+  });
 </script>
